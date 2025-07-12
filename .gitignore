@@ -41,7 +41,8 @@ dev-debug.log
 
 # Task files
 # tasks.json
-# tasks/ 
+tasks/ 
 .taskmaster
 mcp.json
 TODO.txt
+.claude/

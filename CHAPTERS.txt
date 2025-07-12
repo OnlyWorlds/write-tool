@@ -1,0 +1,152 @@
+# OnlyWorlds Browse Tool – Final Chapter Structure (TaskMaster Optimized)
+
+Each chapter here is structured for modular development, clean testing, and rapid MVP assembly — with UI first scaffolding, followed by logic, polish, and export.
+
+---
+
+## Chapter 1: Project Bootstrapping & Test Framework
+
+- Initialize Astro project with React and Tailwind
+- Set up folder and file structure for modular development
+- Configure ESLint, Prettier, TypeScript strict mode
+- Set up GitHub Pages deployment (via GitHub Actions)
+- Configure routing: `/`, `/element/:id`, `/showcase/:id`
+- Install and configure:
+  - Zustand (UI state)
+  - React Context (world + auth state)
+  - Vitest, React Testing Library, and Playwright
+- Add `docs/testing.md` with test structure guidelines
+- Create placeholder layout shell (sidebar + header + main content)
+
+---
+
+## Chapter 2: World Validation & Initial Data Load
+
+- Build World Key + Pin input screen
+- Handle API validation against OnlyWorlds endpoint
+- On success, fetch:
+  - World metadata
+  - All world elements
+- Store data in global `WorldContext`
+- Persist context until refresh (no login session)
+- Show loading, success, error states
+- Write tests for validation flow and error handling
+- Lock access to rest of UI until validation succeeds
+
+---
+
+## Chapter 3: Layout Scaffolding & Navigation Shell
+
+- Build base layout:
+  - Sidebar (categories, scrollable)
+  - Main panel (viewer/editor/showcase)
+  - Header (title, edit/view toggle, save button)
+- Create sidebar category blocks:
+  - Expand/collapse
+  - Show element counts
+  - `+` button for new elements
+- Setup route → selection sync (`/element/:id`)
+- Hook sidebar to element selection
+- Add loading placeholders
+- Style layout for clarity using Tailwind
+
+---
+
+## Chapter 4: Element Viewer (Read Mode)
+
+- Create ElementViewer component
+- Render all field values by schema:
+  - Base (name, description, tags, image)
+  - Category-specific fields
+- Format links as referenced names
+- Handle empty/null gracefully
+- Visually distinguish field types (text, links, arrays)
+- Display reverse links at bottom
+- Test rendering for various categories
+- Prepare element state for editing toggle
+
+---
+
+## Chapter 5: Editor Mode – Core Fields
+
+- Toggle to “Edit Mode” (default on load)
+- Render editable inputs per field type:
+  - Text, number, textarea
+  - Link fields (select from existing elements)
+- Dirty state detection
+- Cancel/reset/save controls
+- Validate fields against schema type
+- Store editor state in local element slice
+- Prevent edits to ID fields
+- Unit tests: editing, rollback, field type switch
+
+---
+
+## Chapter 6: Save to API & Element Creation
+
+- Connect save button to OnlyWorlds PUT/POST endpoints
+- Serialize fields into correct API format
+- Show success/fail state and toast
+- Handle creation flow:
+  - Click `+` → select category → open blank editor
+- On save: update context store
+- Validate required field presence (e.g. `name`)
+- Handle saving of links (IDs only)
+- Tests: save/update success, input edge cases
+
+---
+
+## Chapter 7: Reverse Link Viewer
+
+- Calculate reverse links locally:
+  - Scan elements for references to current ID
+- Group reverse links by field and category
+- Display in viewer as expandable block
+- Click to navigate to linked elements
+- Handle circular references, empty groups
+- Add iconography or arrows to distinguish
+- Test detection and grouping logic
+
+---
+
+## Chapter 8: Showcase View & Export
+
+- Add toggle to switch from “Edit” to “Showcase View”
+- Create `/showcase/:id` route for viewing
+- In Showcase:
+  - Render fields with values (clean layout)
+  - Allow user to *exclude* fields via toggle or icon
+- Persist excluded fields locally (state or localStorage)
+- Add “Export to PDF” button (e.g. via `html2pdf.js`)
+- Style for print-readiness (fonts, spacing)
+- Tests: rendering, toggling fields, PDF generation
+
+---
+
+## Chapter 9: Final UI Features & Navigation
+
+- Add sidebar search/filter (by name or tag)
+- Enhance sidebar categories with badges or icons
+- Add “copy link” button to share `/element/:id`
+- Handle invalid routes gracefully
+- Add breadcrumbs or floating nav to header (optional)
+- Handle long lists with scroll memory
+- Finalize mobile tweaks (sidebar collapse)
+- Add keyboard nav or hotkeys (if desired)
+
+---
+
+## Chapter 10: Integration Testing & Polish
+
+- Write full integration tests:
+  - Load → validate → edit → save → showcase
+  - Reverse link navigation
+  - Create new → edit → export flow
+- Ensure test coverage is high (unit + E2E)
+- Final layout tweaks:
+  - Visual spacing
+  - Field grouping/folding
+  - Contrast and themes
+- README: how to deploy, use, contribute
+- Final CI validation for clean deploy
+

@@ -1,0 +1,286 @@
+ <context>
+Overview
+
+The OnlyWorlds Browse Tool is a lightweight, desktop-first web application that enables users to view, edit, and explore structured world data defined using the OnlyWorlds open standard.
+
+It provides a clean, schema-driven interface for interacting with elements like Characters, Locations, Objects, and Institutions, all sourced live from the OnlyWorlds API.
+
+This tool serves worldbuilders, writers, game masters, and designers who need to interact deeply with their world structures — enabling them to update, navigate, and present world content in a structured, visual form.
+Core Features
+1. World Access & Validation
+
+    What: Authenticates using a World Key + Pin
+
+    Why: Securely scopes the tool to a specific world via API
+
+    How: On input and validation, the tool fetches all world metadata and elements into memory
+
+2. Element Editor (Default Mode)
+
+    What: Full schema-based editor for all element fields
+
+    Why: Enables direct editing and creation of world elements in a visual way
+
+    How: Dynamically renders editable fields based on the element’s schema (base + category fields), using a clean panel UI
+
+3. Element Browser & Sidebar Navigation
+
+    What: Sidebar groups elements by category with collapsible headers
+
+    Why: Simplifies browsing large world datasets
+
+    How: Sidebar lists elements per category with quick add (+) and click-to-select. Optional search/filtering.
+
+4. Reverse Link Awareness
+
+    What: Shows linked elements that reference the current one (e.g. “used in,” “belongs to”)
+
+    Why: Highlights connections across world elements
+
+    How: Calculated on the frontend using schema field references (reverse ID resolution)
+
+5. Showcase View (MVP Feature)
+
+    What: Generates a clean, preview-style display of any element with selected fields
+
+    Why: Allows the user to present or export a version of the element for external sharing or printing
+
+    How:
+
+        All fields with values are shown by default
+
+        Fields can be excluded via small UI toggle (e.g. right-click or icon)
+
+        View is toggled via a big "Showcase View" button
+
+        Includes export to PDF
+
+6. Save to API
+
+    What: Saves edited or newly created elements back to the OnlyWorlds API
+
+    Why: Enables persistent updating without needing file or YAML management
+
+    How: POST/PUT to OW endpoints; schema validation enforced
+
+7. Responsive Layout (Bonus)
+
+    What: Ensures tool degrades gracefully on mobile/tablet
+
+    Why: Mobile access isn’t required but is beneficial
+
+    How: Tailwind breakpoints, stacked panels, collapsible sidebar
+
+8. Testing & Stability
+
+    What: Unit and E2E testing across modules
+
+    Why: Ensures confidence as features grow
+
+    How: Vitest + React Testing Library for logic/components, Playwright for user flows
+
+User Experience
+Personas
+
+    Worldbuilder: Navigating a large fantasy or sci-fi world
+
+    Writer/Author: Tracking consistent details across drafts
+
+    Game Master: Showing NPCs, items, places to players
+
+    Designer/Dev: Editing game assets tied to structured world data
+
+Key Flows
+
+    User enters World Key + Pin → World data loads
+
+    Elements shown in sidebar by category
+
+    User selects element → Editor opens in center
+
+    User edits, adds, removes data → Saves to API
+
+    User toggles to Showcase View → Selects visible fields → Exports to PDF
+
+UI/UX Considerations
+
+    Editor is default mode
+
+    Field values shown clearly and collapsibly
+
+    All field types rendered according to schema (text, number, link, etc.)
+
+    Subtle exclude toggle per field for Showcase
+
+    Reverse links grouped by field/category
+
+    Showcase is clean, readable, themeable (optional)
+
+</context> <PRD>
+Technical Architecture
+System Components
+
+    Astro + React (@astrojs/react)
+
+    Tailwind CSS for styling
+
+    Zustand for UI/global state
+
+    React Context for world/auth state
+
+    OnlyWorlds API for all world reads/writes
+
+    GitHub Pages for static deploy (via GitHub Actions)
+
+Data Models
+
+    Based on OnlyWorlds base + category schema
+
+    Fields:
+
+        Base: id, name, description, tags, etc.
+
+        Category-specific: dynamic by type
+
+    Element links are by ID reference
+
+    All field values follow schema type constraints
+
+APIs
+
+    GET /world and GET /elements: Used after validation
+
+    PUT /element or POST /element: Used for saving changes
+
+    No user accounts: Key/Pin is the only auth
+
+    No local YAML editing — always API-bound
+
+Infrastructure
+
+    Codebase on GitHub
+
+    Deploy via GitHub Actions → GitHub Pages
+
+    Testing stack:
+
+        Vitest + Testing Library
+
+        Playwright for E2E
+
+    No backend server (pure client-side app)
+
+Development Roadmap
+✅ Phase 1: MVP Core
+
+    Astro + Tailwind + routing setup
+
+    Auth screen for World Key + Pin
+
+    Fetch & store world/elements in context
+
+    Sidebar element browser
+
+    Schema-driven element editor (text, number, links)
+
+    Field toggle for exclusion
+
+    Showcase View page:
+
+        Select visible fields
+
+        Export to PDF
+
+    Save to API (new/edit)
+
+    Reverse link viewer
+
+    Routing: /, /element/:id, /showcase/:id
+
+    Test coverage for auth, save, edit, UI logic
+
+🔄 Phase 2: Enhanced UI/UX
+
+    Sidebar filtering and search
+
+    Collapsible field groups (long descriptions, tags)
+
+    Theme toggle (light/dark)
+
+    Showcase style options (compact/full, etc.)
+
+    Element copy/clone button
+
+🧪 Phase 3: Expansion
+
+    Visual link graph (DAG, force-directed)
+
+    Saved view profiles for showcase
+
+    Field presets or template editor
+
+    Local export or offline YAML draft preview
+
+Logical Dependency Chain
+🔨 Foundation
+
+    Setup Astro, routing, Tailwind
+
+    Install Zustand, Context, Testing tools
+
+    Add layout shell (sidebar + main panel)
+
+🧠 Data & Auth
+
+    Auth screen → fetch world + elements → store
+
+🧭 Navigation
+
+    Sidebar by category → select element → load viewer
+
+✍️ Edit & Save
+
+    Editor per field → local state → Save to API
+
+🎭 Showcase Mode
+
+    Toggle to Showcase → exclude fields → export to PDF
+
+🧬 Relations
+
+    Show reverse links → navigate → link preview
+
+Risks and Mitigations
+Technical
+
+    Schema flexibility → use a centralized field renderer
+
+    Link resolution complexity → maintain ID lookup maps
+
+    Large element sets → virtualized lists (future)
+
+Product
+
+    UX overcomplication → field toggle should be subtle, not noisy
+
+    Too much freedom → enforce valid fields, no custom schema extensions
+
+Resource
+
+    Solo dev load → modular, test-first, task-based approach
+
+    Visual design needs iteration → use Tailwind defaults + polish later
+
+Appendix
+
+    OnlyWorlds Base Schema
+
+    OnlyWorlds API Docs
+
+    [OW LLM Guide](parsed from ow_llm_guide.txt)
+
+    [Design Sketch Image](see /mnt/data/5cc27b80...)
+
+    Inspiration: Notion, Obsidian, Tailwind UI, D&D Beyond
+
+</PRD>

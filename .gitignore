@@ -38,11 +38,13 @@ dev-debug.log
 *.sln
 *.sw?
 # OS specific
-
-# Task files
-# tasks.json
+ 
+PRD.txt
 tasks/ 
 .taskmaster
 mcp.json
 TODO.txt
 .claude/
+docs/ 
+CLAUDE.md
+commands/

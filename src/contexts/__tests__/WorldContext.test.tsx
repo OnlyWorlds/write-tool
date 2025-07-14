@@ -1,9 +1,45 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen, renderHook, act } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, renderHook, act, waitFor } from '@testing-library/react';
 import { WorldProvider, useWorldContext } from '../WorldContext';
 import type { ReactNode } from 'react';
 
+// Mock the API service
+vi.mock('../../services/ApiService', () => ({
+  ApiService: {
+    validateCredentials: vi.fn(),
+    fetchWorldMetadata: vi.fn(),
+    fetchAllElements: vi.fn(),
+  },
+  organizeElementsByCategory: vi.fn((elements) => {
+    const map = new Map();
+    elements.forEach((el: any) => {
+      const category = el.category || 'uncategorized';
+      if (!map.has(category)) map.set(category, []);
+      map.get(category).push(el);
+    });
+    return map;
+  }),
+}));
+
 describe('WorldContext', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    // Reset localStorage mock
+    const storage: Record<string, string> = {};
+    const mockStorage = {
+      getItem: vi.fn((key: string) => storage[key] || null),
+      setItem: vi.fn((key: string, value: string) => { storage[key] = value; }),
+      removeItem: vi.fn((key: string) => { delete storage[key]; }),
+      clear: vi.fn(() => { Object.keys(storage).forEach(key => delete storage[key]); }),
+      key: vi.fn(() => null),
+      length: 0,
+    };
+    Object.defineProperty(window, 'localStorage', {
+      value: mockStorage,
+      writable: true,
+    });
+  });
+
   const wrapper = ({ children }: { children: ReactNode }) => (
     <WorldProvider>{children}</WorldProvider>
   );
@@ -18,7 +54,17 @@ describe('WorldContext', () => {
     expect(result.current.categories.size).toBe(0);
   });
 
-  it('should handle authentication', async () => {
+  it('should handle successful authentication', async () => {
+    const { ApiService } = await import('../../services/ApiService');
+    ApiService.validateCredentials = vi.fn().mockResolvedValue(true);
+    ApiService.fetchWorldMetadata = vi.fn().mockResolvedValue({ 
+      id: '1', 
+      name: 'Test World' 
+    });
+    ApiService.fetchAllElements = vi.fn().mockResolvedValue([
+      { id: '1', name: 'Element 1', category: 'characters' }
+    ]);
+    
     const { result } = renderHook(() => useWorldContext(), { wrapper });
     
     let authResult: boolean = false;
@@ -30,10 +76,32 @@ describe('WorldContext', () => {
     expect(result.current.isAuthenticated).toBe(true);
     expect(result.current.worldKey).toBe('test-world');
     expect(result.current.pin).toBe('test-pin');
+    expect(localStorage.getItem('onlyworlds_worldKey')).toBe('test-world');
+    expect(localStorage.getItem('onlyworlds_pin')).toBe('test-pin');
+  });
+
+  it('should handle failed authentication', async () => {
+    const { ApiService } = await import('../../services/ApiService');
+    ApiService.validateCredentials = vi.fn().mockResolvedValue(false);
+    
+    const { result } = renderHook(() => useWorldContext(), { wrapper });
+    
+    let authResult: boolean = true;
+    await act(async () => {
+      authResult = await result.current.authenticate('invalid', 'invalid');
+    });
+    
+    expect(authResult).toBe(false);
+    expect(result.current.isAuthenticated).toBe(false);
+    expect(result.current.error).toBe('Invalid World Key or Pin');
   });
 
   it('should handle logout', () => {
     const { result } = renderHook(() => useWorldContext(), { wrapper });
+    
+    // Set some initial data
+    localStorage.setItem('onlyworlds_worldKey', 'test');
+    localStorage.setItem('onlyworlds_pin', 'test');
     
     act(() => {
       result.current.logout();
@@ -42,6 +110,8 @@ describe('WorldContext', () => {
     expect(result.current.isAuthenticated).toBe(false);
     expect(result.current.worldKey).toBe('');
     expect(result.current.pin).toBe('');
+    expect(localStorage.getItem('onlyworlds_worldKey')).toBeNull();
+    expect(localStorage.getItem('onlyworlds_pin')).toBeNull();
   });
 
   it('should update element and rebuild categories', () => {

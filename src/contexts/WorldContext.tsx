@@ -1,5 +1,6 @@
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import type { WorldState, Element } from '../types/world';
+import { ApiService, organizeElementsByCategory } from '../services/ApiService';
 
 interface WorldContextType extends WorldState {
   authenticate: (worldKey: string, pin: string) => Promise<boolean>;
@@ -10,6 +11,11 @@ interface WorldContextType extends WorldState {
 }
 
 const WorldContext = createContext<WorldContextType | undefined>(undefined);
+
+const STORAGE_KEYS = {
+  WORLD_KEY: 'onlyworlds_worldKey',
+  PIN: 'onlyworlds_pin',
+};
 
 export function WorldProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<WorldState>({
@@ -27,15 +33,48 @@ export function WorldProvider({ children }: { children: ReactNode }) {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
     
     try {
-      // This will be implemented when we create the API service
-      // For now, just set the state
-      setState(prev => ({
-        ...prev,
+      // Validate credentials
+      const isValid = await ApiService.validateCredentials(worldKey, pin);
+      
+      if (!isValid) {
+        setState(prev => ({
+          ...prev,
+          error: 'Invalid World Key or Pin',
+          isLoading: false,
+        }));
+        return false;
+      }
+      
+      // Fetch world data
+      const [metadata, elementsArray] = await Promise.all([
+        ApiService.fetchWorldMetadata(worldKey, pin),
+        ApiService.fetchAllElements(worldKey, pin),
+      ]);
+      
+      // Convert elements array to Map
+      const elementsMap = new Map<string, Element>();
+      elementsArray.forEach(element => {
+        elementsMap.set(element.id, element);
+      });
+      
+      // Organize by categories
+      const categories = organizeElementsByCategory(elementsArray);
+      
+      // Store credentials in localStorage
+      localStorage.setItem(STORAGE_KEYS.WORLD_KEY, worldKey);
+      localStorage.setItem(STORAGE_KEYS.PIN, pin);
+      
+      setState({
         worldKey,
         pin,
+        metadata,
+        elements: elementsMap,
+        categories,
         isAuthenticated: true,
         isLoading: false,
-      }));
+        error: null,
+      });
+      
       return true;
     } catch (error) {
       setState(prev => ({
@@ -58,8 +97,8 @@ export function WorldProvider({ children }: { children: ReactNode }) {
       isLoading: false,
       error: null,
     });
-    localStorage.removeItem('worldKey');
-    localStorage.removeItem('pin');
+    localStorage.removeItem(STORAGE_KEYS.WORLD_KEY);
+    localStorage.removeItem(STORAGE_KEYS.PIN);
   }, []);
 
   const updateElement = useCallback((element: Element) => {
@@ -121,6 +160,20 @@ export function WorldProvider({ children }: { children: ReactNode }) {
       };
     });
   }, []);
+
+  // Check for stored credentials on mount
+  useEffect(() => {
+    const checkStoredCredentials = async () => {
+      const storedWorldKey = localStorage.getItem(STORAGE_KEYS.WORLD_KEY);
+      const storedPin = localStorage.getItem(STORAGE_KEYS.PIN);
+      
+      if (storedWorldKey && storedPin) {
+        await authenticate(storedWorldKey, storedPin);
+      }
+    };
+    
+    checkStoredCredentials();
+  }, [authenticate]);
 
   const value: WorldContextType = {
     ...state,

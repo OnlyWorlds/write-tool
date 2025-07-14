@@ -11,18 +11,16 @@ describe('ApiService', () => {
     it('should return true for valid credentials', async () => {
       global.fetch = vi.fn().mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ success: true }),
+        json: async () => ({ id: '1', name: 'Test World' }),
       } as Response);
 
       const result = await ApiService.validateCredentials('test-world', 'test-pin');
       
       expect(result).toBe(true);
       expect(global.fetch).toHaveBeenCalledWith(
-        'https://www.onlyworlds.com/api/validate',
+        'https://www.onlyworlds.com/api/worldapi/world/test-world',
         expect.objectContaining({
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ worldKey: 'test-world', pin: 'test-pin' }),
+          headers: { 'Authorization': 'Pin test-pin' }
         })
       );
     });
@@ -70,7 +68,7 @@ describe('ApiService', () => {
       
       expect(result).toEqual(mockElements);
       expect(global.fetch).toHaveBeenCalledWith(
-        'https://www.onlyworlds.com/api/world/test-world/elements',
+        'https://www.onlyworlds.com/api/worldapi/world/test-world/elements',
         expect.objectContaining({
           headers: { 'Authorization': 'Pin test-pin' },
         })

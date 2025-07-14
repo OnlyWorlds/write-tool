@@ -1,14 +1,17 @@
 import type { Element, WorldMetadata } from '../types/world';
 
-const API_BASE_URL = 'https://www.onlyworlds.com/api';
+const API_BASE_URL = 'https://www.onlyworlds.com/api/worldapi';
 
 export class ApiService {
   static async validateCredentials(worldKey: string, pin: string): Promise<boolean> {
     try {
-      const response = await fetch(`${API_BASE_URL}/validate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ worldKey, pin })
+      const response = await fetch(`${API_BASE_URL}/world/`, {
+        headers: { 
+          'API-Key': worldKey,
+          'API-Pin': pin,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
       });
       return response.ok;
     } catch (error) {

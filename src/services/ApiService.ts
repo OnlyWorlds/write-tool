@@ -2,15 +2,34 @@ import type { Element, WorldMetadata } from '../types/world';
 
 const API_BASE_URL = 'https://www.onlyworlds.com/api/worldapi';
 
+// Element types that have their own endpoints
+const ELEMENT_TYPES = [
+  'character',
+  'location', 
+  'object',
+  'trait',
+  'ability',
+  'institution',
+  'event',
+  'collective',
+  'construct',
+  'creature',
+  'family',
+  'language',
+  'law',
+  'narrative',
+  'phenomenon'
+];
+
 export class ApiService {
   static async validateCredentials(worldKey: string, pin: string): Promise<boolean> {
     try {
-      const response = await fetch(`${API_BASE_URL}/world/`, {
+      // Try to fetch from any endpoint to validate credentials
+      const response = await fetch(`${API_BASE_URL}/character/`, {
         headers: { 
           'API-Key': worldKey,
           'API-Pin': pin,
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
+          'Accept': 'application/json'
         }
       });
       return response.ok;
@@ -21,36 +40,59 @@ export class ApiService {
   }
 
   static async fetchWorldMetadata(worldKey: string, pin: string): Promise<WorldMetadata> {
-    const response = await fetch(`${API_BASE_URL}/world/${worldKey}`, {
-      headers: { 'Authorization': `Pin ${pin}` }
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Failed to fetch world metadata: ${response.statusText}`);
-    }
-    
-    return await response.json();
+    // Since there's no metadata endpoint, return a placeholder
+    // The actual world name/description might come from elements
+    return {
+      id: worldKey,
+      name: 'World',
+      description: '',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
   }
 
   static async fetchAllElements(worldKey: string, pin: string): Promise<Element[]> {
-    const response = await fetch(`${API_BASE_URL}/world/${worldKey}/elements`, {
-      headers: { 'Authorization': `Pin ${pin}` }
-    });
+    const allElements: Element[] = [];
     
-    if (!response.ok) {
-      throw new Error(`Failed to fetch elements: ${response.statusText}`);
+    // Fetch elements from each endpoint
+    for (const elementType of ELEMENT_TYPES) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/${elementType}/`, {
+          headers: { 
+            'API-Key': worldKey,
+            'API-Pin': pin,
+            'Accept': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          const elements = await response.json();
+          // Add category to each element based on the endpoint
+          const categorizedElements = elements.map((el: any) => ({
+            ...el,
+            category: elementType
+          }));
+          allElements.push(...categorizedElements);
+        }
+        // Continue even if one endpoint fails
+      } catch (error) {
+        console.warn(`Failed to fetch ${elementType} elements:`, error);
+      }
     }
     
-    return await response.json();
+    return allElements;
   }
 
   static async updateElement(worldKey: string, pin: string, element: Element): Promise<boolean> {
     try {
-      const response = await fetch(`${API_BASE_URL}/world/${worldKey}/element/${element.id}`, {
+      const elementType = element.category || 'object';
+      const response = await fetch(`${API_BASE_URL}/${elementType}/${element.id}/`, {
         method: 'PUT',
         headers: {
+          'API-Key': worldKey,
+          'API-Pin': pin,
           'Content-Type': 'application/json',
-          'Authorization': `Pin ${pin}`
+          'Accept': 'application/json'
         },
         body: JSON.stringify(element)
       });
@@ -63,11 +105,14 @@ export class ApiService {
 
   static async createElement(worldKey: string, pin: string, element: Element): Promise<Element | null> {
     try {
-      const response = await fetch(`${API_BASE_URL}/world/${worldKey}/element`, {
+      const elementType = element.category || 'object';
+      const response = await fetch(`${API_BASE_URL}/${elementType}/`, {
         method: 'POST',
         headers: {
+          'API-Key': worldKey,
+          'API-Pin': pin,
           'Content-Type': 'application/json',
-          'Authorization': `Pin ${pin}`
+          'Accept': 'application/json'
         },
         body: JSON.stringify(element)
       });
@@ -82,12 +127,14 @@ export class ApiService {
     }
   }
 
-  static async deleteElement(worldKey: string, pin: string, elementId: string): Promise<boolean> {
+  static async deleteElement(worldKey: string, pin: string, elementId: string, elementType: string): Promise<boolean> {
     try {
-      const response = await fetch(`${API_BASE_URL}/world/${worldKey}/element/${elementId}`, {
+      const response = await fetch(`${API_BASE_URL}/${elementType}/${elementId}/`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Pin ${pin}`
+          'API-Key': worldKey,
+          'API-Pin': pin,
+          'Accept': 'application/json'
         }
       });
       return response.ok;

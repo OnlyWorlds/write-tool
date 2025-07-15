@@ -69,7 +69,7 @@ export function AuthBar() {
               : 'bg-blue-600 hover:bg-blue-700'
           }`}
         >
-          {isLoading ? '...' : 'validate'}
+          {isLoading ? 'Loading...' : 'validate'}
         </button>
         {error && (
           <span className="text-xs text-red-400 ml-2">{error}</span>

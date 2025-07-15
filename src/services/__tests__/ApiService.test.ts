@@ -18,9 +18,13 @@ describe('ApiService', () => {
       
       expect(result).toBe(true);
       expect(global.fetch).toHaveBeenCalledWith(
-        'https://www.onlyworlds.com/api/worldapi/world/test-world',
+        'https://www.onlyworlds.com/api/worldapi/character/',
         expect.objectContaining({
-          headers: { 'Authorization': 'Pin test-pin' }
+          headers: {
+            'API-Key': 'test-world',
+            'API-Pin': 'test-pin',
+            'Accept': 'application/json'
+          }
         })
       );
     });
@@ -54,36 +58,58 @@ describe('ApiService', () => {
 
   describe('fetchAllElements', () => {
     it('should return elements array on success', async () => {
-      const mockElements: Element[] = [
-        { id: '1', name: 'Element 1', category: 'characters' },
-        { id: '2', name: 'Element 2', category: 'locations' },
+      const mockCharacters = [
+        { id: '1', name: 'Element 1' },
+        { id: '2', name: 'Element 2' },
       ];
 
-      global.fetch = vi.fn().mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockElements,
-      } as Response);
+      // Mock fetch to return data for character endpoint and empty for others
+      global.fetch = vi.fn().mockImplementation((url: string) => {
+        if (url.includes('/character/')) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => mockCharacters,
+          } as Response);
+        }
+        return Promise.resolve({
+          ok: true,
+          json: async () => [],
+        } as Response);
+      });
 
       const result = await ApiService.fetchAllElements('test-world', 'test-pin');
       
-      expect(result).toEqual(mockElements);
-      expect(global.fetch).toHaveBeenCalledWith(
-        'https://www.onlyworlds.com/api/worldapi/world/test-world/elements',
-        expect.objectContaining({
-          headers: { 'Authorization': 'Pin test-pin' },
-        })
-      );
+      // Should have the characters with category added
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual({ ...mockCharacters[0], category: 'character' });
+      expect(result[1]).toEqual({ ...mockCharacters[1], category: 'character' });
+      expect(global.fetch).toHaveBeenCalled();
     });
 
-    it('should throw error on failed response', async () => {
-      global.fetch = vi.fn().mockResolvedValueOnce({
+    it('should return empty array when all endpoints fail', async () => {
+      global.fetch = vi.fn().mockResolvedValue({
         ok: false,
         statusText: 'Unauthorized',
       } as Response);
 
-      await expect(
-        ApiService.fetchAllElements('test-world', 'invalid-pin')
-      ).rejects.toThrow('Failed to fetch elements: Unauthorized');
+      const result = await ApiService.fetchAllElements('test-world', 'invalid-pin');
+      
+      expect(result).toEqual([]);
+    });
+    
+    it('should handle network errors gracefully', async () => {
+      // Mock console.warn to suppress expected warnings
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      
+      global.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
+
+      const result = await ApiService.fetchAllElements('test-world', 'test-pin');
+      
+      expect(result).toEqual([]);
+      expect(consoleWarnSpy).toHaveBeenCalled();
+      
+      // Restore console.warn
+      consoleWarnSpy.mockRestore();
     });
   });
 });

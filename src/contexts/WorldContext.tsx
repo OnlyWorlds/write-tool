@@ -136,6 +136,9 @@ export function WorldProvider({ children }: { children: ReactNode }) {
   const deleteElement = useCallback((elementId: string) => {
     setState(prev => {
       const newElements = new Map(prev.elements);
+      const element = prev.elements.get(elementId);
+      if (!element) return prev;
+      
       newElements.delete(elementId);
       
       // Rebuild categories

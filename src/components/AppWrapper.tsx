@@ -1,10 +1,13 @@
+import { BrowserRouter } from 'react-router-dom';
 import { WorldProvider } from '../contexts/WorldContext';
 import { App } from './App';
 
 export function AppWrapper() {
   return (
-    <WorldProvider>
-      <App />
-    </WorldProvider>
+    <BrowserRouter>
+      <WorldProvider>
+        <App />
+      </WorldProvider>
+    </BrowserRouter>
   );
 }

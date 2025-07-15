@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useWorldContext } from '../contexts/WorldContext';
 import { useSidebarStore, useEditorStore } from '../stores/uiStore';
 import { FieldRenderer } from './FieldRenderers';
+import { FieldTypeIndicator } from './FieldTypeIndicator';
 
 export function EditArea() {
   const { elements } = useWorldContext();
@@ -35,9 +36,16 @@ export function EditArea() {
     <div className="w-96 bg-gray-50 border-l flex flex-col">
       <div className="p-4 border-b bg-white">
         <div className="flex items-center justify-between">
-          <h3 className="font-medium capitalize">
-            {selectedFieldId.replace(/_/g, ' ')}
-          </h3>
+          <div className="flex items-center gap-2">
+            <h3 className="font-medium capitalize">
+              {selectedFieldId.replace(/_/g, ' ')}
+            </h3>
+            <FieldTypeIndicator 
+              fieldName={selectedFieldId} 
+              value={currentValue} 
+              elementCategory={selectedElement.category} 
+            />
+          </div>
           {isEdited && (
             <span className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded">
               Modified

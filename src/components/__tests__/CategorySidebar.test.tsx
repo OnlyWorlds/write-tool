@@ -3,6 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { CategorySidebar } from '../CategorySidebar';
 import { WorldProvider } from '../../contexts/WorldContext';
 import { useSidebarStore } from '../../stores/uiStore';
+import { BrowserRouter } from 'react-router-dom';
 
 // Mock the API service
 vi.mock('../../services/ApiService', () => ({
@@ -39,6 +40,13 @@ vi.mock('../../contexts/WorldContext', () => ({
   })
 }));
 
+// Test wrapper with Router
+const TestWrapper = ({ children }: { children: React.ReactNode }) => (
+  <BrowserRouter>
+    {children}
+  </BrowserRouter>
+);
+
 describe('CategorySidebar', () => {
   const mockSetFilterText = vi.fn();
   const mockToggleCategory = vi.fn();
@@ -61,13 +69,13 @@ describe('CategorySidebar', () => {
   });
 
   it('should render search input', () => {
-    render(<CategorySidebar />);
+    render(<TestWrapper><CategorySidebar /></TestWrapper>);
     
     expect(screen.getByPlaceholderText('Search elements... (press / to focus)')).toBeInTheDocument();
   });
 
   it('should show all categories when no filter', () => {
-    render(<CategorySidebar />);
+    render(<TestWrapper><CategorySidebar /></TestWrapper>);
     
     expect(screen.getByText('characters')).toBeInTheDocument();
     expect(screen.getByText('locations')).toBeInTheDocument();
@@ -85,7 +93,7 @@ describe('CategorySidebar', () => {
       setFilterText: mockSetFilterText,
     });
 
-    render(<CategorySidebar />);
+    render(<TestWrapper><CategorySidebar /></TestWrapper>);
     
     // Should show characters category with Hero Bob
     expect(screen.getByText('characters')).toBeInTheDocument();
@@ -107,7 +115,7 @@ describe('CategorySidebar', () => {
       setFilterText: mockSetFilterText,
     });
 
-    render(<CategorySidebar />);
+    render(<TestWrapper><CategorySidebar /></TestWrapper>);
     
     // Should show "1 / 2" indicating 1 match out of 2 total
     expect(screen.getByText('1')).toBeInTheDocument();
@@ -126,7 +134,7 @@ describe('CategorySidebar', () => {
       setFilterText: mockSetFilterText,
     });
 
-    render(<CategorySidebar />);
+    render(<TestWrapper><CategorySidebar /></TestWrapper>);
     
     const clearButton = screen.getByTitle('Clear search');
     fireEvent.click(clearButton);
@@ -146,7 +154,7 @@ describe('CategorySidebar', () => {
       setFilterText: mockSetFilterText,
     });
 
-    render(<CategorySidebar />);
+    render(<TestWrapper><CategorySidebar /></TestWrapper>);
     
     expect(screen.getByText('No elements found matching "nonexistent"')).toBeInTheDocument();
   });
@@ -163,7 +171,7 @@ describe('CategorySidebar', () => {
       setFilterText: mockSetFilterText,
     });
 
-    render(<CategorySidebar />);
+    render(<TestWrapper><CategorySidebar /></TestWrapper>);
     
     // Should show Hero Bob even though category is not expanded
     expect(screen.getByText('Hero Bob')).toBeInTheDocument();

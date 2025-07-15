@@ -1,11 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSidebarStore } from '../stores/uiStore';
 import { useWorldContext } from '../contexts/WorldContext';
 import { getCategorySchema, validateElementData, type FieldSchema } from '../services/ElementSchemas';
+import { detectFieldType } from '../services/FieldTypeDetector';
+import { FieldRenderer } from './FieldRenderers';
 
 export function CreateElementModal() {
   const { createModalOpen, createModalCategory, closeCreateModal } = useSidebarStore();
-  const { createElement } = useWorldContext();
+  const { createElement, elements } = useWorldContext();
   
   const [formData, setFormData] = useState<Record<string, any>>({});
   
@@ -13,6 +15,20 @@ export function CreateElementModal() {
   const [errors, setErrors] = useState<string[]>([]);
 
   const schema = getCategorySchema(createModalCategory || 'general');
+
+  // Handle Escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && createModalOpen) {
+        handleClose();
+      }
+    };
+    
+    if (createModalOpen) {
+      document.addEventListener('keydown', handleEscape);
+      return () => document.removeEventListener('keydown', handleEscape);
+    }
+  }, [createModalOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,15 +77,29 @@ export function CreateElementModal() {
   };
 
   const renderField = (field: FieldSchema) => {
-    const value = formData[field.name] || '';
+    const value = formData[field.name];
     
+    // For link/links fields, use FieldRenderer which has proper filtering
+    if (field.type === 'link' || field.type === 'links') {
+      return (
+        <FieldRenderer
+          fieldName={field.name}
+          value={value}
+          elementCategory={createModalCategory || undefined}
+          mode="edit"
+          onChange={(newValue) => handleFieldChange(field.name, newValue)}
+        />
+      );
+    }
+    
+    // For other field types, render directly
     switch (field.type) {
       case 'text':
         return (
           <input
             type="text"
             id={field.name}
-            value={value}
+            value={value || ''}
             onChange={(e) => handleFieldChange(field.name, e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder={field.placeholder}
@@ -81,7 +111,7 @@ export function CreateElementModal() {
         return (
           <textarea
             id={field.name}
-            value={value}
+            value={value || ''}
             onChange={(e) => handleFieldChange(field.name, e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             rows={3}
@@ -104,7 +134,7 @@ export function CreateElementModal() {
             {options.length > 0 && (
               <select
                 id={field.name}
-                value={value}
+                value={value || ''}
                 onChange={(e) => handleFieldChange(field.name, e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 disabled={isSubmitting}
@@ -118,7 +148,7 @@ export function CreateElementModal() {
             {field.allowCustom && (
               <input
                 type="text"
-                value={value}
+                value={value || ''}
                 onChange={(e) => handleFieldChange(field.name, e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder={field.placeholder || `Enter custom ${field.label.toLowerCase()}`}
@@ -142,6 +172,11 @@ export function CreateElementModal() {
             {field.description && (
               <span className="ml-2 text-sm text-gray-600">{field.description}</span>
             )}
+            {field.name === 'is_public' && (
+              <div className="ml-2 text-xs text-gray-500">
+                Public elements are visible to all users in the world
+              </div>
+            )}
           </div>
         );
       
@@ -150,7 +185,7 @@ export function CreateElementModal() {
           <input
             type="url"
             id={field.name}
-            value={value}
+            value={value || ''}
             onChange={(e) => handleFieldChange(field.name, e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder={field.placeholder}
@@ -163,7 +198,7 @@ export function CreateElementModal() {
           <input
             type="number"
             id={field.name}
-            value={value}
+            value={value || ''}
             onChange={(e) => handleFieldChange(field.name, e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder={field.placeholder}
@@ -172,21 +207,37 @@ export function CreateElementModal() {
         );
       
       default:
-        return null;
+        return (
+          <input
+            type="text"
+            id={field.name}
+            value={value || ''}
+            onChange={(e) => handleFieldChange(field.name, e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}`}
+            disabled={isSubmitting}
+          />
+        );
     }
   };
 
   if (!createModalOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      onClick={handleClose}
+    >
+      <div 
+        className="bg-white rounded-lg p-6 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
         <h2 className="text-lg font-semibold mb-4">
           Create New {schema.name}
         </h2>
         
         <form onSubmit={handleSubmit} className="space-y-4">
-          {schema.fields.map((field, index) => (
+          {schema.fields.map((field) => (
             <div key={field.name}>
               <label htmlFor={field.name} className="block text-sm font-medium text-gray-700 mb-1">
                 {field.label} {field.required && '*'}

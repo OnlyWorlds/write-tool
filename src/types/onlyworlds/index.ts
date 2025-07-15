@@ -1,0 +1,52 @@
+// Export all OnlyWorlds types
+export * from './base_elements';
+export * from './Ability';
+export * from './Character';
+export * from './Collective';
+export * from './Construct';
+export * from './Creature';
+export * from './Event';
+export * from './Family';
+export * from './Institution';
+export * from './Language';
+export * from './Law';
+export * from './Location';
+export * from './Map';
+export * from './Marker';
+export * from './Narrative';
+export * from './Object';
+export * from './Phenomenon';
+export * from './Pin';
+export * from './Relation';
+export * from './Species';
+export * from './Title';
+export * from './Trait';
+export * from './World';
+export * from './Zone';
+
+// Type map for category to interface mapping
+export type OnlyWorldsElementTypes = {
+  ability: import('./Ability').Ability;
+  character: import('./Character').Character;
+  collective: import('./Collective').Collective;
+  construct: import('./Construct').Construct;
+  creature: import('./Creature').Creature;
+  event: import('./Event').Event;
+  family: import('./Family').Family;
+  institution: import('./Institution').Institution;
+  language: import('./Language').Language;
+  law: import('./Law').Law;
+  location: import('./Location').Location;
+  map: import('./Map').Map;
+  marker: import('./Marker').Marker;
+  narrative: import('./Narrative').Narrative;
+  object: import('./Object').Object;
+  phenomenon: import('./Phenomenon').Phenomenon;
+  pin: import('./Pin').Pin;
+  relation: import('./Relation').Relation;
+  species: import('./Species').Species;
+  title: import('./Title').Title;
+  trait: import('./Trait').Trait;
+  world: import('./World').World;
+  zone: import('./Zone').Zone;
+};

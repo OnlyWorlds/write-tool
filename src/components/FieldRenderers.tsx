@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { detectFieldType, convertFieldValue, formatFieldValue, type FieldTypeInfo } from '../services/FieldTypeDetector';
+import { useWorldContext } from '../contexts/WorldContext';
+import { useSidebarStore } from '../stores/uiStore';
 
 interface FieldRendererProps {
   fieldName: string;
@@ -29,6 +32,9 @@ interface FieldViewerProps {
 
 function FieldViewer({ fieldName, value, fieldTypeInfo, className }: FieldViewerProps) {
   const { type } = fieldTypeInfo;
+  const { elements } = useWorldContext();
+  const { selectElement } = useSidebarStore();
+  const navigate = useNavigate();
   
   if (value === null || value === undefined || value === '') {
     return <span className={`text-gray-400 italic ${className}`}>No value</span>;
@@ -87,6 +93,54 @@ function FieldViewer({ fieldName, value, fieldTypeInfo, className }: FieldViewer
       }
       return <span className={`text-gray-400 italic ${className}`}>No tags</span>;
       
+    case 'link':
+      if (typeof value === 'string' && value) {
+        const linkedElement = elements.get(value);
+        if (linkedElement) {
+          return (
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                navigate(`/element/${value}`);
+              }}
+              className={`text-blue-600 hover:text-blue-800 hover:underline cursor-pointer ${className}`}
+            >
+              {linkedElement.name}
+            </button>
+          );
+        }
+        return <span className={`text-gray-500 ${className}`}>Unknown element ({value})</span>;
+      }
+      return <span className={`text-gray-400 italic ${className}`}>No link</span>;
+      
+    case 'links':
+      if (Array.isArray(value) && value.length > 0) {
+        return (
+          <div className={`space-y-1 ${className}`}>
+            {value.map((linkId, index) => {
+              const linkedElement = elements.get(linkId);
+              if (linkedElement) {
+                return (
+                  <button
+                    key={index}
+                    onClick={() => navigate(`/element/${linkId}`)}
+                    className="block text-blue-600 hover:text-blue-800 hover:underline text-left"
+                  >
+                    {linkedElement.name}
+                  </button>
+                );
+              }
+              return (
+                <span key={index} className="block text-gray-500">
+                  Unknown element ({linkId})
+                </span>
+              );
+            })}
+          </div>
+        );
+      }
+      return <span className={`text-gray-400 italic ${className}`}>No links</span>;
+      
     case 'json':
       return (
         <pre className={`text-sm bg-gray-50 p-2 rounded border overflow-auto ${className}`}>
@@ -119,8 +173,9 @@ interface FieldEditorProps {
 }
 
 function FieldEditor({ fieldName, value, fieldTypeInfo, onChange, className }: FieldEditorProps) {
-  const { type, options, allowCustom } = fieldTypeInfo;
+  const { type, options, allowCustom, linkedCategory } = fieldTypeInfo;
   const [localValue, setLocalValue] = useState(value);
+  const { elements } = useWorldContext();
   
   useEffect(() => {
     setLocalValue(value);
@@ -172,31 +227,58 @@ function FieldEditor({ fieldName, value, fieldTypeInfo, onChange, className }: F
       );
       
     case 'select':
-      return (
-        <div className="space-y-2">
-          {options && options.length > 0 && (
-            <select
-              value={localValue || ''}
-              onChange={(e) => handleChange(e.target.value)}
-              className={baseInputClass}
-            >
-              <option value="">Select {fieldName}</option>
-              {options.map(option => (
-                <option key={option} value={option}>{option}</option>
-              ))}
-            </select>
-          )}
-          {allowCustom && (
+      if (allowCustom && options && options.length > 0) {
+        // Use datalist for combobox behavior when custom values are allowed
+        const inputId = `${fieldName}-input`;
+        const listId = `${fieldName}-list`;
+        
+        return (
+          <div>
             <input
+              id={inputId}
+              list={listId}
               type="text"
               value={localValue || ''}
               onChange={(e) => handleChange(e.target.value)}
               className={baseInputClass}
-              placeholder={`Enter custom ${fieldName}`}
+              placeholder={`Select or enter ${fieldName}`}
+              role="combobox"
+              aria-expanded="false"
+              aria-autocomplete="list"
             />
-          )}
-        </div>
-      );
+            <datalist id={listId}>
+              {options.map(option => (
+                <option key={option} value={option} />
+              ))}
+            </datalist>
+          </div>
+        );
+      } else if (options && options.length > 0) {
+        // Use select for strict selection
+        return (
+          <select
+            value={localValue || ''}
+            onChange={(e) => handleChange(e.target.value)}
+            className={baseInputClass}
+          >
+            <option value="">Select {fieldName}</option>
+            {options.map(option => (
+              <option key={option} value={option}>{option}</option>
+            ))}
+          </select>
+        );
+      } else {
+        // Fallback to text input if no options
+        return (
+          <input
+            type="text"
+            value={localValue || ''}
+            onChange={(e) => handleChange(e.target.value)}
+            className={baseInputClass}
+            placeholder={`Enter ${fieldName}`}
+          />
+        );
+      }
       
     case 'tags':
       return (
@@ -213,6 +295,95 @@ function FieldEditor({ fieldName, value, fieldTypeInfo, onChange, className }: F
           />
           <div className="text-xs text-gray-500">
             Separate multiple tags with commas
+          </div>
+        </div>
+      );
+      
+    case 'link':
+      const allElements = Array.from(elements.values());
+      
+      // Filter elements by category if specified in field type info
+      let filteredElements = allElements;
+      if (linkedCategory) {
+        filteredElements = allElements.filter(el => el.category === linkedCategory);
+      }
+      
+      return (
+        <div className="space-y-2">
+          <select
+            value={localValue || ''}
+            onChange={(e) => handleChange(e.target.value)}
+            className={baseInputClass}
+          >
+            <option value="">Select element...</option>
+            {filteredElements.map(element => (
+              <option key={element.id} value={element.id}>
+                {element.name} ({element.category})
+              </option>
+            ))}
+          </select>
+          <div className="text-xs text-gray-500">
+            Choose an element to link to
+          </div>
+        </div>
+      );
+      
+    case 'links':
+      const allElementsForLinks = Array.from(elements.values());
+      
+      // Filter elements by category if specified in field type info
+      let filteredElementsForLinks = allElementsForLinks;
+      if (linkedCategory) {
+        filteredElementsForLinks = allElementsForLinks.filter(el => el.category === linkedCategory);
+      }
+      
+      const currentLinks = Array.isArray(localValue) ? localValue : [];
+      
+      return (
+        <div className="space-y-3">
+          <div className="space-y-2">
+            {currentLinks.map((linkId, index) => {
+              const linkedElement = elements.get(linkId);
+              return (
+                <div key={index} className="flex items-center gap-2 p-2 bg-gray-50 rounded">
+                  <span className="flex-1">
+                    {linkedElement ? `${linkedElement.name} (${linkedElement.category})` : `Unknown: ${linkId}`}
+                  </span>
+                  <button
+                    onClick={() => {
+                      const newLinks = currentLinks.filter((_, i) => i !== index);
+                      handleChange(newLinks);
+                    }}
+                    className="text-red-600 hover:text-red-800 px-2 py-1 text-sm"
+                  >
+                    Remove
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+          
+          <select
+            value=""
+            onChange={(e) => {
+              if (e.target.value && !currentLinks.includes(e.target.value)) {
+                handleChange([...currentLinks, e.target.value]);
+              }
+            }}
+            className={baseInputClass}
+          >
+            <option value="">Add element...</option>
+            {filteredElementsForLinks
+              .filter(element => !currentLinks.includes(element.id))
+              .map(element => (
+                <option key={element.id} value={element.id}>
+                  {element.name} ({element.category})
+                </option>
+              ))}
+          </select>
+          
+          <div className="text-xs text-gray-500">
+            Add multiple elements to create relationships
           </div>
         </div>
       );

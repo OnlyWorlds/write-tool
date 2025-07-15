@@ -109,6 +109,7 @@ describe('CreateElementModal', () => {
     // Character-specific fields should be present
     expect(screen.getByLabelText('Age')).toBeInTheDocument();
     expect(screen.getByLabelText('Gender')).toBeInTheDocument();
-    expect(screen.getByLabelText('Species')).toBeInTheDocument();
+    // Species is now a multi-link field (speciesIds) 
+    expect(screen.getByText('Species')).toBeInTheDocument();
   });
 });

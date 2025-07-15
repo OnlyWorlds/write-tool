@@ -1,6 +1,7 @@
 import { useWorldContext } from '../contexts/WorldContext';
 import { useSidebarStore, useEditorStore } from '../stores/uiStore';
 import { FieldRenderer } from './FieldRenderers';
+import { FieldTypeIndicator } from './FieldTypeIndicator';
 
 export function ElementViewer() {
   const { elements } = useWorldContext();
@@ -21,6 +22,21 @@ export function ElementViewer() {
   const fields = Object.entries(selectedElement).filter(([key]) => 
     !['id', 'created_at', 'updated_at'].includes(key)
   );
+  
+  // Debug: Log the actual field names we're getting
+  console.log('[ElementViewer] Field names from element:', {
+    elementId: selectedElement.id,
+    elementName: selectedElement.name,
+    category: selectedElement.category,
+    fieldNames: fields.map(([fieldName]) => fieldName),
+    // Log specific fields we're interested in
+    hasLocationId: 'locationId' in selectedElement,
+    hasLocation: 'location' in selectedElement,
+    hasBirthplaceId: 'birthplaceId' in selectedElement,
+    hasBirthplace: 'birthplace' in selectedElement,
+    hasSpeciesIds: 'speciesIds' in selectedElement,
+    hasSpecies: 'species' in selectedElement,
+  });
   
   return (
     <div className={`flex-1 p-6 ${editMode === 'showcase' ? 'max-w-4xl mx-auto' : ''}`}>
@@ -58,13 +74,18 @@ export function ElementViewer() {
                 }`}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <label className={`block capitalize ${
-                    editMode === 'showcase' 
-                      ? 'text-base font-semibold text-gray-900' 
-                      : 'text-sm font-medium text-gray-700'
-                  }`}>
-                    {fieldName.replace(/_/g, ' ')}
-                  </label>
+                  <div className="flex items-center gap-2">
+                    <label className={`block capitalize ${
+                      editMode === 'showcase' 
+                        ? 'text-base font-semibold text-gray-900' 
+                        : 'text-sm font-medium text-gray-700'
+                    }`}>
+                      {fieldName.replace(/_/g, ' ')}
+                    </label>
+                    {editMode === 'edit' && (
+                      <FieldTypeIndicator fieldName={fieldName} value={value} elementCategory={selectedElement.category} />
+                    )}
+                  </div>
                   {isEdited && editMode === 'edit' && (
                     <span className="text-xs text-amber-600">edited</span>
                   )}

@@ -1,4 +1,5 @@
 import { useState, FormEvent } from 'react';
+import { Link } from 'react-router-dom';
 import { useWorldContext } from '../contexts/WorldContext';
 import { useEditorStore } from '../stores/uiStore';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
@@ -73,6 +74,10 @@ export function AuthBar() {
     return (
       <div className="flex items-center justify-between p-4 bg-gray-900 text-white">
         <div className="flex items-center gap-4">
+          <Link to="/" className="text-sm font-bold hover:text-blue-400 transition-colors">
+            OnlyWorlds Browse Tool
+          </Link>
+          <span className="text-xs text-gray-400">|</span>
           <span className="text-sm">
             {metadata?.name || `World ${authenticatedWorldKey}`}
           </span>

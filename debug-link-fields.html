@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Link Fields</title>
+    <script type="module">
+        import { analyzeOnlyWorldsField } from './src/services/OnlyWorldsFieldTypes.js';
+        import { detectFieldType } from './src/services/FieldTypeDetector.js';
+
+        // Test cases showing the issue
+        const testCases = [
+            // These SHOULD be detected as link fields (and are in tests)
+            { fieldName: 'locationId', value: 'loc-123', category: 'character' },
+            { fieldName: 'birthplaceId', value: 'loc-456', category: 'character' },
+            { fieldName: 'speciesIds', value: ['sp-1', 'sp-2'], category: 'character' },
+            
+            // These are NOT detected as link fields (what API might be returning)
+            { fieldName: 'location', value: 'loc-123', category: 'character' },
+            { fieldName: 'birthplace', value: 'loc-456', category: 'character' },
+            { fieldName: 'species', value: ['sp-1', 'sp-2'], category: 'character' },
+        ];
+
+        console.log('Testing field detection:\n');
+        
+        testCases.forEach(test => {
+            const owResult = analyzeOnlyWorldsField(test.fieldName, test.value, test.category);
+            const ftResult = detectFieldType(test.fieldName, test.value, test.category);
+            
+            console.log(`Field: ${test.fieldName}`);
+            console.log(`  OnlyWorlds Type: ${owResult.type}${owResult.linkedCategory ? ` -> ${owResult.linkedCategory}` : ''}`);
+            console.log(`  UI Type: ${ftResult.type}${ftResult.linkedCategory ? ` -> ${ftResult.linkedCategory}` : ''}`);
+            console.log(`  Expected: ${test.fieldName.endsWith('Id') || test.fieldName.endsWith('Ids') ? 'link/links' : 'string/text'}`);
+            console.log('');
+        });
+
+        // Demonstrate the problem
+        console.log('\n=== THE ISSUE ===');
+        console.log('If the API returns fields without "Id" suffix:');
+        console.log('- "location" instead of "locationId"');
+        console.log('- "birthplace" instead of "birthplaceId"');  
+        console.log('- "species" instead of "speciesIds"');
+        console.log('\nThese fields will NOT be detected as link fields!');
+        
+        // Show what needs to happen
+        console.log('\n=== POSSIBLE SOLUTIONS ===');
+        console.log('1. Check if API is actually returning fields without "Id" suffix');
+        console.log('2. If yes, either:');
+        console.log('   a) Transform field names when receiving from API (add "Id" suffix)');
+        console.log('   b) Update field detection logic to handle both cases');
+        console.log('   c) Update API to return proper field names');
+    </script>
+</head>
+<body>
+    <h1>Debug Link Fields</h1>
+    <p>Open the browser console to see the debug output.</p>
+    
+    <h2>Summary</h2>
+    <p>The field type detection relies on field names ending with "Id" or "Ids" to identify link fields.</p>
+    <p>If the API returns fields without these suffixes (e.g., "location" instead of "locationId"), they won't be detected as link fields.</p>
+    
+    <h3>Next Steps:</h3>
+    <ol>
+        <li>Run the app and check the console logs to see actual field names from the API</li>
+        <li>If fields are missing the "Id" suffix, implement a transformation layer</li>
+        <li>Consider updating the OnlyWorlds specification or API response format</li>
+    </ol>
+</body>
+</html>

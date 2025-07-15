@@ -2,11 +2,13 @@ import { ChevronDownIcon, ChevronRightIcon, PlusIcon, SearchIcon } from './icons
 import { useWorldContext } from '../contexts/WorldContext';
 import { useSidebarStore } from '../stores/uiStore';
 import { useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export function CategorySidebar() {
   const { categories } = useWorldContext();
   const { expandedCategories, selectedElementId, filterText, toggleCategory, selectElement, openCreateModal, setFilterText } = useSidebarStore();
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -118,10 +120,10 @@ export function CategorySidebar() {
                   
                   {(isExpanded || isSearching) && (
                     <div className="ml-4">
-                      {elements.map(element => (
+                      {elements.map((element: any) => (
                         <button
                           key={element.id}
-                          onClick={() => selectElement(element.id)}
+                          onClick={() => navigate(`/element/${element.id}`)}
                           className={`w-full text-left px-4 py-1.5 text-sm hover:bg-gray-100 transition-colors ${
                             selectedElementId === element.id ? 'bg-blue-50 text-blue-700' : ''
                           }`}

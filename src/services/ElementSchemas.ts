@@ -1,7 +1,7 @@
 // Category-specific field schemas for element creation
 export interface FieldSchema {
   name: string;
-  type: 'text' | 'textarea' | 'select' | 'boolean' | 'number' | 'url';
+  type: 'text' | 'textarea' | 'select' | 'boolean' | 'number' | 'url' | 'link' | 'links';
   label: string;
   required: boolean;
   placeholder?: string;
@@ -33,13 +33,13 @@ const commonFields = {
     required: false,
     placeholder: 'Optional description'
   },
-  type: {
-    name: 'type',
+  supertype: {
+    name: 'supertype',
     type: 'select' as const,
-    label: 'Type',
+    label: 'Supertype',
     required: false,
     allowCustom: true,
-    placeholder: 'Select or enter type'
+    placeholder: 'Select or enter supertype'
   },
   subtype: {
     name: 'subtype',
@@ -72,7 +72,7 @@ export const categorySchemas: Record<string, CategorySchema> = {
     fields: [
       commonFields.name,
       commonFields.description,
-      commonFields.type,
+      commonFields.supertype,
       commonFields.subtype,
       {
         name: 'age',
@@ -90,11 +90,60 @@ export const categorySchemas: Record<string, CategorySchema> = {
         allowCustom: true
       },
       {
-        name: 'species',
-        type: 'text',
+        name: 'locationId',
+        type: 'link',
+        label: 'Current Location',
+        required: false,
+        description: 'Where this character is currently located'
+      },
+      {
+        name: 'birthplaceId',
+        type: 'link',
+        label: 'Birthplace',
+        required: false,
+        description: 'Where this character was born'
+      },
+      {
+        name: 'speciesIds',
+        type: 'links',
         label: 'Species',
         required: false,
-        placeholder: 'e.g., Human, Elf, Dragon'
+        description: 'Species of this character'
+      },
+      {
+        name: 'traitsIds',
+        type: 'links',
+        label: 'Traits',
+        required: false,
+        description: 'Character traits'
+      },
+      {
+        name: 'abilitiesIds',
+        type: 'links',
+        label: 'Abilities',
+        required: false,
+        description: 'Character abilities'
+      },
+      {
+        name: 'familyIds',
+        type: 'links',
+        label: 'Family',
+        required: false,
+        description: 'Family members'
+      },
+      {
+        name: 'friendsIds',
+        type: 'links',
+        label: 'Friends',
+        required: false,
+        description: 'Friends of this character'
+      },
+      {
+        name: 'rivalsIds',
+        type: 'links',
+        label: 'Rivals',
+        required: false,
+        description: 'Character rivals'
       },
       commonFields.imageUrl,
       commonFields.isPublic
@@ -108,7 +157,7 @@ export const categorySchemas: Record<string, CategorySchema> = {
     fields: [
       commonFields.name,
       commonFields.description,
-      commonFields.type,
+      commonFields.supertype,
       commonFields.subtype,
       {
         name: 'climate',
@@ -125,6 +174,34 @@ export const categorySchemas: Record<string, CategorySchema> = {
         required: false,
         placeholder: 'e.g., 10,000, Large, Unknown'
       },
+      {
+        name: 'parentLocationId',
+        type: 'link',
+        label: 'Parent Location',
+        required: false,
+        description: 'The larger location this place is within'
+      },
+      {
+        name: 'populationsIds',
+        type: 'links',
+        label: 'Populations',
+        required: false,
+        description: 'Populations living in this location'
+      },
+      {
+        name: 'foundersIds',
+        type: 'links',
+        label: 'Founders',
+        required: false,
+        description: 'Founders of this location'
+      },
+      {
+        name: 'buildingsIds',
+        type: 'links',
+        label: 'Buildings',
+        required: false,
+        description: 'Buildings in this location'
+      },
       commonFields.imageUrl,
       commonFields.isPublic
     ],
@@ -137,7 +214,7 @@ export const categorySchemas: Record<string, CategorySchema> = {
     fields: [
       commonFields.name,
       commonFields.description,
-      commonFields.type,
+      commonFields.supertype,
       commonFields.subtype,
       {
         name: 'material',
@@ -166,7 +243,7 @@ export const categorySchemas: Record<string, CategorySchema> = {
     fields: [
       commonFields.name,
       commonFields.description,
-      commonFields.type,
+      commonFields.supertype,
       commonFields.subtype,
       {
         name: 'date',
@@ -194,7 +271,7 @@ export const categorySchemas: Record<string, CategorySchema> = {
     fields: [
       commonFields.name,
       commonFields.description,
-      commonFields.type,
+      commonFields.supertype,
       commonFields.subtype,
       {
         name: 'leader',
@@ -225,7 +302,7 @@ export function getCategorySchema(category: string): CategorySchema {
     fields: [
       commonFields.name,
       commonFields.description,
-      commonFields.type,
+      commonFields.supertype,
       commonFields.subtype,
       commonFields.imageUrl,
       commonFields.isPublic

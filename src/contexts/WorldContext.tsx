@@ -132,11 +132,32 @@ export function WorldProvider({ children }: { children: ReactNode }) {
 
   const createElement = useCallback(async (elementData: Partial<Element>): Promise<Element> => {
     try {
-      // Generate a temporary ID for the new element
-      const tempId = `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      // Generate a proper UUIDv7
+      const generateUuid = () => {
+        const timestamp = Date.now();
+        const randomBytes = crypto.getRandomValues(new Uint8Array(10));
+        
+        // Convert timestamp to hex and pad to 12 characters (48 bits)
+        const timestampHex = timestamp.toString(16).padStart(12, '0');
+        
+        // Convert random bytes to hex
+        const randomHex = Array.from(randomBytes, byte => 
+          byte.toString(16).padStart(2, '0')
+        ).join('');
+        
+        // Format as UUIDv7: xxxxxxxx-xxxx-7xxx-yxxx-xxxxxxxxxxxx
+        // Where first 48 bits are timestamp, version is 7
+        return [
+          timestampHex.slice(0, 8),                    // 32 bits timestamp
+          timestampHex.slice(8, 12),                   // 16 bits timestamp  
+          '7' + randomHex.slice(0, 3),                 // version 7 + 12 bits random
+          ((parseInt(randomHex.slice(3, 4), 16) & 0x3) | 0x8).toString(16) + randomHex.slice(4, 7), // variant + 12 bits random
+          randomHex.slice(7, 19)                       // 48 bits random
+        ].join('-');
+      };
       
       const newElement: Element = {
-        id: tempId,
+        id: generateUuid(),
         name: elementData.name || 'Untitled',
         description: elementData.description,
         category: elementData.category || 'general',
@@ -144,17 +165,23 @@ export function WorldProvider({ children }: { children: ReactNode }) {
         subtype: elementData.subtype,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        is_public: false,
+        is_public: elementData.is_public || false,
         ...elementData,
       };
       
       // Call API to create element
       const createdElement = await ApiService.createElement(state.worldKey, state.pin, newElement);
       
-      // Update local state with the server-returned element
-      updateElement(createdElement);
+      // Ensure the created element has the correct category
+      const elementWithCategory = {
+        ...createdElement,
+        category: createdElement.category || elementData.category || 'general'
+      };
       
-      return createdElement;
+      // Update local state with the server-returned element
+      updateElement(elementWithCategory);
+      
+      return elementWithCategory;
     } catch (error) {
       throw new Error(error instanceof Error ? error.message : 'Failed to create element');
     }
@@ -218,6 +245,7 @@ export function WorldProvider({ children }: { children: ReactNode }) {
       const storedPin = localStorage.getItem(STORAGE_KEYS.PIN);
       
       if (storedWorldKey && storedPin) {
+        setState(prev => ({ ...prev, isLoading: true }));
         await authenticate(storedWorldKey, storedPin);
       }
     };

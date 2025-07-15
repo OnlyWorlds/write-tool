@@ -6,7 +6,7 @@ interface WorldContextType extends WorldState {
   authenticate: (worldKey: string, pin: string) => Promise<boolean>;
   logout: () => void;
   updateElement: (element: Element) => void;
-  createElement: (element: Element) => void;
+  createElement: (elementData: Partial<Element>) => Promise<Element>;
   deleteElement: (elementId: string) => void;
   saveElement: (elementId: string, updates: Partial<Element>) => Promise<boolean>;
 }
@@ -130,9 +130,35 @@ export function WorldProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const createElement = useCallback((element: Element) => {
-    updateElement(element);
-  }, [updateElement]);
+  const createElement = useCallback(async (elementData: Partial<Element>): Promise<Element> => {
+    try {
+      // Generate a temporary ID for the new element
+      const tempId = `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      
+      const newElement: Element = {
+        id: tempId,
+        name: elementData.name || 'Untitled',
+        description: elementData.description,
+        category: elementData.category || 'general',
+        type: elementData.type,
+        subtype: elementData.subtype,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        is_public: false,
+        ...elementData,
+      };
+      
+      // Call API to create element
+      const createdElement = await ApiService.createElement(state.worldKey, state.pin, newElement);
+      
+      // Update local state with the server-returned element
+      updateElement(createdElement);
+      
+      return createdElement;
+    } catch (error) {
+      throw new Error(error instanceof Error ? error.message : 'Failed to create element');
+    }
+  }, [state.worldKey, state.pin, updateElement]);
 
   const deleteElement = useCallback((elementId: string) => {
     setState(prev => {

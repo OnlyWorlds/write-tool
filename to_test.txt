@@ -1,0 +1,63 @@
+
+  1. Basic Element Creation
+
+  - Click any "+" button next to a category (e.g., Characters)
+  - Verify modal opens with category-specific title "Create New Character"
+  - Fill in just the Name field and click "Create"
+  - Check that element appears in the category list
+
+  2. Form Validation
+
+  - Open create modal
+  - Click "Create" without filling anything
+  - Verify "Name is required" error appears
+  - Try entering invalid URL in Image URL field
+  - Check validation catches it
+
+  3. Category-Specific Fields
+
+  - Test different categories to see different field sets:
+    - Character: Age, Gender, Species
+    - Location: Climate, Population
+    - Object: Material, Rarity
+  - Verify dropdowns show category-appropriate options
+
+  4. Type/Subtype Dropdowns
+
+  - For Character: Type dropdown should show "Hero, Villain, NPC" etc.
+  - For Location: Type should show "City, Town, Village" etc.
+  - Test custom input - type something not in dropdown
+  - Check both dropdown selection and custom input work
+
+  5. Modal Behavior
+
+  - Click "Cancel" - modal should close without creating
+  - Click outside modal - should stay open (no accidental close)
+  - Create element successfully - modal should close and reset
+
+  6. Integration with Existing Features
+
+  - Create new element
+  - Click on it in sidebar - should load in ElementViewer
+  - Edit the new element - should work with existing save system
+  - Check that new element appears in correct category
+
+  🎯 Quick 2-Minute Test:
+
+  1. Click "+" on Characters
+  2. Enter name "Test Hero", select Type "Hero", add description
+  3. Click Create
+  4. Verify it appears in Characters list
+  5. Click on it to edit
+  6. Save changes
+
+
+
+
+    🚀 Ready for Manual Testing:
+
+  - Type in search box to filter elements
+  - Press "/" to focus search from anywhere
+  - Press Escape to clear search
+  - Check match counts show correctly
+  - Verify categories auto-expand during search

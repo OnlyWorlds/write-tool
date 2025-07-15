@@ -1,10 +1,10 @@
-import { ChevronDownIcon, ChevronRightIcon } from './icons';
+import { ChevronDownIcon, ChevronRightIcon, PlusIcon } from './icons';
 import { useWorldContext } from '../contexts/WorldContext';
 import { useSidebarStore } from '../stores/uiStore';
 
 export function CategorySidebar() {
   const { categories } = useWorldContext();
-  const { expandedCategories, selectedElementId, toggleCategory, selectElement } = useSidebarStore();
+  const { expandedCategories, selectedElementId, toggleCategory, selectElement, openCreateModal } = useSidebarStore();
 
   return (
     <aside className="w-64 bg-white border-r flex flex-col h-full">
@@ -22,18 +22,27 @@ export function CategorySidebar() {
               
               return (
                 <div key={category}>
-                  <button
-                    onClick={() => toggleCategory(category)}
-                    className="w-full flex items-center justify-between px-4 py-2 hover:bg-gray-50 transition-colors"
-                  >
-                    <div className="flex items-center gap-2">
-                      {isExpanded ? <ChevronDownIcon /> : <ChevronRightIcon />}
-                      <span className="text-sm font-medium capitalize">{category}</span>
-                    </div>
-                    <span className="text-xs text-gray-500">
-                      {elements.length}
-                    </span>
-                  </button>
+                  <div className="flex items-center">
+                    <button
+                      onClick={() => toggleCategory(category)}
+                      className="flex-1 flex items-center justify-between px-4 py-2 hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="flex items-center gap-2">
+                        {isExpanded ? <ChevronDownIcon /> : <ChevronRightIcon />}
+                        <span className="text-sm font-medium capitalize">{category}</span>
+                      </div>
+                      <span className="text-xs text-gray-500">
+                        {elements.length}
+                      </span>
+                    </button>
+                    <button
+                      onClick={() => openCreateModal(category)}
+                      className="p-2 hover:bg-gray-50 text-gray-500 hover:text-gray-700 transition-colors"
+                      title={`Create new ${category}`}
+                    >
+                      <PlusIcon />
+                    </button>
+                  </div>
                   
                   {isExpanded && (
                     <div className="ml-4">

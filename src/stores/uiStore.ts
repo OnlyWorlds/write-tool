@@ -4,15 +4,21 @@ interface SidebarState {
   expandedCategories: Set<string>;
   selectedElementId: string | null;
   filterText: string;
+  createModalOpen: boolean;
+  createModalCategory: string | null;
   toggleCategory: (category: string) => void;
   selectElement: (id: string | null) => void;
   setFilterText: (text: string) => void;
+  openCreateModal: (category: string) => void;
+  closeCreateModal: () => void;
 }
 
 export const useSidebarStore = create<SidebarState>((set) => ({
   expandedCategories: new Set(),
   selectedElementId: null,
   filterText: '',
+  createModalOpen: false,
+  createModalCategory: null,
   toggleCategory: (category) => set((state) => {
     const newExpanded = new Set(state.expandedCategories);
     if (newExpanded.has(category)) {
@@ -24,6 +30,8 @@ export const useSidebarStore = create<SidebarState>((set) => ({
   }),
   selectElement: (id) => set({ selectedElementId: id }),
   setFilterText: (text) => set({ filterText: text }),
+  openCreateModal: (category) => set({ createModalOpen: true, createModalCategory: category }),
+  closeCreateModal: () => set({ createModalOpen: false, createModalCategory: null }),
 }));
 
 interface EditorState {

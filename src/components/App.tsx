@@ -4,6 +4,7 @@ import { AuthBar } from './AuthBar';
 import { CategorySidebar } from './CategorySidebar';
 import { ElementViewer } from './ElementViewer';
 import { EditArea } from './EditArea';
+import { CreateElementModal } from './CreateElementModal';
 
 export function App() {
   const { isAuthenticated } = useWorldContext();
@@ -55,6 +56,9 @@ export function App() {
           </div>
         )}
       </div>
+      
+      {/* Create Element Modal */}
+      <CreateElementModal />
     </div>
   );
 }

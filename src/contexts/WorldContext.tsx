@@ -8,6 +8,7 @@ interface WorldContextType extends WorldState {
   updateElement: (element: Element) => void;
   createElement: (element: Element) => void;
   deleteElement: (elementId: string) => void;
+  saveElement: (elementId: string, updates: Partial<Element>) => Promise<boolean>;
 }
 
 const WorldContext = createContext<WorldContextType | undefined>(undefined);
@@ -164,6 +165,26 @@ export function WorldProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const saveElement = useCallback(async (elementId: string, updates: Partial<Element>): Promise<boolean> => {
+    const element = state.elements.get(elementId);
+    if (!element) return false;
+    
+    const updatedElement = { ...element, ...updates };
+    
+    try {
+      const success = await ApiService.updateElement(state.worldKey, state.pin, updatedElement);
+      if (success) {
+        // Update local state
+        updateElement(updatedElement);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Failed to save element:', error);
+      return false;
+    }
+  }, [state.elements, state.worldKey, state.pin, updateElement]);
+
   // Check for stored credentials on mount
   useEffect(() => {
     const checkStoredCredentials = async () => {
@@ -185,6 +206,7 @@ export function WorldProvider({ children }: { children: ReactNode }) {
     updateElement,
     createElement,
     deleteElement,
+    saveElement,
   };
 
   return <WorldContext.Provider value={value}>{children}</WorldContext.Provider>;

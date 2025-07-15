@@ -1,10 +1,14 @@
 import { useState, FormEvent } from 'react';
 import { useWorldContext } from '../contexts/WorldContext';
+import { useEditorStore } from '../stores/uiStore';
+import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 
 export function AuthBar() {
-  const { authenticate, isLoading, error, isAuthenticated, logout, metadata } = useWorldContext();
+  const { authenticate, isLoading, error, isAuthenticated, logout, metadata, worldKey: authenticatedWorldKey, saveElement } = useWorldContext();
+  const { hasUnsavedChanges, clearEdits, localEdits } = useEditorStore();
   const [worldKey, setWorldKey] = useState('');
   const [pin, setPin] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -22,19 +26,86 @@ export function AuthBar() {
     const value = e.target.value.replace(/\D/g, '').slice(0, 4);
     setPin(value);
   };
+  
+  const handleSave = async () => {
+    setIsSaving(true);
+    
+    try {
+      // Group edits by element
+      const editsByElement = new Map<string, Map<string, any>>();
+      
+      localEdits.forEach((value, key) => {
+        const [elementId, fieldName] = key.split(':');
+        if (!editsByElement.has(elementId)) {
+          editsByElement.set(elementId, new Map());
+        }
+        editsByElement.get(elementId)!.set(fieldName, value);
+      });
+      
+      // Save each element
+      let allSuccess = true;
+      for (const [elementId, fields] of editsByElement) {
+        const updates = Object.fromEntries(fields);
+        const success = await saveElement(elementId, updates);
+        if (!success) {
+          allSuccess = false;
+          break;
+        }
+      }
+      
+      if (allSuccess) {
+        clearEdits();
+        alert('All changes saved successfully!');
+      } else {
+        alert('Some changes could not be saved. Please try again.');
+      }
+    } catch (error) {
+      console.error('Save error:', error);
+      alert('Failed to save changes. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+  
+  useKeyboardShortcuts(isAuthenticated && hasUnsavedChanges ? handleSave : undefined);
 
   if (isAuthenticated) {
     return (
-      <div className="flex items-center gap-4 p-4 bg-gray-900 text-white">
-        <span className="text-sm">
-          {metadata?.name || `World ${worldKey}`}
-        </span>
-        <button
-          onClick={logout}
-          className="text-xs text-gray-400 hover:text-white transition-colors"
-        >
-          logout
-        </button>
+      <div className="flex items-center justify-between p-4 bg-gray-900 text-white">
+        <div className="flex items-center gap-4">
+          <span className="text-sm">
+            {metadata?.name || `World ${authenticatedWorldKey}`}
+          </span>
+          <button
+            onClick={logout}
+            className="text-xs text-gray-400 hover:text-white transition-colors"
+          >
+            logout
+          </button>
+        </div>
+        
+        {hasUnsavedChanges && (
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-amber-400">Unsaved changes</span>
+            <button
+              onClick={() => clearEdits()}
+              className="px-3 py-1 text-xs bg-gray-700 hover:bg-gray-600 rounded transition-colors"
+            >
+              Discard
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={isSaving}
+              className={`px-3 py-1 text-xs rounded transition-colors ${
+                isSaving 
+                  ? 'bg-gray-600 cursor-not-allowed' 
+                  : 'bg-blue-600 hover:bg-blue-700'
+              }`}
+            >
+              {isSaving ? 'Saving...' : 'Save'}
+            </button>
+          </div>
+        )}
       </div>
     );
   }

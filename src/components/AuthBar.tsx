@@ -5,7 +5,7 @@ import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 
 export function AuthBar() {
   const { authenticate, isLoading, error, isAuthenticated, logout, metadata, worldKey: authenticatedWorldKey, saveElement } = useWorldContext();
-  const { hasUnsavedChanges, clearEdits, localEdits } = useEditorStore();
+  const { hasUnsavedChanges, clearEdits, localEdits, editMode, toggleMode } = useEditorStore();
   const [worldKey, setWorldKey] = useState('');
   const [pin, setPin] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -82,6 +82,19 @@ export function AuthBar() {
           >
             logout
           </button>
+          <div className="flex items-center gap-2 ml-6">
+            <span className="text-xs text-gray-400">Mode:</span>
+            <button
+              onClick={toggleMode}
+              className={`px-2 py-0.5 text-xs rounded transition-colors ${
+                editMode === 'showcase' 
+                  ? 'bg-green-600 text-white' 
+                  : 'bg-gray-700 text-gray-300'
+              }`}
+            >
+              {editMode === 'showcase' ? 'Showcase' : 'Edit'}
+            </button>
+          </div>
         </div>
         
         {hasUnsavedChanges && (

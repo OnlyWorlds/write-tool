@@ -5,7 +5,7 @@ import { useSidebarStore, useEditorStore } from '../stores/uiStore';
 export function EditArea() {
   const { elements } = useWorldContext();
   const { selectedElementId } = useSidebarStore();
-  const { selectedFieldId, getEditedValue, setFieldValue, editMode } = useEditorStore();
+  const { selectedFieldId, getEditedValue, setFieldValue, editMode, toggleMode } = useEditorStore();
   
   const selectedElement = selectedElementId ? elements.get(selectedElementId) : null;
   const originalValue = selectedElement && selectedFieldId ? selectedElement[selectedFieldId as keyof typeof selectedElement] : null;
@@ -78,15 +78,33 @@ export function EditArea() {
         />
       </div>
       
-      <div className="p-4 border-t bg-white">
-        {isEdited && (
-          <button
-            onClick={() => selectedElementId && selectedFieldId && setFieldValue(selectedElementId, selectedFieldId, originalValue)}
-            className="text-xs text-blue-600 hover:text-blue-700"
-          >
-            Reset to original
-          </button>
-        )}
+      <div className="p-4 border-t bg-white space-y-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-gray-500">Mode:</span>
+            <button
+              onClick={toggleMode}
+              className={`px-3 py-1 text-xs rounded transition-colors ${
+                editMode === 'edit' 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-gray-200 text-gray-700'
+              }`}
+            >
+              {editMode === 'edit' ? 'Edit' : 'Showcase'}
+            </button>
+          </div>
+          {isEdited && editMode === 'edit' && (
+            <button
+              onClick={() => selectedElementId && selectedFieldId && setFieldValue(selectedElementId, selectedFieldId, originalValue)}
+              className="text-xs text-blue-600 hover:text-blue-700"
+            >
+              Reset to original
+            </button>
+          )}
+        </div>
+        <p className="text-xs text-gray-400">
+          Press Cmd/Ctrl+E to toggle mode
+        </p>
       </div>
     </div>
   );

@@ -4,7 +4,7 @@ import { useSidebarStore, useEditorStore } from '../stores/uiStore';
 export function ElementViewer() {
   const { elements } = useWorldContext();
   const { selectedElementId } = useSidebarStore();
-  const { selectedFieldId, selectField, getEditedValue, hasUnsavedChanges } = useEditorStore();
+  const { selectedFieldId, selectField, getEditedValue, hasUnsavedChanges, editMode } = useEditorStore();
   
   const selectedElement = selectedElementId ? elements.get(selectedElementId) : null;
   
@@ -22,15 +22,15 @@ export function ElementViewer() {
   );
   
   return (
-    <div className="flex-1 p-6">
-      <div className="bg-white rounded-lg shadow-sm border">
+    <div className={`flex-1 p-6 ${editMode === 'showcase' ? 'max-w-4xl mx-auto' : ''}`}>
+      <div className={`bg-white rounded-lg shadow-sm border ${editMode === 'showcase' ? 'shadow-lg' : ''}`}>
         <div className="p-6 border-b">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-semibold">{selectedElement.name}</h2>
               <p className="text-sm text-gray-500 mt-1 capitalize">{selectedElement.category}</p>
             </div>
-            {hasUnsavedChanges && (
+            {hasUnsavedChanges && editMode === 'edit' && (
               <span className="text-sm text-amber-600 bg-amber-50 px-3 py-1 rounded-full">
                 Unsaved changes
               </span>
@@ -38,7 +38,7 @@ export function ElementViewer() {
           </div>
         </div>
         
-        <div className="p-6 space-y-4">
+        <div className={`p-6 ${editMode === 'showcase' ? 'space-y-6 bg-gray-50' : 'space-y-4'}`}>
           {fields.map(([fieldName, originalValue]) => {
             const editedValue = selectedElementId ? getEditedValue(selectedElementId, fieldName) : undefined;
             const value = editedValue !== undefined ? editedValue : originalValue;
@@ -47,26 +47,34 @@ export function ElementViewer() {
             return (
               <div 
                 key={fieldName}
-                onClick={() => selectField(fieldName)}
-                className={`p-4 rounded-lg border cursor-pointer transition-all relative ${
-                  selectedFieldId === fieldName 
-                    ? 'border-blue-500 bg-blue-50' 
-                    : 'border-gray-200 hover:border-gray-300'
+                onClick={() => editMode === 'edit' && selectField(fieldName)}
+                className={`p-4 rounded-lg border transition-all relative ${
+                  editMode === 'showcase' 
+                    ? 'border-transparent bg-white' 
+                    : selectedFieldId === fieldName 
+                      ? 'border-blue-500 bg-blue-50 cursor-pointer' 
+                      : 'border-gray-200 hover:border-gray-300 cursor-pointer'
                 }`}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <label className="block text-sm font-medium text-gray-700 capitalize">
+                  <label className={`block capitalize ${
+                    editMode === 'showcase' 
+                      ? 'text-base font-semibold text-gray-900' 
+                      : 'text-sm font-medium text-gray-700'
+                  }`}>
                     {fieldName.replace(/_/g, ' ')}
                   </label>
-                  {isEdited && (
+                  {isEdited && editMode === 'edit' && (
                     <span className="text-xs text-amber-600">edited</span>
                   )}
                 </div>
-                <div className="text-gray-900">
+                <div className={editMode === 'showcase' ? 'text-gray-800' : 'text-gray-900'}>
                   {typeof value === 'string' && value ? (
-                    <p className="whitespace-pre-wrap">{value}</p>
+                    <p className={`whitespace-pre-wrap ${editMode === 'showcase' ? 'text-base leading-relaxed' : ''}`}>
+                      {value}
+                    </p>
                   ) : typeof value === 'object' && value ? (
-                    <pre className="text-sm bg-gray-50 p-2 rounded">
+                    <pre className={`text-sm p-2 rounded ${editMode === 'showcase' ? 'bg-gray-100' : 'bg-gray-50'}`}>
                       {JSON.stringify(value, null, 2)}
                     </pre>
                   ) : (

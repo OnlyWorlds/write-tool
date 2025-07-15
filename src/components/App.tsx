@@ -1,4 +1,5 @@
 import { useWorldContext } from '../contexts/WorldContext';
+import { useEditorStore } from '../stores/uiStore';
 import { AuthBar } from './AuthBar';
 import { CategorySidebar } from './CategorySidebar';
 import { ElementViewer } from './ElementViewer';
@@ -6,6 +7,7 @@ import { EditArea } from './EditArea';
 
 export function App() {
   const { isAuthenticated } = useWorldContext();
+  const { editMode } = useEditorStore();
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -24,8 +26,8 @@ export function App() {
               {/* Element Viewer */}
               <ElementViewer />
               
-              {/* Edit Area */}
-              <EditArea />
+              {/* Edit Area - Only show in edit mode */}
+              {editMode === 'edit' && <EditArea />}
             </div>
           </>
         ) : (

@@ -1,5 +1,6 @@
 import { useWorldContext } from '../contexts/WorldContext';
 import { useSidebarStore, useEditorStore } from '../stores/uiStore';
+import { FieldRenderer } from './FieldRenderers';
 
 export function ElementViewer() {
   const { elements } = useWorldContext();
@@ -69,17 +70,13 @@ export function ElementViewer() {
                   )}
                 </div>
                 <div className={editMode === 'showcase' ? 'text-gray-800' : 'text-gray-900'}>
-                  {typeof value === 'string' && value ? (
-                    <p className={`whitespace-pre-wrap ${editMode === 'showcase' ? 'text-base leading-relaxed' : ''}`}>
-                      {value}
-                    </p>
-                  ) : typeof value === 'object' && value ? (
-                    <pre className={`text-sm p-2 rounded ${editMode === 'showcase' ? 'bg-gray-100' : 'bg-gray-50'}`}>
-                      {JSON.stringify(value, null, 2)}
-                    </pre>
-                  ) : (
-                    <p className="text-gray-400 italic">No value</p>
-                  )}
+                  <FieldRenderer
+                    fieldName={fieldName}
+                    value={value}
+                    elementCategory={selectedElement.category}
+                    mode="view"
+                    className={editMode === 'showcase' ? 'text-base leading-relaxed' : ''}
+                  />
                 </div>
               </div>
             );

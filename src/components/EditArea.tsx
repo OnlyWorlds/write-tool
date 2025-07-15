@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useWorldContext } from '../contexts/WorldContext';
 import { useSidebarStore, useEditorStore } from '../stores/uiStore';
+import { FieldRenderer } from './FieldRenderers';
 
 export function EditArea() {
   const { elements } = useWorldContext();
@@ -12,29 +13,9 @@ export function EditArea() {
   const editedValue = selectedElementId && selectedFieldId ? getEditedValue(selectedElementId, selectedFieldId) : undefined;
   const currentValue = editedValue !== undefined ? editedValue : originalValue;
   
-  const [localValue, setLocalValue] = useState('');
-  
-  useEffect(() => {
-    if (currentValue !== null && currentValue !== undefined) {
-      setLocalValue(typeof currentValue === 'string' ? currentValue : JSON.stringify(currentValue, null, 2));
-    } else {
-      setLocalValue('');
-    }
-  }, [currentValue, selectedFieldId, selectedElementId]);
-  
-  const handleChange = (value: string) => {
-    setLocalValue(value);
+  const handleChange = (value: any) => {
     if (selectedElementId && selectedFieldId) {
-      // Try to parse as JSON if it looks like JSON
-      let parsedValue = value;
-      if (value.trim().startsWith('{') || value.trim().startsWith('[')) {
-        try {
-          parsedValue = JSON.parse(value);
-        } catch {
-          // Keep as string if JSON parse fails
-        }
-      }
-      setFieldValue(selectedElementId, selectedFieldId, parsedValue);
+      setFieldValue(selectedElementId, selectedFieldId, value);
     }
   };
   
@@ -69,13 +50,16 @@ export function EditArea() {
       </div>
       
       <div className="flex-1 p-4">
-        <textarea
-          className="w-full h-full p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          value={localValue}
-          onChange={(e) => handleChange(e.target.value)}
-          placeholder="Enter content..."
-          readOnly={editMode === 'showcase'}
-        />
+        <div className="h-full">
+          <FieldRenderer
+            fieldName={selectedFieldId}
+            value={currentValue}
+            elementCategory={selectedElement.category}
+            mode={editMode === 'edit' ? 'edit' : 'view'}
+            onChange={handleChange}
+            className="h-full"
+          />
+        </div>
       </div>
       
       <div className="p-4 border-t bg-white space-y-2">

@@ -85,7 +85,7 @@ describe('WorldContext', () => {
     expect(result.current.worldKey).toBe('test-world');
     expect(result.current.pin).toBe('test-pin');
     expect(localStorage.getItem('onlyworlds_worldKey')).toBe('test-world');
-    expect(localStorage.getItem('onlyworlds_pin')).toBe('test-pin');
+    expect(sessionStorage.getItem('onlyworlds_pin')).toBe('test-pin');
   });
 
   it('should handle failed authentication', async () => {
@@ -109,7 +109,7 @@ describe('WorldContext', () => {
     
     // Set some initial data
     localStorage.setItem('onlyworlds_worldKey', 'test');
-    localStorage.setItem('onlyworlds_pin', 'test');
+    sessionStorage.setItem('onlyworlds_pin', 'test');
     
     act(() => {
       result.current.logout();
@@ -119,7 +119,7 @@ describe('WorldContext', () => {
     expect(result.current.worldKey).toBe('');
     expect(result.current.pin).toBe('');
     expect(localStorage.getItem('onlyworlds_worldKey')).toBeNull();
-    expect(localStorage.getItem('onlyworlds_pin')).toBeNull();
+    expect(sessionStorage.getItem('onlyworlds_pin')).toBeNull();
   });
 
   it('should update element and rebuild categories', () => {

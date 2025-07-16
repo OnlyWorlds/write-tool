@@ -61,9 +61,9 @@ export function WorldProvider({ children }: { children: ReactNode }) {
       // Organize by categories
       const categories = organizeElementsByCategory(elementsArray);
       
-      // Store credentials in localStorage
+      // Store credentials - world key in localStorage, PIN in sessionStorage
       localStorage.setItem(STORAGE_KEYS.WORLD_KEY, worldKey);
-      localStorage.setItem(STORAGE_KEYS.PIN, pin);
+      sessionStorage.setItem(STORAGE_KEYS.PIN, pin);
       
       setState({
         worldKey,
@@ -99,7 +99,7 @@ export function WorldProvider({ children }: { children: ReactNode }) {
       error: null,
     });
     localStorage.removeItem(STORAGE_KEYS.WORLD_KEY);
-    localStorage.removeItem(STORAGE_KEYS.PIN);
+    sessionStorage.removeItem(STORAGE_KEYS.PIN);
   }, []);
 
   const updateElement = useCallback((element: Element) => {
@@ -242,7 +242,7 @@ export function WorldProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const checkStoredCredentials = async () => {
       const storedWorldKey = localStorage.getItem(STORAGE_KEYS.WORLD_KEY);
-      const storedPin = localStorage.getItem(STORAGE_KEYS.PIN);
+      const storedPin = sessionStorage.getItem(STORAGE_KEYS.PIN);
       
       if (storedWorldKey && storedPin) {
         setState(prev => ({ ...prev, isLoading: true }));

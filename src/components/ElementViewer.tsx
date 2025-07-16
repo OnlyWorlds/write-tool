@@ -1,19 +1,22 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { useWorldContext } from '../contexts/WorldContext';
 import { useSidebarStore, useEditorStore } from '../stores/uiStore';
 import { FieldRenderer } from './FieldRenderers';
 import { FieldTypeIndicator } from './FieldTypeIndicator';
 import { ReverseLinkSection } from './ReverseLinkSection';
 import { ApiService } from '../services/ApiService';
+import { exportElementToPdf, isPdfExportSupported } from '../utils/pdfExport';
 
 export function ElementViewer() {
   const { elements, worldKey, pin, deleteElement } = useWorldContext();
   const { selectedElementId, selectElement } = useSidebarStore();
-  const { selectedFieldId, selectField, getEditedValue, hasUnsavedChanges, editMode, getFieldError } = useEditorStore();
+  const { selectedFieldId, selectField, getEditedValue, hasUnsavedChanges, editMode, getFieldError, isFieldVisible, toggleFieldVisibility } = useEditorStore();
   const navigate = useNavigate();
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   
   const selectedElement = selectedElementId ? elements.get(selectedElementId) : null;
   
@@ -35,7 +38,7 @@ export function ElementViewer() {
     
     setIsDeleting(true);
     try {
-      const success = await ApiService.deleteElement(worldKey, pin, selectedElement.id);
+      const success = await ApiService.deleteElement(worldKey, pin, selectedElement.id, selectedElement.category || 'general');
       if (success) {
         // Update local state
         deleteElement(selectedElement.id);
@@ -43,21 +46,44 @@ export function ElementViewer() {
         selectElement(null);
         navigate('/');
         setShowDeleteConfirm(false);
+        toast.success('Element deleted successfully');
       } else {
-        alert('Failed to delete element. Please try again.');
+        toast.error('Failed to delete element. Please try again.');
       }
     } catch (error) {
       console.error('Error deleting element:', error);
-      alert('An error occurred while deleting the element.');
+      toast.error('An error occurred while deleting the element.');
     } finally {
       setIsDeleting(false);
+    }
+  };
+  
+  const handleExport = async () => {
+    if (!selectedElement || !selectedElementId) return;
+    
+    setIsExporting(true);
+    try {
+      await exportElementToPdf(selectedElementId, {
+        elementName: selectedElement.name,
+        includeImages: true,
+        quality: 2
+      });
+      toast.success('PDF exported successfully!');
+    } catch (error) {
+      console.error('Export error:', error);
+      toast.error('Failed to export PDF. Please try again.');
+    } finally {
+      setIsExporting(false);
     }
   };
   
   
   return (
     <div className={`flex-1 p-6 ${editMode === 'showcase' ? 'max-w-4xl mx-auto' : ''}`}>
-      <div className={`bg-white rounded-lg shadow-sm border ${editMode === 'showcase' ? 'shadow-lg' : ''}`}>
+      <div 
+        id={editMode === 'showcase' ? `showcase-${selectedElementId}` : undefined}
+        className={`bg-white rounded-lg shadow-sm border ${editMode === 'showcase' ? 'shadow-lg' : ''}`}
+      >
         <div className="p-6 border-b">
           <div className="flex items-center justify-between">
             <div>
@@ -78,6 +104,15 @@ export function ElementViewer() {
                   Delete
                 </button>
               )}
+              {editMode === 'showcase' && isPdfExportSupported() && (
+                <button
+                  onClick={handleExport}
+                  disabled={isExporting}
+                  className="text-sm text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded-full transition-colors disabled:opacity-50"
+                >
+                  {isExporting ? 'Exporting...' : 'Export PDF'}
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -88,6 +123,12 @@ export function ElementViewer() {
             const value = editedValue !== undefined ? editedValue : originalValue;
             const isEdited = editedValue !== undefined;
             const error = selectedElementId ? getFieldError(selectedElementId, fieldName) : null;
+            const fieldVisible = isFieldVisible(fieldName);
+            
+            // In showcase mode, hide fields that are not visible or have no value
+            if (editMode === 'showcase' && (!fieldVisible || !value)) {
+              return null;
+            }
             
             return (
               <div 
@@ -116,9 +157,24 @@ export function ElementViewer() {
                       <FieldTypeIndicator fieldName={fieldName} value={value} elementCategory={selectedElement.category} />
                     )}
                   </div>
-                  {isEdited && editMode === 'edit' && (
-                    <span className="text-xs text-amber-600">edited</span>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {editMode === 'showcase' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleFieldVisibility(fieldName);
+                        }}
+                        className="text-xs text-gray-400 hover:text-gray-600 px-1"
+                        data-exclude-from-export
+                        title="Hide field from showcase"
+                      >
+                        ×
+                      </button>
+                    )}
+                    {isEdited && editMode === 'edit' && (
+                      <span className="text-xs text-amber-600">edited</span>
+                    )}
+                  </div>
                 </div>
                 <div className={editMode === 'showcase' ? 'text-gray-800' : 'text-gray-900'}>
                   <FieldRenderer

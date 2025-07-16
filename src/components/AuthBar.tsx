@@ -1,5 +1,6 @@
 import { useState, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { useWorldContext } from '../contexts/WorldContext';
 import { useEditorStore } from '../stores/uiStore';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
@@ -63,7 +64,7 @@ export function AuthBar() {
       }
       
       if (hasErrors) {
-        alert('Please fix validation errors before saving.');
+        toast.error('Please fix validation errors before saving');
         setIsSaving(false);
         return;
       }
@@ -81,13 +82,13 @@ export function AuthBar() {
       
       if (allSuccess) {
         clearEdits();
-        alert('All changes saved successfully!');
+        toast.success('All changes saved successfully!');
       } else {
-        alert('Some changes could not be saved. Please try again.');
+        toast.error('Some changes could not be saved. Please try again.');
       }
     } catch (error) {
       console.error('Save error:', error);
-      alert('Failed to save changes. Please try again.');
+      toast.error('Failed to save changes. Please try again.');
     } finally {
       setIsSaving(false);
     }

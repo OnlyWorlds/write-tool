@@ -105,7 +105,7 @@ describe('ValidationService', () => {
       const element: Element = {
         id: 'test-1',
         name: 'Test',
-        description: null,
+        description: undefined,
         imageUrl: undefined,
         category: 'characters',
       };

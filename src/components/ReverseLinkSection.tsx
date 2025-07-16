@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useWorldContext } from '../contexts/WorldContext';
 import { calculateReverseLinks, groupReverseLinks } from '../utils/reverseLinks';
@@ -9,7 +9,7 @@ interface ReverseLinkSectionProps {
   className?: string;
 }
 
-export function ReverseLinkSection({ elementId, className = '' }: ReverseLinkSectionProps) {
+export const ReverseLinkSection = memo(function ReverseLinkSection({ elementId, className = '' }: ReverseLinkSectionProps) {
   const { elements } = useWorldContext();
   const navigate = useNavigate();
   
@@ -62,4 +62,4 @@ export function ReverseLinkSection({ elementId, className = '' }: ReverseLinkSec
       </div>
     </div>
   );
-}
+});

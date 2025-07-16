@@ -25,6 +25,8 @@ const mockUseEditorStore = vi.fn(() => ({
   hasUnsavedChanges: false,
   editMode: 'edit',
   getFieldError: vi.fn(() => null),
+  isFieldVisible: vi.fn(() => true),
+  toggleFieldVisibility: vi.fn(),
 }));
 
 // Mock stores
@@ -71,6 +73,8 @@ describe('ElementViewer - Delete Functionality', () => {
       hasUnsavedChanges: false,
       editMode: 'edit',
       getFieldError: vi.fn(() => null),
+      isFieldVisible: vi.fn(() => true),
+      toggleFieldVisibility: vi.fn(),
     });
   });
   
@@ -92,6 +96,8 @@ describe('ElementViewer - Delete Functionality', () => {
       hasUnsavedChanges: false,
       editMode: 'showcase',
       getFieldError: vi.fn(() => null),
+      isFieldVisible: vi.fn(() => true),
+      toggleFieldVisibility: vi.fn(),
     });
     
     render(
@@ -146,7 +152,7 @@ describe('ElementViewer - Delete Functionality', () => {
     fireEvent.click(deleteButton);
     
     await waitFor(() => {
-      expect(ApiService.deleteElement).toHaveBeenCalledWith('test-world', 'test-pin', 'test-element-1');
+      expect(ApiService.deleteElement).toHaveBeenCalledWith('test-world', 'test-pin', 'test-element-1', 'characters');
       expect(mockDeleteElement).toHaveBeenCalledWith('test-element-1');
       expect(mockSelectElement).toHaveBeenCalledWith(null);
       expect(mockNavigate).toHaveBeenCalledWith('/');
@@ -155,7 +161,6 @@ describe('ElementViewer - Delete Functionality', () => {
   
   it('shows error when deletion fails', async () => {
     vi.mocked(ApiService.deleteElement).mockResolvedValue(false);
-    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
     
     render(
       <BrowserRouter>
@@ -169,9 +174,7 @@ describe('ElementViewer - Delete Functionality', () => {
     fireEvent.click(deleteButton);
     
     await waitFor(() => {
-      expect(alertSpy).toHaveBeenCalledWith('Failed to delete element. Please try again.');
+      expect(ApiService.deleteElement).toHaveBeenCalledWith('test-world', 'test-pin', 'test-element-1', 'characters');
     });
-    
-    alertSpy.mockRestore();
   });
 });

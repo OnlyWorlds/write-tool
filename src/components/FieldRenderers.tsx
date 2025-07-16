@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { detectFieldType, convertFieldValue, formatFieldValue, type FieldTypeInfo } from '../services/FieldTypeDetector';
 import { useWorldContext } from '../contexts/WorldContext';
@@ -13,15 +13,18 @@ interface FieldRendererProps {
   className?: string;
 }
 
-export function FieldRenderer({ fieldName, value, elementCategory, mode, onChange, className }: FieldRendererProps) {
-  const fieldTypeInfo = detectFieldType(fieldName, value, elementCategory);
+export const FieldRenderer = memo(function FieldRenderer({ fieldName, value, elementCategory, mode, onChange, className }: FieldRendererProps) {
+  const fieldTypeInfo = useMemo(() => 
+    detectFieldType(fieldName, value, elementCategory), 
+    [fieldName, value, elementCategory]
+  );
   
   if (mode === 'view') {
     return <FieldViewer fieldName={fieldName} value={value} fieldTypeInfo={fieldTypeInfo} className={className} />;
   } else {
     return <FieldEditor fieldName={fieldName} value={value} fieldTypeInfo={fieldTypeInfo} onChange={onChange} className={className} />;
   }
-}
+});
 
 interface FieldViewerProps {
   fieldName: string;
@@ -30,7 +33,7 @@ interface FieldViewerProps {
   className?: string;
 }
 
-function FieldViewer({ fieldName, value, fieldTypeInfo, className }: FieldViewerProps) {
+const FieldViewer = memo(function FieldViewer({ fieldName, value, fieldTypeInfo, className }: FieldViewerProps) {
   const { type } = fieldTypeInfo;
   const { elements } = useWorldContext();
   const { selectElement } = useSidebarStore();
@@ -162,7 +165,7 @@ function FieldViewer({ fieldName, value, fieldTypeInfo, className }: FieldViewer
         </span>
       );
   }
-}
+});
 
 interface FieldEditorProps {
   fieldName: string;
@@ -172,7 +175,7 @@ interface FieldEditorProps {
   className?: string;
 }
 
-function FieldEditor({ fieldName, value, fieldTypeInfo, onChange, className }: FieldEditorProps) {
+const FieldEditor = memo(function FieldEditor({ fieldName, value, fieldTypeInfo, onChange, className }: FieldEditorProps) {
   const { type, options, allowCustom, linkedCategory } = fieldTypeInfo;
   const [localValue, setLocalValue] = useState(value);
   const { elements } = useWorldContext();
@@ -433,4 +436,4 @@ function FieldEditor({ fieldName, value, fieldTypeInfo, onChange, className }: F
         />
       );
   }
-}
+});

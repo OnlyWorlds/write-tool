@@ -82,7 +82,7 @@ describe('CreateElementModal', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText('Name is required')).toBeInTheDocument();
+      expect(screen.getAllByText('Name is required').length).toBeGreaterThanOrEqual(1);
     });
   });
 

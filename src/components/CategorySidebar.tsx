@@ -1,7 +1,7 @@
 import { ChevronDownIcon, ChevronRightIcon, PlusIcon, SearchIcon } from './icons';
 import { useWorldContext } from '../contexts/WorldContext';
 import { useSidebarStore } from '../stores/uiStore';
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export function CategorySidebar() {
@@ -28,27 +28,31 @@ export function CategorySidebar() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [filterText, setFilterText]);
 
-  // Filter elements based on search text
-  const filteredCategories = new Map();
-  
-  if (filterText.trim()) {
-    const searchTerm = filterText.toLowerCase();
-    categories.forEach((elements, category) => {
-      const filtered = elements.filter(element => 
-        element.name.toLowerCase().includes(searchTerm) ||
-        element.description?.toLowerCase().includes(searchTerm) ||
-        element.type?.toLowerCase().includes(searchTerm) ||
-        element.subtype?.toLowerCase().includes(searchTerm)
-      );
-      if (filtered.length > 0) {
-        filteredCategories.set(category, filtered);
-      }
-    });
-  } else {
-    categories.forEach((elements, category) => {
-      filteredCategories.set(category, elements);
-    });
-  }
+  // Filter elements based on search text (memoized for performance)
+  const filteredCategories = useMemo(() => {
+    const filtered = new Map();
+    
+    if (filterText.trim()) {
+      const searchTerm = filterText.toLowerCase();
+      categories.forEach((elements, category) => {
+        const filteredElements = elements.filter(element => 
+          element.name.toLowerCase().includes(searchTerm) ||
+          element.description?.toLowerCase().includes(searchTerm) ||
+          element.type?.toLowerCase().includes(searchTerm) ||
+          element.subtype?.toLowerCase().includes(searchTerm)
+        );
+        if (filteredElements.length > 0) {
+          filtered.set(category, filteredElements);
+        }
+      });
+    } else {
+      categories.forEach((elements, category) => {
+        filtered.set(category, elements);
+      });
+    }
+    
+    return filtered;
+  }, [categories, filterText]);
 
   return (
     <aside className="w-64 bg-white border-r flex flex-col h-full">

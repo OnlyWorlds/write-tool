@@ -41,6 +41,7 @@ interface EditorState {
   localEdits: Map<string, any>; // elementId:fieldName -> value
   hasUnsavedChanges: boolean;
   validationErrors: Map<string, ValidationError[]>; // elementId -> errors
+  hiddenFields: Set<string>; // fieldNames to hide in showcase mode
   selectField: (id: string | null) => void;
   toggleMode: () => void;
   setFieldValue: (elementId: string, fieldName: string, value: any) => void;
@@ -49,6 +50,8 @@ interface EditorState {
   setValidationErrors: (elementId: string, errors: ValidationError[]) => void;
   clearValidationErrors: () => void;
   getFieldError: (elementId: string, fieldName: string) => string | null;
+  toggleFieldVisibility: (fieldName: string) => void;
+  isFieldVisible: (fieldName: string) => boolean;
 }
 
 export const useEditorStore = create<EditorState>((set, get) => ({
@@ -57,6 +60,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   localEdits: new Map(),
   hasUnsavedChanges: false,
   validationErrors: new Map(),
+  hiddenFields: new Set(),
   selectField: (id) => set({ selectedFieldId: id }),
   toggleMode: () => set((state) => ({ 
     editMode: state.editMode === 'edit' ? 'showcase' : 'edit' 
@@ -93,5 +97,17 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     if (!errors) return null;
     const fieldError = errors.find(e => e.field === fieldName);
     return fieldError ? fieldError.message : null;
+  },
+  toggleFieldVisibility: (fieldName) => set((state) => {
+    const newHiddenFields = new Set(state.hiddenFields);
+    if (newHiddenFields.has(fieldName)) {
+      newHiddenFields.delete(fieldName);
+    } else {
+      newHiddenFields.add(fieldName);
+    }
+    return { hiddenFields: newHiddenFields };
+  }),
+  isFieldVisible: (fieldName) => {
+    return !get().hiddenFields.has(fieldName);
   }
 }));

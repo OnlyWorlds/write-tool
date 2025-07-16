@@ -1,18 +1,20 @@
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { useSidebarStore } from '../stores/uiStore';
 import { useWorldContext } from '../contexts/WorldContext';
 import { getCategorySchema, validateElementData, type FieldSchema } from '../services/ElementSchemas';
 import { detectFieldType } from '../services/FieldTypeDetector';
 import { FieldRenderer } from './FieldRenderers';
+import { ValidationService } from '../services/ValidationService';
 
 export function CreateElementModal() {
   const { createModalOpen, createModalCategory, closeCreateModal } = useSidebarStore();
   const { createElement, elements } = useWorldContext();
   
   const [formData, setFormData] = useState<Record<string, any>>({});
-  
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const schema = getCategorySchema(createModalCategory || 'general');
 
@@ -33,15 +35,31 @@ export function CreateElementModal() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate using schema
-    const validation = validateElementData(formData, schema);
-    if (!validation.isValid) {
-      setErrors(validation.errors);
+    // Create element object for validation
+    const elementToValidate = {
+      ...formData,
+      name: formData.name || '', // Ensure name is always present
+      category: createModalCategory || 'general',
+      id: 'temp-id', // Required for validation
+    };
+    
+    // Validate using our ValidationService
+    const validationErrors = ValidationService.validateElement(elementToValidate);
+    if (validationErrors.length > 0) {
+      // Set field-specific errors
+      const newFieldErrors: Record<string, string> = {};
+      validationErrors.forEach(error => {
+        newFieldErrors[error.field] = error.message;
+      });
+      setFieldErrors(newFieldErrors);
+      setErrors(validationErrors.map(err => err.message));
+      toast.error('Please fix validation errors before saving');
       return;
     }
     
     setIsSubmitting(true);
     setErrors([]);
+    setFieldErrors({});
     
     try {
       const newElement = {
@@ -49,13 +67,18 @@ export function CreateElementModal() {
         category: createModalCategory || 'general'
       };
       
-      await createElement(newElement);
+      const createdElement = await createElement(newElement);
       
       // Reset form and close modal
       setFormData({});
       closeCreateModal();
+      
+      // Show success message
+      toast.success(`Created ${createdElement.name} successfully!`);
     } catch (err) {
-      setErrors([err instanceof Error ? err.message : 'Failed to create element']);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create element';
+      setErrors([errorMessage]);
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -78,6 +101,12 @@ export function CreateElementModal() {
 
   const renderField = (field: FieldSchema) => {
     const value = formData[field.name];
+    const hasError = fieldErrors[field.name];
+    const baseClassName = `w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+      hasError 
+        ? 'border-red-500 focus:ring-red-500 bg-red-50' 
+        : 'border-gray-300 focus:ring-blue-500'
+    }`;
     
     // For link/links fields, use FieldRenderer which has proper filtering
     if (field.type === 'link' || field.type === 'links') {
@@ -101,7 +130,7 @@ export function CreateElementModal() {
             id={field.name}
             value={value || ''}
             onChange={(e) => handleFieldChange(field.name, e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className={baseClassName}
             placeholder={field.placeholder}
             disabled={isSubmitting}
           />
@@ -113,7 +142,7 @@ export function CreateElementModal() {
             id={field.name}
             value={value || ''}
             onChange={(e) => handleFieldChange(field.name, e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className={baseClassName}
             rows={3}
             placeholder={field.placeholder}
             disabled={isSubmitting}
@@ -136,7 +165,7 @@ export function CreateElementModal() {
                 id={field.name}
                 value={value || ''}
                 onChange={(e) => handleFieldChange(field.name, e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={baseClassName}
                 disabled={isSubmitting}
               >
                 <option value="">Select {field.label}</option>
@@ -150,7 +179,7 @@ export function CreateElementModal() {
                 type="text"
                 value={value || ''}
                 onChange={(e) => handleFieldChange(field.name, e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={baseClassName}
                 placeholder={field.placeholder || `Enter custom ${field.label.toLowerCase()}`}
                 disabled={isSubmitting}
               />
@@ -187,7 +216,7 @@ export function CreateElementModal() {
             id={field.name}
             value={value || ''}
             onChange={(e) => handleFieldChange(field.name, e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className={baseClassName}
             placeholder={field.placeholder}
             disabled={isSubmitting}
           />
@@ -200,7 +229,7 @@ export function CreateElementModal() {
             id={field.name}
             value={value || ''}
             onChange={(e) => handleFieldChange(field.name, e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className={baseClassName}
             placeholder={field.placeholder}
             disabled={isSubmitting}
           />
@@ -213,7 +242,7 @@ export function CreateElementModal() {
             id={field.name}
             value={value || ''}
             onChange={(e) => handleFieldChange(field.name, e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className={baseClassName}
             placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}`}
             disabled={isSubmitting}
           />
@@ -243,6 +272,11 @@ export function CreateElementModal() {
                 {field.label} {field.required && '*'}
               </label>
               {renderField(field)}
+              {fieldErrors[field.name] && (
+                <div className="mt-1 text-sm text-red-600">
+                  {fieldErrors[field.name]}
+                </div>
+              )}
             </div>
           ))}
           

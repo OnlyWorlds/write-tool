@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, useMemo, type ReactNode } from 'react';
 import type { WorldState, Element } from '../types/world';
 import { ApiService, organizeElementsByCategory } from '../services/ApiService';
 
@@ -253,8 +253,14 @@ export function WorldProvider({ children }: { children: ReactNode }) {
     checkStoredCredentials();
   }, [authenticate]);
 
+  // Memoized categories to avoid recomputation
+  const memoizedCategories = useMemo(() => {
+    return state.categories;
+  }, [state.elements]); // Recompute when elements change
+
   const value: WorldContextType = {
     ...state,
+    categories: memoizedCategories,
     authenticate,
     logout,
     updateElement,

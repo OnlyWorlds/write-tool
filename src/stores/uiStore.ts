@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import type { ValidationError } from '../services/ValidationService';
 
 interface SidebarState {
   expandedCategories: Set<string>;
@@ -39,11 +40,15 @@ interface EditorState {
   editMode: 'edit' | 'showcase';
   localEdits: Map<string, any>; // elementId:fieldName -> value
   hasUnsavedChanges: boolean;
+  validationErrors: Map<string, ValidationError[]>; // elementId -> errors
   selectField: (id: string | null) => void;
   toggleMode: () => void;
   setFieldValue: (elementId: string, fieldName: string, value: any) => void;
   clearEdits: () => void;
   getEditedValue: (elementId: string, fieldName: string) => any | undefined;
+  setValidationErrors: (elementId: string, errors: ValidationError[]) => void;
+  clearValidationErrors: () => void;
+  getFieldError: (elementId: string, fieldName: string) => string | null;
 }
 
 export const useEditorStore = create<EditorState>((set, get) => ({
@@ -51,6 +56,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   editMode: 'edit',
   localEdits: new Map(),
   hasUnsavedChanges: false,
+  validationErrors: new Map(),
   selectField: (id) => set({ selectedFieldId: id }),
   toggleMode: () => set((state) => ({ 
     editMode: state.editMode === 'edit' ? 'showcase' : 'edit' 
@@ -71,5 +77,21 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   getEditedValue: (elementId, fieldName) => {
     const key = `${elementId}:${fieldName}`;
     return get().localEdits.get(key);
+  },
+  setValidationErrors: (elementId, errors) => set((state) => {
+    const newErrors = new Map(state.validationErrors);
+    if (errors.length > 0) {
+      newErrors.set(elementId, errors);
+    } else {
+      newErrors.delete(elementId);
+    }
+    return { validationErrors: newErrors };
+  }),
+  clearValidationErrors: () => set({ validationErrors: new Map() }),
+  getFieldError: (elementId, fieldName) => {
+    const errors = get().validationErrors.get(elementId);
+    if (!errors) return null;
+    const fieldError = errors.find(e => e.field === fieldName);
+    return fieldError ? fieldError.message : null;
   }
 }));

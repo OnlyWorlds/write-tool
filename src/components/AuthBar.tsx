@@ -3,10 +3,11 @@ import { Link } from 'react-router-dom';
 import { useWorldContext } from '../contexts/WorldContext';
 import { useEditorStore } from '../stores/uiStore';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
+import { ValidationService } from '../services/ValidationService';
 
 export function AuthBar() {
-  const { authenticate, isLoading, error, isAuthenticated, logout, metadata, worldKey: authenticatedWorldKey, saveElement } = useWorldContext();
-  const { hasUnsavedChanges, clearEdits, localEdits, editMode, toggleMode } = useEditorStore();
+  const { authenticate, isLoading, error, isAuthenticated, logout, metadata, worldKey: authenticatedWorldKey, saveElement, elements } = useWorldContext();
+  const { hasUnsavedChanges, clearEdits, localEdits, editMode, toggleMode, setValidationErrors, clearValidationErrors } = useEditorStore();
   const [worldKey, setWorldKey] = useState('');
   const [pin, setPin] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -30,6 +31,7 @@ export function AuthBar() {
   
   const handleSave = async () => {
     setIsSaving(true);
+    clearValidationErrors();
     
     try {
       // Group edits by element
@@ -42,6 +44,29 @@ export function AuthBar() {
         }
         editsByElement.get(elementId)!.set(fieldName, value);
       });
+      
+      // Validate all elements before saving
+      let hasErrors = false;
+      for (const [elementId, fields] of editsByElement) {
+        const element = elements.get(elementId);
+        if (!element) continue;
+        
+        // Merge current element with updates
+        const updatedElement = { ...element, ...Object.fromEntries(fields) };
+        
+        // Validate the updated element
+        const errors = ValidationService.validateElement(updatedElement);
+        if (errors.length > 0) {
+          hasErrors = true;
+          setValidationErrors(elementId, errors);
+        }
+      }
+      
+      if (hasErrors) {
+        alert('Please fix validation errors before saving.');
+        setIsSaving(false);
+        return;
+      }
       
       // Save each element
       let allSuccess = true;

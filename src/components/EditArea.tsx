@@ -7,12 +7,13 @@ import { FieldTypeIndicator } from './FieldTypeIndicator';
 export function EditArea() {
   const { elements } = useWorldContext();
   const { selectedElementId } = useSidebarStore();
-  const { selectedFieldId, getEditedValue, setFieldValue, editMode, toggleMode } = useEditorStore();
+  const { selectedFieldId, getEditedValue, setFieldValue, editMode, toggleMode, getFieldError } = useEditorStore();
   
   const selectedElement = selectedElementId ? elements.get(selectedElementId) : null;
   const originalValue = selectedElement && selectedFieldId ? selectedElement[selectedFieldId as keyof typeof selectedElement] : null;
   const editedValue = selectedElementId && selectedFieldId ? getEditedValue(selectedElementId, selectedFieldId) : undefined;
   const currentValue = editedValue !== undefined ? editedValue : originalValue;
+  const error = selectedElementId && selectedFieldId ? getFieldError(selectedElementId, selectedFieldId) : null;
   
   const handleChange = (value: any) => {
     if (selectedElementId && selectedFieldId) {
@@ -67,6 +68,11 @@ export function EditArea() {
             onChange={handleChange}
             className="h-full"
           />
+          {error && (
+            <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-600">
+              {error}
+            </div>
+          )}
         </div>
       </div>
       

@@ -10,7 +10,7 @@ import { ApiService } from '../services/ApiService';
 export function ElementViewer() {
   const { elements, worldKey, pin, deleteElement } = useWorldContext();
   const { selectedElementId, selectElement } = useSidebarStore();
-  const { selectedFieldId, selectField, getEditedValue, hasUnsavedChanges, editMode } = useEditorStore();
+  const { selectedFieldId, selectField, getEditedValue, hasUnsavedChanges, editMode, getFieldError } = useEditorStore();
   const navigate = useNavigate();
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -87,6 +87,7 @@ export function ElementViewer() {
             const editedValue = selectedElementId ? getEditedValue(selectedElementId, fieldName) : undefined;
             const value = editedValue !== undefined ? editedValue : originalValue;
             const isEdited = editedValue !== undefined;
+            const error = selectedElementId ? getFieldError(selectedElementId, fieldName) : null;
             
             return (
               <div 
@@ -95,9 +96,11 @@ export function ElementViewer() {
                 className={`p-4 rounded-lg border transition-all relative ${
                   editMode === 'showcase' 
                     ? 'border-transparent bg-white' 
-                    : selectedFieldId === fieldName 
-                      ? 'border-blue-500 bg-blue-50 cursor-pointer' 
-                      : 'border-gray-200 hover:border-gray-300 cursor-pointer'
+                    : error
+                      ? 'border-red-500 bg-red-50 cursor-pointer'
+                      : selectedFieldId === fieldName 
+                        ? 'border-blue-500 bg-blue-50 cursor-pointer' 
+                        : 'border-gray-200 hover:border-gray-300 cursor-pointer'
                 }`}
               >
                 <div className="flex items-center justify-between mb-1">
@@ -126,6 +129,11 @@ export function ElementViewer() {
                     className={editMode === 'showcase' ? 'text-base leading-relaxed' : ''}
                   />
                 </div>
+                {error && editMode === 'edit' && (
+                  <div className="mt-1 text-sm text-red-600">
+                    {error}
+                  </div>
+                )}
               </div>
             );
           })}

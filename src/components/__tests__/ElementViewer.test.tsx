@@ -24,6 +24,7 @@ const mockUseEditorStore = vi.fn(() => ({
   getEditedValue: vi.fn(),
   hasUnsavedChanges: false,
   editMode: 'edit',
+  getFieldError: vi.fn(() => null),
 }));
 
 // Mock stores
@@ -69,6 +70,7 @@ describe('ElementViewer - Delete Functionality', () => {
       getEditedValue: vi.fn(),
       hasUnsavedChanges: false,
       editMode: 'edit',
+      getFieldError: vi.fn(() => null),
     });
   });
   
@@ -89,6 +91,7 @@ describe('ElementViewer - Delete Functionality', () => {
       getEditedValue: vi.fn(),
       hasUnsavedChanges: false,
       editMode: 'showcase',
+      getFieldError: vi.fn(() => null),
     });
     
     render(

@@ -12,6 +12,7 @@ interface SidebarState {
   setFilterText: (text: string) => void;
   openCreateModal: (category: string) => void;
   closeCreateModal: () => void;
+  expandAllCategories: (categories: string[]) => void;
 }
 
 export const useSidebarStore = create<SidebarState>((set) => ({
@@ -33,6 +34,7 @@ export const useSidebarStore = create<SidebarState>((set) => ({
   setFilterText: (text) => set({ filterText: text }),
   openCreateModal: (category) => set({ createModalOpen: true, createModalCategory: category }),
   closeCreateModal: () => set({ createModalOpen: false, createModalCategory: null }),
+  expandAllCategories: (categories) => set({ expandedCategories: new Set(categories) }),
 }));
 
 interface EditorState {

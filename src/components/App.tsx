@@ -46,7 +46,7 @@ export function App() {
   const { editMode } = useEditorStore();
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-paper-50 flex flex-col">
       {/* Auth Bar at top */}
       <AuthBar />
       

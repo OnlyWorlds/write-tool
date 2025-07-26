@@ -1,12 +1,13 @@
-import { ChevronDownIcon, ChevronRightIcon, PlusIcon, SearchIcon } from './icons';
+import { useEffect, useMemo, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useWorldContext } from '../contexts/WorldContext';
 import { useSidebarStore } from '../stores/uiStore';
-import { useRef, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { CategoryIcon } from '../utils/categoryIcons';
+import { ChevronDownIcon, ChevronRightIcon, PlusIcon, SearchIcon } from './icons';
 
 export function CategorySidebar() {
   const { categories } = useWorldContext();
-  const { expandedCategories, selectedElementId, filterText, toggleCategory, selectElement, openCreateModal, setFilterText } = useSidebarStore();
+  const { expandedCategories, selectedElementId, filterText, toggleCategory, selectElement, openCreateModal, setFilterText, expandAllCategories } = useSidebarStore();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
@@ -27,6 +28,14 @@ export function CategorySidebar() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [filterText, setFilterText]);
+
+  // Expand all categories when categories are loaded
+  useEffect(() => {
+    if (categories.size > 0) {
+      const categoryNames = Array.from(categories.keys());
+      expandAllCategories(categoryNames);
+    }
+  }, [categories, expandAllCategories]);
 
   // Filter elements based on search text (memoized for performance)
   const filteredCategories = useMemo(() => {
@@ -55,20 +64,20 @@ export function CategorySidebar() {
   }, [categories, filterText]);
 
   return (
-    <aside className="w-64 bg-white border-r flex flex-col h-full">
-      <div className="p-4 border-b space-y-3">
-        <h2 className="text-lg font-semibold">Categories</h2>
+    <aside className="w-64 bg-sand-50 border-r border-sand-200 flex flex-col h-full">
+      <div className="p-4 border-b border-sand-200 space-y-3 bg-sand-200 shadow-md">
+        <h2 className="text-lg font-semibold text-sand-800">categories</h2>
         <div className="relative">
-          <div className="absolute left-3 top-2.5 text-gray-400">
+          <div className="absolute left-3 top-2.5 text-gray-500">
             <SearchIcon />
           </div>
           <input
             ref={searchInputRef}
             type="text"
-            placeholder="Search elements... (press / to focus)"
+            placeholder="filter..."
             value={filterText}
             onChange={(e) => setFilterText(e.target.value)}
-            className="w-full pl-10 pr-8 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-10 pr-8 py-2 text-sm border border-sand-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-sand-50 text-gray-800 placeholder-gray-500"
           />
           {filterText && (
             <button
@@ -84,9 +93,9 @@ export function CategorySidebar() {
       
       <div className="flex-1 overflow-y-auto">
         {categories.size === 0 ? (
-          <p className="text-sm text-gray-500 p-4">No elements loaded</p>
+          <p className="text-sm text-gray-500 p-4">no elements loaded</p>
         ) : filteredCategories.size === 0 ? (
-          <p className="text-sm text-gray-500 p-4">No elements found matching "{filterText}"</p>
+          <p className="text-sm text-gray-500 p-4">no elements found matching "{filterText}"</p>
         ) : (
           <div className="py-2">
             {Array.from(filteredCategories.entries()).map(([category, elements]) => {
@@ -98,11 +107,12 @@ export function CategorySidebar() {
                   <div className="flex items-center">
                     <button
                       onClick={() => toggleCategory(category)}
-                      className="flex-1 flex items-center justify-between px-4 py-2 hover:bg-gray-50 transition-colors"
+                      className="flex-1 flex items-center justify-between px-4 py-2 hover:bg-sand-100 transition-colors"
                     >
                       <div className="flex items-center gap-2">
                         {isExpanded ? <ChevronDownIcon /> : <ChevronRightIcon />}
-                        <span className="text-sm font-medium capitalize">{category}</span>
+                        <CategoryIcon category={category} className="w-4 h-4 text-blue-600" />
+                        <span className="text-sm font-medium text-gray-800">{category.toLowerCase()}</span>
                       </div>
                       <span className="text-xs text-gray-500">
                         {elements.length}
@@ -115,8 +125,8 @@ export function CategorySidebar() {
                     </button>
                     <button
                       onClick={() => openCreateModal(category)}
-                      className="p-2 hover:bg-gray-50 text-gray-500 hover:text-gray-700 transition-colors"
-                      title={`Create new ${category}`}
+                      className="p-2 hover:bg-sand-100 text-gray-500 hover:text-blue-700 transition-colors"
+                      title={`create new ${category}`}
                     >
                       <PlusIcon />
                     </button>
@@ -128,8 +138,8 @@ export function CategorySidebar() {
                         <button
                           key={element.id}
                           onClick={() => navigate(`/element/${element.id}`)}
-                          className={`w-full text-left px-4 py-1.5 text-sm hover:bg-gray-100 transition-colors ${
-                            selectedElementId === element.id ? 'bg-blue-50 text-blue-700' : ''
+                          className={`w-full text-left px-4 py-1.5 text-sm hover:bg-sand-100 transition-colors ${
+                            selectedElementId === element.id ? 'bg-blue-200 text-blue-800' : 'text-gray-800'
                           }`}
                         >
                           <div className="flex items-center justify-between">

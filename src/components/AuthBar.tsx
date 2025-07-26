@@ -64,7 +64,7 @@ export function AuthBar() {
       }
       
       if (hasErrors) {
-        toast.error('Please fix validation errors before saving');
+        toast.error('please fix validation errors before saving');
         setIsSaving(false);
         return;
       }
@@ -82,13 +82,13 @@ export function AuthBar() {
       
       if (allSuccess) {
         clearEdits();
-        toast.success('All changes saved successfully!');
+        toast.success('all changes saved successfully!');
       } else {
-        toast.error('Some changes could not be saved. Please try again.');
+        toast.error('some changes could not be saved. please try again.');
       }
     } catch (error) {
       console.error('Save error:', error);
-      toast.error('Failed to save changes. Please try again.');
+      toast.error('failed to save changes. please try again.');
     } finally {
       setIsSaving(false);
     }
@@ -98,9 +98,9 @@ export function AuthBar() {
 
   if (isAuthenticated) {
     return (
-      <div className="flex items-center justify-between p-4 bg-gray-900 text-white">
+      <div className="flex items-center justify-between p-4 bg-blue-700 text-gray-50 shadow-lg">
         <div className="flex items-center gap-4">
-          <Link to="/" className="text-sm font-bold hover:text-blue-400 transition-colors">
+          <Link to="/" className="text-sm font-bold hover:text-blue-300 transition-colors">
             OnlyWorlds Browse Tool
           </Link>
           <span className="text-xs text-gray-400">|</span>
@@ -109,33 +109,33 @@ export function AuthBar() {
           </span>
           <button
             onClick={logout}
-            className="text-xs text-gray-400 hover:text-white transition-colors"
+            className="text-xs text-gray-400 hover:text-gray-50 transition-colors"
           >
             logout
           </button>
           <div className="flex items-center gap-2 ml-6">
-            <span className="text-xs text-gray-400">Mode:</span>
+            <span className="text-xs text-gray-400">mode:</span>
             <button
               onClick={toggleMode}
               className={`px-2 py-0.5 text-xs rounded transition-colors ${
                 editMode === 'showcase' 
-                  ? 'bg-green-600 text-white' 
+                  ? 'bg-blue-600 text-gray-50' 
                   : 'bg-gray-700 text-gray-300'
               }`}
             >
-              {editMode === 'showcase' ? 'Showcase' : 'Edit'}
+              {editMode === 'showcase' ? 'showcase' : 'edit'}
             </button>
           </div>
         </div>
         
         {hasUnsavedChanges && (
           <div className="flex items-center gap-2">
-            <span className="text-xs text-amber-400">Unsaved changes</span>
+            <span className="text-xs text-blue-400">unsaved changes</span>
             <button
               onClick={() => clearEdits()}
               className="px-3 py-1 text-xs bg-gray-700 hover:bg-gray-600 rounded transition-colors"
             >
-              Discard
+              discard
             </button>
             <button
               onClick={handleSave}
@@ -146,7 +146,7 @@ export function AuthBar() {
                   : 'bg-blue-600 hover:bg-blue-700'
               }`}
             >
-              {isSaving ? 'Saving...' : 'Save'}
+              {isSaving ? 'saving...' : 'save'}
             </button>
           </div>
         )}
@@ -155,14 +155,14 @@ export function AuthBar() {
   }
 
   return (
-    <div className="p-4 bg-gray-900 text-white">
+    <div className="p-4 bg-gradient-to-r from-blue-900 to-blue-800 text-gray-50 shadow-lg">
       <form onSubmit={handleSubmit} className="flex items-center gap-2">
         <input
           type="text"
           value={worldKey}
           onChange={handleWorldKeyChange}
           placeholder="api key"
-          className="w-24 px-2 py-1 text-xs bg-gray-800 border border-gray-700 rounded focus:outline-none focus:border-blue-500"
+          className="w-24 px-2 py-1 text-xs bg-gray-800 border border-gray-600 rounded focus:outline-none focus:border-blue-500 text-gray-50 placeholder-gray-400"
           disabled={isLoading}
           maxLength={10}
         />
@@ -171,7 +171,7 @@ export function AuthBar() {
           value={pin}
           onChange={handlePinChange}
           placeholder="pin"
-          className="w-16 px-2 py-1 text-xs bg-gray-800 border border-gray-700 rounded focus:outline-none focus:border-blue-500"
+          className="w-16 px-2 py-1 text-xs bg-gray-800 border border-gray-600 rounded focus:outline-none focus:border-blue-500 text-gray-50 placeholder-gray-400"
           disabled={isLoading}
           maxLength={4}
         />
@@ -184,10 +184,10 @@ export function AuthBar() {
               : 'bg-blue-600 hover:bg-blue-700'
           }`}
         >
-          {isLoading ? 'Loading...' : 'validate'}
+          {isLoading ? 'loading...' : 'validate'}
         </button>
         {error && (
-          <span className="text-xs text-red-400 ml-2">{error}</span>
+          <span className="text-xs text-red-300 ml-2">{error}</span>
         )}
       </form>
     </div>

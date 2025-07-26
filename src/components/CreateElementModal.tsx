@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useSidebarStore } from '../stores/uiStore';
 import { useWorldContext } from '../contexts/WorldContext';
-import { getCategorySchema, validateElementData, type FieldSchema } from '../services/ElementSchemas';
+import { getCategorySchema, getSimplifiedCategorySchema, validateElementData, type FieldSchema } from '../services/ElementSchemas';
 import { detectFieldType } from '../services/FieldTypeDetector';
 import { FieldRenderer } from './FieldRenderers';
 import { ValidationService } from '../services/ValidationService';
@@ -10,13 +11,14 @@ import { ValidationService } from '../services/ValidationService';
 export function CreateElementModal() {
   const { createModalOpen, createModalCategory, closeCreateModal } = useSidebarStore();
   const { createElement, elements } = useWorldContext();
+  const navigate = useNavigate();
   
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
-  const schema = getCategorySchema(createModalCategory || 'general');
+  const schema = getSimplifiedCategorySchema(createModalCategory || 'general');
 
   // Handle Escape key
   useEffect(() => {
@@ -53,7 +55,7 @@ export function CreateElementModal() {
       });
       setFieldErrors(newFieldErrors);
       setErrors(validationErrors.map(err => err.message));
-      toast.error('Please fix validation errors before saving');
+      toast.error('please fix validation errors before saving');
       return;
     }
     
@@ -73,10 +75,13 @@ export function CreateElementModal() {
       setFormData({});
       closeCreateModal();
       
+      // Navigate to the newly created element
+      navigate(`/element/${createdElement.id}`);
+      
       // Show success message
-      toast.success(`Created ${createdElement.name} successfully!`);
+      toast.success(`created ${createdElement.name} successfully!`);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create element';
+      const errorMessage = err instanceof Error ? err.message : 'failed to create element';
       setErrors([errorMessage]);
       toast.error(errorMessage);
     } finally {
@@ -168,7 +173,7 @@ export function CreateElementModal() {
                 className={baseClassName}
                 disabled={isSubmitting}
               >
-                <option value="">Select {field.label}</option>
+                <option value="">select {field.label.toLowerCase()}</option>
                 {options.map(option => (
                   <option key={option} value={option}>{option}</option>
                 ))}
@@ -180,7 +185,7 @@ export function CreateElementModal() {
                 value={value || ''}
                 onChange={(e) => handleFieldChange(field.name, e.target.value)}
                 className={baseClassName}
-                placeholder={field.placeholder || `Enter custom ${field.label.toLowerCase()}`}
+                placeholder={field.placeholder || `enter custom ${field.label.toLowerCase()}`}
                 disabled={isSubmitting}
               />
             )}
@@ -199,11 +204,11 @@ export function CreateElementModal() {
               disabled={isSubmitting}
             />
             {field.description && (
-              <span className="ml-2 text-sm text-gray-600">{field.description}</span>
+              <span className="ml-2 text-sm text-gray-600">{field.description.toLowerCase()}</span>
             )}
             {field.name === 'is_public' && (
               <div className="ml-2 text-xs text-gray-500">
-                Public elements are visible to all users in the world
+                public elements are visible to all users in the world
               </div>
             )}
           </div>
@@ -243,7 +248,7 @@ export function CreateElementModal() {
             value={value || ''}
             onChange={(e) => handleFieldChange(field.name, e.target.value)}
             className={baseClassName}
-            placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}`}
+            placeholder={field.placeholder || `enter ${field.label.toLowerCase()}`}
             disabled={isSubmitting}
           />
         );
@@ -258,18 +263,18 @@ export function CreateElementModal() {
       onClick={handleClose}
     >
       <div 
-        className="bg-white rounded-lg p-6 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto"
+        className="bg-sand-50 rounded-lg p-6 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto border border-sand-200"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-lg font-semibold mb-4">
-          Create New {schema.name}
+          create new {schema.name.toLowerCase()}
         </h2>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           {schema.fields.map((field) => (
             <div key={field.name}>
               <label htmlFor={field.name} className="block text-sm font-medium text-gray-700 mb-1">
-                {field.label} {field.required && '*'}
+                {field.label.toLowerCase()} {field.required && '*'}
               </label>
               {renderField(field)}
               {fieldErrors[field.name] && (
@@ -295,14 +300,14 @@ export function CreateElementModal() {
               disabled={isSubmitting}
               className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50"
             >
-              Cancel
+              cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
             >
-              {isSubmitting ? 'Creating...' : 'Create'}
+              {isSubmitting ? 'creating...' : 'create'}
             </button>
           </div>
         </form>

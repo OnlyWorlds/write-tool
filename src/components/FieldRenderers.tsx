@@ -1,7 +1,7 @@
-import { useState, useEffect, useMemo, memo } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { detectFieldType, convertFieldValue, formatFieldValue, type FieldTypeInfo } from '../services/FieldTypeDetector';
 import { useWorldContext } from '../contexts/WorldContext';
+import { detectFieldType, type FieldTypeInfo } from '../services/FieldTypeDetector';
 import { useSidebarStore } from '../stores/uiStore';
 
 interface FieldRendererProps {
@@ -40,7 +40,7 @@ const FieldViewer = memo(function FieldViewer({ fieldName, value, fieldTypeInfo,
   const navigate = useNavigate();
   
   if (value === null || value === undefined || value === '') {
-    return <span className={`text-gray-400 italic ${className}`}>No value</span>;
+    return <span className={className}></span>;
   }
   
   switch (type) {
@@ -67,7 +67,7 @@ const FieldViewer = memo(function FieldViewer({ fieldName, value, fieldTypeInfo,
             )}
           </div>
           <span className={value ? 'text-green-700' : 'text-gray-600'}>
-            {value ? 'Yes' : 'No'}
+            {value ? 'yes' : 'no'}
           </span>
         </div>
       );
@@ -94,7 +94,7 @@ const FieldViewer = memo(function FieldViewer({ fieldName, value, fieldTypeInfo,
           </div>
         );
       }
-      return <span className={`text-gray-400 italic ${className}`}>No tags</span>;
+      return <span className={className}></span>;
       
     case 'link':
       if (typeof value === 'string' && value) {
@@ -114,7 +114,7 @@ const FieldViewer = memo(function FieldViewer({ fieldName, value, fieldTypeInfo,
         }
         return <span className={`text-gray-500 ${className}`}>Unknown element ({value})</span>;
       }
-      return <span className={`text-gray-400 italic ${className}`}>No link</span>;
+      return <span className={className}></span>;
       
     case 'links':
       if (Array.isArray(value) && value.length > 0) {
@@ -142,7 +142,7 @@ const FieldViewer = memo(function FieldViewer({ fieldName, value, fieldTypeInfo,
           </div>
         );
       }
-      return <span className={`text-gray-400 italic ${className}`}>No links</span>;
+      return <span className={className}></span>;
       
     case 'json':
       return (
@@ -202,7 +202,7 @@ const FieldEditor = memo(function FieldEditor({ fieldName, value, fieldTypeInfo,
             className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
           />
           <label className="text-sm text-gray-700">
-            {localValue ? 'Yes' : 'No'}
+            {localValue ? 'yes' : 'no'}
           </label>
         </div>
       );
@@ -214,7 +214,7 @@ const FieldEditor = memo(function FieldEditor({ fieldName, value, fieldTypeInfo,
           value={localValue || ''}
           onChange={(e) => handleChange(e.target.value ? Number(e.target.value) : '')}
           className={baseInputClass}
-          placeholder="Enter number"
+          placeholder="enter number"
         />
       );
       
@@ -244,7 +244,7 @@ const FieldEditor = memo(function FieldEditor({ fieldName, value, fieldTypeInfo,
               value={localValue || ''}
               onChange={(e) => handleChange(e.target.value)}
               className={baseInputClass}
-              placeholder={`Select or enter ${fieldName}`}
+              placeholder={`select or enter ${fieldName}`}
               role="combobox"
               aria-expanded="false"
               aria-autocomplete="list"
@@ -264,7 +264,7 @@ const FieldEditor = memo(function FieldEditor({ fieldName, value, fieldTypeInfo,
             onChange={(e) => handleChange(e.target.value)}
             className={baseInputClass}
           >
-            <option value="">Select {fieldName}</option>
+            <option value="">select {fieldName}</option>
             {options.map(option => (
               <option key={option} value={option}>{option}</option>
             ))}
@@ -278,7 +278,7 @@ const FieldEditor = memo(function FieldEditor({ fieldName, value, fieldTypeInfo,
             value={localValue || ''}
             onChange={(e) => handleChange(e.target.value)}
             className={baseInputClass}
-            placeholder={`Enter ${fieldName}`}
+            placeholder={`enter ${fieldName}`}
           />
         );
       }
@@ -294,10 +294,10 @@ const FieldEditor = memo(function FieldEditor({ fieldName, value, fieldTypeInfo,
               handleChange(tags);
             }}
             className={baseInputClass}
-            placeholder="Enter tags separated by commas"
+            placeholder="enter tags separated by commas"
           />
           <div className="text-xs text-gray-500">
-            Separate multiple tags with commas
+            separate multiple tags with commas
           </div>
         </div>
       );
@@ -318,7 +318,7 @@ const FieldEditor = memo(function FieldEditor({ fieldName, value, fieldTypeInfo,
             onChange={(e) => handleChange(e.target.value)}
             className={baseInputClass}
           >
-            <option value="">Select element...</option>
+            <option value="">select element...</option>
             {filteredElements.map(element => (
               <option key={element.id} value={element.id}>
                 {element.name} ({element.category})
@@ -326,7 +326,7 @@ const FieldEditor = memo(function FieldEditor({ fieldName, value, fieldTypeInfo,
             ))}
           </select>
           <div className="text-xs text-gray-500">
-            Choose an element to link to
+            choose an element to link to
           </div>
         </div>
       );
@@ -359,7 +359,7 @@ const FieldEditor = memo(function FieldEditor({ fieldName, value, fieldTypeInfo,
                     }}
                     className="text-red-600 hover:text-red-800 px-2 py-1 text-sm"
                   >
-                    Remove
+                    remove
                   </button>
                 </div>
               );
@@ -375,7 +375,7 @@ const FieldEditor = memo(function FieldEditor({ fieldName, value, fieldTypeInfo,
             }}
             className={baseInputClass}
           >
-            <option value="">Add element...</option>
+            <option value="">add element...</option>
             {filteredElementsForLinks
               .filter(element => !currentLinks.includes(element.id))
               .map(element => (
@@ -386,7 +386,7 @@ const FieldEditor = memo(function FieldEditor({ fieldName, value, fieldTypeInfo,
           </select>
           
           <div className="text-xs text-gray-500">
-            Add multiple elements to create relationships
+            add multiple elements to create relationships
           </div>
         </div>
       );
@@ -397,7 +397,7 @@ const FieldEditor = memo(function FieldEditor({ fieldName, value, fieldTypeInfo,
           value={localValue || ''}
           onChange={(e) => handleChange(e.target.value)}
           className={`${baseInputClass} min-h-[100px] resize-y`}
-          placeholder="Enter text..."
+          placeholder="enter text..."
           rows={4}
         />
       );
@@ -416,11 +416,11 @@ const FieldEditor = memo(function FieldEditor({ fieldName, value, fieldTypeInfo,
               }
             }}
             className={`${baseInputClass} min-h-[120px] font-mono text-sm`}
-            placeholder="Enter JSON..."
+            placeholder="enter json..."
             rows={6}
           />
           <div className="text-xs text-gray-500">
-            Enter valid JSON or plain text
+            enter valid json or plain text
           </div>
         </div>
       );
@@ -432,7 +432,7 @@ const FieldEditor = memo(function FieldEditor({ fieldName, value, fieldTypeInfo,
           value={localValue || ''}
           onChange={(e) => handleChange(e.target.value)}
           className={baseInputClass}
-          placeholder="Enter text..."
+          placeholder="enter text..."
         />
       );
   }

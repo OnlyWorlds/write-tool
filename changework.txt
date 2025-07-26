@@ -1,0 +1,46 @@
+
+
+overall
+- the color scheme is very white. would be nice to go slightly more yellow/paper kinda look.  like a sunny desert type of feeling. 
+
+left bar
+- the filter box palcehgolder text doesnt fit (cuts of at (press)), pls make smaller
+- the cateogry foldouts should be collapsed open by default
+- they should also have an icon in front of them . OR, if it looks better, a small icon in front of each child element. use these:
+ 
+    CategoryStyling(Icons.person_4_outlined, Category.Character),
+    CategoryStyling(Icons.webhook_rounded, Category.Object),
+    CategoryStyling(Icons.castle_outlined, Category.Location),
+    //
+    CategoryStyling(Icons.supervisor_account_outlined, Category.Family),
+    CategoryStyling(Icons.bug_report_outlined, Category.Creature),
+    CategoryStyling(Icons.business, Category.Institution),
+    //
+    CategoryStyling(Icons.flaky_outlined, Category.Trait),
+    CategoryStyling(Icons.crib_outlined, Category.Species),
+    CategoryStyling(Icons.architecture_outlined, Category.Zone),
+    //
+    CategoryStyling(Icons.auto_fix_normal_outlined, Category.Ability),
+    CategoryStyling(Icons.groups_3_outlined, Category.Collective),
+    CategoryStyling(Icons.military_tech_outlined, Category.Title),
+    //
+    CategoryStyling(Icons.edit_road_rounded, Category.Language),
+    CategoryStyling(Icons.thunderstorm_outlined, Category.Phenomenon),
+    CategoryStyling(Icons.gpp_bad_outlined, Category.Law),
+    //
+    CategoryStyling(Icons.link, Category.Relation),
+    CategoryStyling(Icons.saved_search_rounded, Category.Event),
+    CategoryStyling(Icons.api_rounded, Category.Construct),
+ 
+- it would be nice if the geaders 'feel' like they have some depth, eg separate elements floating on top
+
+
+fields area
+- remvoe the name feild. isntead make the top bname label editable on click, and saveable
+- the fields take too much space. remove the border element around them; make them one line, not multi. make the typeoffield icon more subtle and 
+integrated. 
+
+
+create screen 
+- only keep name, descr, supertype and subtype field. remove the rest. remove teh public visible checkbox. 
+- select the element immedatiely on creation

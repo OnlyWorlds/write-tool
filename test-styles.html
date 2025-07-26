@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Style Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        paper: {
+                            50: '#faf8f2',
+                            100: '#f5f1e6',
+                            200: '#ede6d5',
+                        },
+                        sand: {
+                            50: '#fdfbf4',
+                            100: '#f8f3e8',
+                            200: '#f0e7d6',
+                        },
+                        blue: {
+                            50: '#f4f6f8',
+                            100: '#e8ecf1',
+                            200: '#d1dae3',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-paper-50">
+    <div class="p-8">
+        <h1 class="text-2xl font-bold mb-4">Style Test</h1>
+        <div class="bg-sand-50 p-4 rounded-lg border border-sand-200 mb-4">
+            <h2 class="text-lg font-semibold mb-2">Sand Background</h2>
+            <p>This should have a sand background color</p>
+        </div>
+        <div class="bg-blue-100 p-4 rounded-lg border border-blue-200">
+            <h2 class="text-lg font-semibold mb-2">Blue Background</h2>
+            <p>This should have a blue background color</p>
+        </div>
+    </div>
+</body>
+</html>

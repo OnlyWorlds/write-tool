@@ -10,6 +10,66 @@ export interface FieldSchema {
   description?: string;
 }
 
+// Simplified schema for create form with only essential fields
+export function getSimplifiedCategorySchema(category: string): CategorySchema {
+  return {
+    name: category.charAt(0).toUpperCase() + category.slice(1),
+    fields: [
+      {
+        name: 'name',
+        type: 'text',
+        label: 'name',
+        required: true,
+        placeholder: 'Enter element name'
+      },
+      {
+        name: 'description',
+        type: 'textarea',
+        label: 'description',
+        required: false,
+        placeholder: 'Optional description'
+      },
+      {
+        name: 'supertype',
+        type: 'select',
+        label: 'supertype',
+        required: false,
+        placeholder: 'Select or enter supertype',
+        allowCustom: true,
+        options: []
+      },
+      {
+        name: 'subtype',
+        type: 'select',
+        label: 'subtype',
+        required: false,
+        placeholder: 'Select or enter subtype',
+        allowCustom: true,
+        options: []
+      }
+    ],
+    commonTypes: [],
+    commonSubtypes: getCategorySubtypes(category)
+  };
+}
+
+// Get category-specific subtypes
+function getCategorySubtypes(category: string): string[] {
+  const subtypes: Record<string, string[]> = {
+    characters: ['Warrior', 'Mage', 'Rogue', 'Noble', 'Merchant', 'Scholar'],
+    locations: ['City', 'Town', 'Village', 'Castle', 'Temple', 'Forest', 'Mountain', 'River'],
+    objects: ['Weapon', 'Armor', 'Tool', 'Artifact', 'Book', 'Potion', 'Gem'],
+    creatures: ['Beast', 'Monster', 'Dragon', 'Elemental', 'Undead', 'Fey'],
+    institutions: ['Guild', 'Temple', 'Academy', 'Government', 'Military', 'Trading Company'],
+    abilities: ['Spell', 'Skill', 'Talent', 'Power', 'Technique'],
+    events: ['Battle', 'Festival', 'Meeting', 'Discovery', 'Catastrophe'],
+    relations: ['Alliance', 'Conflict', 'Family', 'Professional', 'Romantic'],
+    // Add more as needed
+  };
+  
+  return subtypes[category] || [];
+}
+
 export interface CategorySchema {
   name: string;
   fields: FieldSchema[];
@@ -22,21 +82,21 @@ const commonFields = {
   name: {
     name: 'name',
     type: 'text' as const,
-    label: 'Name',
+    label: 'name',
     required: true,
     placeholder: 'Enter element name'
   },
   description: {
     name: 'description',
     type: 'textarea' as const,
-    label: 'Description',
+    label: 'description',
     required: false,
     placeholder: 'Optional description'
   },
   supertype: {
     name: 'supertype',
     type: 'select' as const,
-    label: 'Supertype',
+    label: 'supertype',
     required: false,
     allowCustom: true,
     placeholder: 'Select or enter supertype'
@@ -44,7 +104,7 @@ const commonFields = {
   subtype: {
     name: 'subtype',
     type: 'select' as const,
-    label: 'Subtype',
+    label: 'subtype',
     required: false,
     allowCustom: true,
     placeholder: 'Select or enter subtype'
@@ -52,14 +112,14 @@ const commonFields = {
   imageUrl: {
     name: 'image_url',
     type: 'url' as const,
-    label: 'Image URL',
+    label: 'image URL',
     required: false,
     placeholder: 'https://example.com/image.jpg'
   },
   isPublic: {
     name: 'is_public',
     type: 'boolean' as const,
-    label: 'Public',
+    label: 'public',
     required: false,
     description: 'Make this element publicly visible'
   }
@@ -77,14 +137,14 @@ export const categorySchemas: Record<string, CategorySchema> = {
       {
         name: 'age',
         type: 'text',
-        label: 'Age',
+        label: 'age',
         required: false,
         placeholder: 'e.g., 25, Ancient, Unknown'
       },
       {
         name: 'gender',
         type: 'select',
-        label: 'Gender',
+        label: 'gender',
         required: false,
         options: ['Male', 'Female', 'Non-binary', 'Other'],
         allowCustom: true
@@ -92,56 +152,56 @@ export const categorySchemas: Record<string, CategorySchema> = {
       {
         name: 'locationId',
         type: 'link',
-        label: 'Current Location',
+        label: 'current location',
         required: false,
         description: 'Where this character is currently located'
       },
       {
         name: 'birthplaceId',
         type: 'link',
-        label: 'Birthplace',
+        label: 'birthplace',
         required: false,
         description: 'Where this character was born'
       },
       {
         name: 'speciesIds',
         type: 'links',
-        label: 'Species',
+        label: 'species',
         required: false,
         description: 'Species of this character'
       },
       {
         name: 'traitsIds',
         type: 'links',
-        label: 'Traits',
+        label: 'traits',
         required: false,
         description: 'Character traits'
       },
       {
         name: 'abilitiesIds',
         type: 'links',
-        label: 'Abilities',
+        label: 'abilities',
         required: false,
         description: 'Character abilities'
       },
       {
         name: 'familyIds',
         type: 'links',
-        label: 'Family',
+        label: 'family',
         required: false,
         description: 'Family members'
       },
       {
         name: 'friendsIds',
         type: 'links',
-        label: 'Friends',
+        label: 'friends',
         required: false,
         description: 'Friends of this character'
       },
       {
         name: 'rivalsIds',
         type: 'links',
-        label: 'Rivals',
+        label: 'rivals',
         required: false,
         description: 'Character rivals'
       },
@@ -162,7 +222,7 @@ export const categorySchemas: Record<string, CategorySchema> = {
       {
         name: 'climate',
         type: 'select',
-        label: 'Climate',
+        label: 'climate',
         required: false,
         options: ['Temperate', 'Tropical', 'Arctic', 'Desert', 'Mountain', 'Coastal'],
         allowCustom: true
@@ -170,35 +230,35 @@ export const categorySchemas: Record<string, CategorySchema> = {
       {
         name: 'population',
         type: 'text',
-        label: 'Population',
+        label: 'population',
         required: false,
         placeholder: 'e.g., 10,000, Large, Unknown'
       },
       {
         name: 'parentLocationId',
         type: 'link',
-        label: 'Parent Location',
+        label: 'parent location',
         required: false,
         description: 'The larger location this place is within'
       },
       {
         name: 'populationsIds',
         type: 'links',
-        label: 'Populations',
+        label: 'populations',
         required: false,
         description: 'Populations living in this location'
       },
       {
         name: 'foundersIds',
         type: 'links',
-        label: 'Founders',
+        label: 'founders',
         required: false,
         description: 'Founders of this location'
       },
       {
         name: 'buildingsIds',
         type: 'links',
-        label: 'Buildings',
+        label: 'buildings',
         required: false,
         description: 'Buildings in this location'
       },
@@ -219,14 +279,14 @@ export const categorySchemas: Record<string, CategorySchema> = {
       {
         name: 'material',
         type: 'text',
-        label: 'Material',
+        label: 'material',
         required: false,
         placeholder: 'e.g., Steel, Wood, Magic'
       },
       {
         name: 'rarity',
         type: 'select',
-        label: 'Rarity',
+        label: 'rarity',
         required: false,
         options: ['Common', 'Uncommon', 'Rare', 'Epic', 'Legendary', 'Artifact'],
         allowCustom: true
@@ -248,14 +308,14 @@ export const categorySchemas: Record<string, CategorySchema> = {
       {
         name: 'date',
         type: 'text',
-        label: 'Date',
+        label: 'date',
         required: false,
         placeholder: 'e.g., Year 1205, Ancient Past'
       },
       {
         name: 'duration',
         type: 'text',
-        label: 'Duration',
+        label: 'duration',
         required: false,
         placeholder: 'e.g., 3 days, Several years'
       },
@@ -276,14 +336,14 @@ export const categorySchemas: Record<string, CategorySchema> = {
       {
         name: 'leader',
         type: 'text',
-        label: 'Leader',
+        label: 'leader',
         required: false,
         placeholder: 'Name of current leader'
       },
       {
         name: 'founded',
         type: 'text',
-        label: 'Founded',
+        label: 'founded',
         required: false,
         placeholder: 'e.g., Year 1150, Ancient times'
       },

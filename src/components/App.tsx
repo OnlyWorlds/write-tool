@@ -1,71 +1,119 @@
+import { useEffect } from 'react';
+import { Routes, Route, Navigate, useParams, useNavigate } from 'react-router-dom';
 import { useWorldContext } from '../contexts/WorldContext';
+import { useEditorStore, useSidebarStore } from '../stores/uiStore';
 import { AuthBar } from './AuthBar';
+import { CategorySidebar } from './CategorySidebar';
+import { ElementViewer } from './ElementViewer';
+import { EditArea } from './EditArea';
+import { CreateElementModal } from './CreateElementModal';
+
+// Element route component that handles URL params
+function ElementRoute() {
+  const { elementId } = useParams<{ elementId: string }>();
+  const { selectElement } = useSidebarStore();
+  const { elements } = useWorldContext();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (elementId) {
+      // Check if element exists
+      if (elements.has(elementId)) {
+        selectElement(elementId);
+      } else {
+        // If element doesn't exist, redirect to home
+        navigate('/', { replace: true });
+      }
+    }
+  }, [elementId, elements, selectElement, navigate]);
+
+  return null;
+}
+
+// Home route component that clears selection
+function HomeRoute() {
+  const { selectElement } = useSidebarStore();
+
+  useEffect(() => {
+    selectElement(null);
+  }, [selectElement]);
+
+  return null;
+}
 
 export function App() {
-  const { isAuthenticated, isLoading, elements, categories } = useWorldContext();
+  const { isAuthenticated, isLoading } = useWorldContext();
+  const { editMode } = useEditorStore();
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-paper-50 flex flex-col">
       {/* Auth Bar at top */}
       <AuthBar />
       
       {/* Main Content */}
-      <div className="flex-1 flex">
+      <div className="flex-1 flex overflow-hidden">
         {isAuthenticated ? (
           <>
             {/* Sidebar */}
-            <aside className="w-64 bg-white border-r p-4">
-              <h2 className="text-lg font-semibold mb-4">Categories</h2>
-              <div className="space-y-2">
-                {Array.from(categories.keys()).map(category => (
-                  <div key={category} className="p-2 hover:bg-gray-50 rounded cursor-pointer">
-                    <span className="text-sm capitalize">{category}</span>
-                    <span className="text-xs text-gray-500 ml-2">
-                      ({categories.get(category)?.length || 0})
-                    </span>
-                  </div>
-                ))}
-              </div>
-              {categories.size === 0 && (
-                <p className="text-sm text-gray-500">No elements loaded</p>
-              )}
-            </aside>
+            <CategorySidebar />
 
-            {/* Main Area */}
-            <main className="flex-1 p-6">
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-2xl font-semibold mb-4">Welcome to Your World</h2>
-                <p className="text-gray-600">
-                  Select a category from the sidebar to start browsing your world elements.
-                </p>
-              </div>
-            </main>
+            {/* Working Area - Split View */}
+            <div className="flex-1 flex">
+              {/* Element Viewer */}
+              <ElementViewer />
+              
+              {/* Edit Area - Only show in edit mode */}
+              {editMode === 'edit' && <EditArea />}
+            </div>
+
+            {/* Routes for element navigation */}
+            <Routes>
+              <Route path="/" element={<HomeRoute />} />
+              <Route path="/element/:elementId" element={<ElementRoute />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center max-w-md">
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">
-                Welcome to the OnlyWorlds Parse Tool!
-              </h1>
-              <p className="text-gray-600 mb-2">
-                Your world 'OnlyWorld' was validated and loaded.
-              </p>
-              <p className="text-gray-600">
-                Type 'info' for more information or{' '}
-                <a
-                  href="https://docs.onlyworlds.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:underline"
-                >
-                  click here
-                </a>{' '}
-                for a user guide.
-              </p>
+              {isLoading ? (
+                <>
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                  <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                    Loading your world...
+                  </h2>
+                  <p className="text-gray-600">
+                    Fetching elements and metadata
+                  </p>
+                </>
+              ) : (
+                <>
+                  <h1 className="text-3xl font-bold text-gray-900 mb-4">
+                    Welcome to the OnlyWorlds Browse Tool!
+                  </h1>
+                  <p className="text-gray-600 mb-2">
+                    Please authenticate using the form above to access your world.
+                  </p>
+                  <p className="text-gray-600">
+                    For more information, visit{' '}
+                    <a
+                      href="https://docs.onlyworlds.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline"
+                    >
+                      the OnlyWorlds documentation
+                    </a>.
+                  </p>
+                </>
+              )}
             </div>
           </div>
         )}
       </div>
+      
+      {/* Create Element Modal */}
+      <CreateElementModal />
     </div>
   );
 }

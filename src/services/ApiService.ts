@@ -103,7 +103,7 @@ export class ApiService {
     }
   }
 
-  static async createElement(worldKey: string, pin: string, element: Element): Promise<Element | null> {
+  static async createElement(worldKey: string, pin: string, element: Element): Promise<Element> {
     try {
       const elementType = element.category || 'object';
       const response = await fetch(`${API_BASE_URL}/${elementType}/`, {
@@ -120,10 +120,12 @@ export class ApiService {
       if (response.ok) {
         return await response.json();
       }
-      return null;
+      
+      const errorText = await response.text();
+      throw new Error(`Failed to create element: ${response.status} ${errorText}`);
     } catch (error) {
       console.error('Create error:', error);
-      return null;
+      throw error instanceof Error ? error : new Error('Failed to create element');
     }
   }
 

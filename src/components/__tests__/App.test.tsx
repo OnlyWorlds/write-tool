@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import { BrowserRouter } from 'react-router-dom';
 import { App } from '../App';
 import { WorldProvider } from '../../contexts/WorldContext';
 
@@ -11,9 +12,11 @@ vi.mock('../AuthBar', () => ({
 describe('App', () => {
   it('should render auth bar', () => {
     render(
-      <WorldProvider>
-        <App />
-      </WorldProvider>
+      <BrowserRouter>
+        <WorldProvider>
+          <App />
+        </WorldProvider>
+      </BrowserRouter>
     );
     
     expect(screen.getByText('Auth Bar')).toBeInTheDocument();
@@ -21,11 +24,13 @@ describe('App', () => {
 
   it('should show welcome message when not authenticated', () => {
     render(
-      <WorldProvider>
-        <App />
-      </WorldProvider>
+      <BrowserRouter>
+        <WorldProvider>
+          <App />
+        </WorldProvider>
+      </BrowserRouter>
     );
     
-    expect(screen.getByText('Welcome to the OnlyWorlds Parse Tool!')).toBeInTheDocument();
+    expect(screen.getByText('Welcome to the OnlyWorlds Browse Tool!')).toBeInTheDocument();
   });
 });

@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, renderHook, act, waitFor } from '@testing-library/react';
 import { WorldProvider, useWorldContext } from '../WorldContext';
+import { ApiService } from '../../services/ApiService';
 import type { ReactNode } from 'react';
 
 // Mock the API service
@@ -9,6 +10,9 @@ vi.mock('../../services/ApiService', () => ({
     validateCredentials: vi.fn(),
     fetchWorldMetadata: vi.fn(),
     fetchAllElements: vi.fn(),
+    createElement: vi.fn(),
+    updateElement: vi.fn(),
+    deleteElement: vi.fn(),
   },
   organizeElementsByCategory: vi.fn((elements) => {
     const map = new Map();
@@ -24,6 +28,10 @@ vi.mock('../../services/ApiService', () => ({
 describe('WorldContext', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Setup mock for createElement
+    (ApiService.createElement as any).mockImplementation((worldKey: string, pin: string, element: any) => {
+      return Promise.resolve({ ...element, id: element.id || 'generated-id' });
+    });
     // Reset localStorage mock
     const storage: Record<string, string> = {};
     const mockStorage = {
@@ -77,7 +85,7 @@ describe('WorldContext', () => {
     expect(result.current.worldKey).toBe('test-world');
     expect(result.current.pin).toBe('test-pin');
     expect(localStorage.getItem('onlyworlds_worldKey')).toBe('test-world');
-    expect(localStorage.getItem('onlyworlds_pin')).toBe('test-pin');
+    expect(sessionStorage.getItem('onlyworlds_pin')).toBe('test-pin');
   });
 
   it('should handle failed authentication', async () => {
@@ -101,7 +109,7 @@ describe('WorldContext', () => {
     
     // Set some initial data
     localStorage.setItem('onlyworlds_worldKey', 'test');
-    localStorage.setItem('onlyworlds_pin', 'test');
+    sessionStorage.setItem('onlyworlds_pin', 'test');
     
     act(() => {
       result.current.logout();
@@ -111,7 +119,7 @@ describe('WorldContext', () => {
     expect(result.current.worldKey).toBe('');
     expect(result.current.pin).toBe('');
     expect(localStorage.getItem('onlyworlds_worldKey')).toBeNull();
-    expect(localStorage.getItem('onlyworlds_pin')).toBeNull();
+    expect(sessionStorage.getItem('onlyworlds_pin')).toBeNull();
   });
 
   it('should update element and rebuild categories', () => {
@@ -132,13 +140,12 @@ describe('WorldContext', () => {
     expect(result.current.categories.get('characters')![0]).toEqual(element);
   });
 
-  it('should delete element', () => {
+  it('should delete element', async () => {
     const { result } = renderHook(() => useWorldContext(), { wrapper });
     
     // First add an element
-    act(() => {
-      result.current.createElement({
-        id: '1',
+    await act(async () => {
+      await result.current.createElement({
         name: 'Test Element',
         category: 'characters',
       });
@@ -146,9 +153,10 @@ describe('WorldContext', () => {
     
     expect(result.current.elements.size).toBe(1);
     
-    // Then delete it
+    // Then delete it - get the generated ID
+    const elementId = Array.from(result.current.elements.keys())[0];
     act(() => {
-      result.current.deleteElement('1');
+      result.current.deleteElement(elementId);
     });
     
     expect(result.current.elements.size).toBe(0);

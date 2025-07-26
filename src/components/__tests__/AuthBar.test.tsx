@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AuthBar } from '../AuthBar';
 import { WorldProvider } from '../../contexts/WorldContext';
+import { BrowserRouter } from 'react-router-dom';
 
 // Mock the API service
 vi.mock('../../services/ApiService', () => ({
@@ -16,9 +17,11 @@ vi.mock('../../services/ApiService', () => ({
 describe('AuthBar', () => {
   const renderWithProvider = () => {
     return render(
-      <WorldProvider>
-        <AuthBar />
-      </WorldProvider>
+      <BrowserRouter>
+        <WorldProvider>
+          <AuthBar />
+        </WorldProvider>
+      </BrowserRouter>
     );
   };
 

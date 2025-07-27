@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useWorldContext } from '../contexts/WorldContext';
 import { useSidebarStore } from '../stores/uiStore';
 import { CategoryIcon } from '../utils/categoryIcons';
-import { ChevronDownIcon, ChevronRightIcon, PlusIcon, SearchIcon } from './icons';
+import { PlusIcon, SearchIcon } from './icons';
 
 export function CategorySidebar() {
   const { categories } = useWorldContext();
@@ -65,8 +65,7 @@ export function CategorySidebar() {
 
   return (
     <aside className="w-64 bg-sidebar border-r border-border flex flex-col h-full">
-      <div className="p-4 border-b border-border space-y-3 bg-tab-bg shadow-md">
-        <h2 className="text-lg font-semibold text-text-light">categories</h2>
+      <div className="p-4 border-b border-border bg-tab-bg shadow-md">
         <div className="relative">
           <div className="absolute left-3 top-2.5 text-text-light/60">
             <SearchIcon />
@@ -110,8 +109,7 @@ export function CategorySidebar() {
                       className="flex-1 flex items-center justify-between px-4 py-2 hover:bg-icon-hover transition-colors"
                     >
                       <div className="flex items-center gap-2">
-                        {isExpanded ? <ChevronDownIcon /> : <ChevronRightIcon />}
-                        <CategoryIcon category={category} className="w-4 h-4 text-accent" />
+                        <CategoryIcon category={category} className={`w-4 h-4 ${isExpanded ? 'text-accent' : 'text-text-light/60'}`} />
                         <span className="text-sm font-medium text-text-light">{category.toLowerCase()}</span>
                       </div>
                       <span className="text-xs text-text-light/60">

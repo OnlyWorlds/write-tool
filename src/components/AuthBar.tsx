@@ -98,29 +98,29 @@ export function AuthBar() {
 
   if (isAuthenticated) {
     return (
-      <div className="flex items-center justify-between p-4 bg-blue-700 text-gray-50 shadow-lg">
+      <div className="flex items-center justify-between p-4 bg-primary text-text-dark shadow-lg">
         <div className="flex items-center gap-4">
-          <Link to="/" className="text-sm font-bold hover:text-blue-300 transition-colors">
+          <Link to="/" className="text-sm font-bold hover:text-accent transition-colors">
             OnlyWorlds Browse Tool
           </Link>
-          <span className="text-xs text-gray-400">|</span>
+          <span className="text-xs text-text-dark/60">|</span>
           <span className="text-sm">
             {metadata?.name || `World ${authenticatedWorldKey}`}
           </span>
           <button
             onClick={logout}
-            className="text-xs text-gray-400 hover:text-gray-50 transition-colors"
+            className="text-xs text-text-dark/60 hover:text-text-dark transition-colors"
           >
             logout
           </button>
           <div className="flex items-center gap-2 ml-6">
-            <span className="text-xs text-gray-400">mode:</span>
+            <span className="text-xs text-text-dark/60">mode:</span>
             <button
               onClick={toggleMode}
               className={`px-2 py-0.5 text-xs rounded transition-colors ${
                 editMode === 'showcase' 
-                  ? 'bg-blue-600 text-gray-50' 
-                  : 'bg-gray-700 text-gray-300'
+                  ? 'bg-accent text-text-dark' 
+                  : 'bg-primary-dark text-text-dark/80'
               }`}
             >
               {editMode === 'showcase' ? 'showcase' : 'edit'}
@@ -130,10 +130,10 @@ export function AuthBar() {
         
         {hasUnsavedChanges && (
           <div className="flex items-center gap-2">
-            <span className="text-xs text-blue-400">unsaved changes</span>
+            <span className="text-xs text-accent">unsaved changes</span>
             <button
               onClick={() => clearEdits()}
-              className="px-3 py-1 text-xs bg-gray-700 hover:bg-gray-600 rounded transition-colors"
+              className="px-3 py-1 text-xs bg-primary-dark hover:bg-primary-dark/80 rounded transition-colors"
             >
               discard
             </button>
@@ -142,8 +142,8 @@ export function AuthBar() {
               disabled={isSaving}
               className={`px-3 py-1 text-xs rounded transition-colors ${
                 isSaving 
-                  ? 'bg-gray-600 cursor-not-allowed' 
-                  : 'bg-blue-600 hover:bg-blue-700'
+                  ? 'bg-primary-dark/60 cursor-not-allowed' 
+                  : 'bg-accent hover:bg-accent-hover'
               }`}
             >
               {isSaving ? 'saving...' : 'save'}
@@ -155,14 +155,14 @@ export function AuthBar() {
   }
 
   return (
-    <div className="p-4 bg-gradient-to-r from-blue-900 to-blue-800 text-gray-50 shadow-lg">
+    <div className="p-4 bg-primary text-text-dark shadow-lg">
       <form onSubmit={handleSubmit} className="flex items-center gap-2">
         <input
           type="text"
           value={worldKey}
           onChange={handleWorldKeyChange}
           placeholder="api key"
-          className="w-24 px-2 py-1 text-xs bg-gray-800 border border-gray-600 rounded focus:outline-none focus:border-blue-500 text-gray-50 placeholder-gray-400"
+          className="w-24 px-2 py-1 text-xs bg-input-bg border border-input-border rounded focus:outline-none focus:border-accent text-text-light placeholder-text-light/60"
           disabled={isLoading}
           maxLength={10}
         />
@@ -171,7 +171,7 @@ export function AuthBar() {
           value={pin}
           onChange={handlePinChange}
           placeholder="pin"
-          className="w-16 px-2 py-1 text-xs bg-gray-800 border border-gray-600 rounded focus:outline-none focus:border-blue-500 text-gray-50 placeholder-gray-400"
+          className="w-16 px-2 py-1 text-xs bg-input-bg border border-input-border rounded focus:outline-none focus:border-accent text-text-light placeholder-text-light/60"
           disabled={isLoading}
           maxLength={4}
         />
@@ -180,14 +180,14 @@ export function AuthBar() {
           disabled={isLoading || !worldKey || !pin}
           className={`px-3 py-1 text-xs rounded transition-colors ${
             isLoading || !worldKey || !pin
-              ? 'bg-gray-700 cursor-not-allowed'
-              : 'bg-blue-600 hover:bg-blue-700'
+              ? 'bg-button text-text-light/60 cursor-not-allowed'
+              : 'bg-button hover:bg-button-hover text-text-light'
           }`}
         >
           {isLoading ? 'loading...' : 'validate'}
         </button>
         {error && (
-          <span className="text-xs text-red-300 ml-2">{error}</span>
+          <span className="text-xs text-warning ml-2">{error}</span>
         )}
       </form>
     </div>

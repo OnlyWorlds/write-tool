@@ -4,57 +4,80 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Light paper/sand base colors
-        paper: {
-          50: '#faf8f2',  // Light sandy paper
-          100: '#f5f1e6', // Sandy paper
-          200: '#ede6d5', // Light sand
-          300: '#e2d8c4', // Sand
-          400: '#d6c9b2', // Medium sand
-          500: '#c8b89e', // Warm sand
-          600: '#b8a689', // Dark sand
-          700: '#a59374', // Darker sand
-          800: '#907e5f', // Deep sand
-          900: '#7a684a', // Deepest sand
+        // OnlyWorlds Map Tool color palette
+        primary: {
+          DEFAULT: '#2c3e50', // Dark blue-grey
+          dark: '#1a2531',    // Darker border
         },
-        // Muted blue accent colors (like OnlyWorlds header)
-        blue: {
-          50: '#f4f6f8',  // Very light muted blue
-          100: '#e8ecf1', // Light muted blue
-          200: '#d1dae3', // Muted sky blue
-          300: '#a8b8c8', // Medium muted blue
-          400: '#7a8fa5', // Muted blue
-          500: '#5c738a', // Primary muted blue
-          600: '#4a5d70', // Strong muted blue
-          700: '#556b7d', // Medium blue (for top bar)
-          800: '#465c6e', // Dark blue
-          900: '#384a5a', // Dark navy
+        secondary: {
+          DEFAULT: '#f8f9fa', // Very light grey (almost white)
+          dark: '#e2e6ea',    // Darker grey for hover
         },
-        // Warm sand/beige tones
-        sand: {
-          50: '#fdfbf4',  // Light warm sand
-          100: '#f8f3e8', // Warm sand
-          200: '#f0e7d6', // Light sandy beige
-          300: '#e6d9c2', // Sandy beige
-          400: '#dbc9ac', // Medium sandy beige
-          500: '#ceb794', // Warm sandy beige
-          600: '#bfa47a', // Dark sandy beige
-          700: '#a98f62', // Darker sandy beige
-          800: '#927a4d', // Deep sandy beige
-          900: '#75643c', // Deepest sandy beige
+        sidebar: {
+          DEFAULT: '#d3d9df', // Slightly darker grey for sidebar
         },
-        // Subtle gray tones with warm tint
-        gray: {
-          50: '#fafaf9',  // Near white
-          100: '#f5f5f3', // Very light gray
-          200: '#ebebe7', // Light gray
-          300: '#e0e0db', // Medium light gray
-          400: '#d5d5cf', // Medium gray
-          500: '#cacac3', // Neutral gray
-          600: '#b0b0a9', // Dark gray
-          700: '#96968f', // Darker gray
-          800: '#7c7c75', // Deep gray
-          900: '#62625b', // Charcoal
+        accent: {
+          DEFAULT: '#3498db', // Bright blue
+          hover: '#2980b9',   // Darker blue for hover
+        },
+        button: {
+          DEFAULT: '#f8f9fa', // Light grey for buttons
+          hover: '#e2e6ea',   // Darker grey for button hover
+        },
+        text: {
+          dark: '#ffffff',    // White text on dark backgrounds
+          light: '#343a40',   // Dark grey text on light backgrounds
+        },
+        border: {
+          DEFAULT: '#dee2e6', // Standard border color
+        },
+        input: {
+          bg: '#ffffff',      // White background for inputs
+          border: '#ced4da',  // Border for inputs
+        },
+        success: {
+          DEFAULT: '#28a745',
+          bg: '#d4edda',
+        },
+        warning: {
+          DEFAULT: '#dc3545', // Bootstrap danger color
+          bg: '#f8d7da',      // Bootstrap danger background
+        },
+        info: {
+          DEFAULT: '#17a2b8',
+          bg: '#d1ecf1',
+        },
+        selected: {
+          DEFAULT: '#a8d8ff', // Lighter blue for selected list item
+        },
+        link: {
+          DEFAULT: '#3498db', // Same as accent
+        },
+        tooltip: {
+          bg: 'rgba(0, 0, 0, 0.7)',
+          text: '#ffffff',
+        },
+        delete: {
+          bg: 'rgba(220, 53, 69, 0.8)',      // var(--warning-color) with alpha
+          activeBg: 'rgba(190, 30, 45, 0.95)', // Darker warning color
+          border: 'white',
+        },
+        grid: {
+          DEFAULT: 'rgba(200, 200, 200, 0.5)', // Lighter grid
+        },
+        icon: {
+          bg: '#d3d9df',       // Match sidebar background
+          hover: '#e2e8f0',
+          active: '#3498db',   // Use accent color
+          activeBorder: '#2980b9', // Use accent hover
+        },
+        tab: {
+          bg: '#c8cfd4',       // Darker inactive tab background
+          activeBg: '#d3d9df', // Match sidebar
+          hover: '#f8f9fa',
+          text: '#495057',
+          activeText: '#000000',
+          border: '#dee2e6',
         },
       },
     },

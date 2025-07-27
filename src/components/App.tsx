@@ -1,12 +1,12 @@
 import { useEffect } from 'react';
-import { Routes, Route, Navigate, useParams, useNavigate } from 'react-router-dom';
+import { Navigate, Route, Routes, useNavigate, useParams } from 'react-router-dom';
 import { useWorldContext } from '../contexts/WorldContext';
 import { useEditorStore, useSidebarStore } from '../stores/uiStore';
 import { AuthBar } from './AuthBar';
 import { CategorySidebar } from './CategorySidebar';
-import { ElementViewer } from './ElementViewer';
-import { EditArea } from './EditArea';
 import { CreateElementModal } from './CreateElementModal';
+import { EditArea } from './EditArea';
+import { ElementViewer } from './ElementViewer';
 
 // Element route component that handles URL params
 function ElementRoute() {
@@ -46,7 +46,7 @@ export function App() {
   const { editMode } = useEditorStore();
 
   return (
-    <div className="min-h-screen bg-paper-50 flex flex-col">
+    <div className="min-h-screen bg-secondary flex flex-col">
       {/* Auth Bar at top */}
       <AuthBar />
       
@@ -78,33 +78,17 @@ export function App() {
             <div className="text-center max-w-md">
               {isLoading ? (
                 <>
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                  <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                    Loading your world...
-                  </h2>
-                  <p className="text-gray-600">
-                    Fetching elements and metadata
-                  </p>
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto mb-4"></div>
+                  <h2 className="text-xl font-semibold text-text-light mb-2">
+                    loading world...
+                  </h2> 
                 </>
               ) : (
-                <>
-                  <h1 className="text-3xl font-bold text-gray-900 mb-4">
-                    Welcome to the OnlyWorlds Browse Tool!
-                  </h1>
-                  <p className="text-gray-600 mb-2">
-                    Please authenticate using the form above to access your world.
+                <> 
+                  <p className="text-text-light mb-2">
+                    load a world using the API key and PIN field above
                   </p>
-                  <p className="text-gray-600">
-                    For more information, visit{' '}
-                    <a
-                      href="https://docs.onlyworlds.com"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline"
-                    >
-                      the OnlyWorlds documentation
-                    </a>.
-                  </p>
+    
                 </>
               )}
             </div>

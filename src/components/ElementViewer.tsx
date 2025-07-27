@@ -25,7 +25,7 @@ export function ElementViewer() {
   
   if (!selectedElement) {
     return (
-      <div className="flex-1 flex items-center justify-center text-gray-500">
+      <div className="flex-1 flex items-center justify-center text-text-light/60">
         <p>select an element from the sidebar to view its details</p>
       </div>
     );
@@ -129,9 +129,9 @@ export function ElementViewer() {
     <div className={`flex-1 p-6 ${editMode === 'showcase' ? 'max-w-4xl mx-auto' : ''}`}>
       <div 
         id={editMode === 'showcase' ? `showcase-${selectedElementId}` : undefined}
-        className={`bg-sand-50 rounded-lg shadow-sm border border-sand-200 ${editMode === 'showcase' ? 'shadow-lg' : ''}`}
+        className={`bg-sidebar rounded-lg shadow-sm border border-border ${editMode === 'showcase' ? 'shadow-lg' : ''}`}
       >
-        <div className="p-6 border-b border-sand-200 bg-sand-200 shadow-md">
+        <div className="p-6 border-b border-border bg-tab-bg shadow-md">
           <div className="flex items-center justify-between">
             <div>
               {isEditingName && editMode === 'edit' ? (
@@ -141,43 +141,43 @@ export function ElementViewer() {
                     value={editedName}
                     onChange={(e) => setEditedName(e.target.value)}
                     onKeyDown={handleNameKeyDown}
-                    className="text-2xl font-semibold text-gray-800 bg-sand-50 border border-sand-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="text-2xl font-semibold text-text-light bg-input-bg border border-input-border rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-accent"
                     autoFocus
                   />
                   <button
                     onClick={handleNameSave}
-                    className="text-sm text-blue-600 hover:text-blue-700 px-2 py-1 rounded transition-colors"
+                    className="text-sm text-accent hover:text-accent-hover px-2 py-1 rounded transition-colors"
                   >
                     ✓
                   </button>
                   <button
                     onClick={handleNameCancel}
-                    className="text-sm text-gray-500 hover:text-gray-700 px-2 py-1 rounded transition-colors"
+                    className="text-sm text-text-light/60 hover:text-text-light px-2 py-1 rounded transition-colors"
                   >
                     ×
                   </button>
                 </div>
               ) : (
                 <h2 
-                  className={`text-2xl font-semibold text-gray-800 ${editMode === 'edit' ? 'cursor-pointer hover:text-gray-700' : ''}`}
+                  className={`text-2xl font-semibold text-text-light ${editMode === 'edit' ? 'cursor-pointer hover:text-text-light/80' : ''}`}
                   onClick={editMode === 'edit' ? handleNameEdit : undefined}
                   title={editMode === 'edit' ? 'click to edit name' : undefined}
                 >
                   {selectedElement.name}
                 </h2>
               )}
-              <p className="text-sm text-gray-500 mt-1">{selectedElement.category.toLowerCase()}</p>
+              <p className="text-sm text-text-light/60 mt-1">{selectedElement.category.toLowerCase()}</p>
             </div>
             <div className="flex items-center gap-2">
               {hasUnsavedChanges && editMode === 'edit' && (
-                <span className="text-sm text-blue-600 bg-blue-100 px-3 py-1 rounded-full">
+                <span className="text-sm text-accent bg-info-bg px-3 py-1 rounded-full">
                   unsaved changes
                 </span>
               )}
               {editMode === 'edit' && (
                 <button
                   onClick={() => setShowDeleteConfirm(true)}
-                  className="text-sm text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 px-3 py-1 rounded-full transition-colors"
+                  className="text-sm text-warning hover:text-warning bg-warning-bg hover:bg-warning-bg/80 px-3 py-1 rounded-full transition-colors"
                 >
                   delete
                 </button>
@@ -186,7 +186,7 @@ export function ElementViewer() {
                 <button
                   onClick={handleExport}
                   disabled={isExporting}
-                  className="text-sm text-blue-600 hover:text-blue-700 bg-blue-100 hover:bg-blue-200 px-3 py-1 rounded-full transition-colors disabled:opacity-50"
+                  className="text-sm text-accent hover:text-accent-hover bg-info-bg hover:bg-info-bg/80 px-3 py-1 rounded-full transition-colors disabled:opacity-50"
                 >
                   {isExporting ? 'exporting...' : 'export pdf'}
                 </button>
@@ -197,7 +197,7 @@ export function ElementViewer() {
             <div className="mt-4">
               <button
                 onClick={() => setShowEmptyFields(!showEmptyFields)}
-                className="text-sm text-gray-600 hover:text-gray-800 transition-colors"
+                className="text-sm text-text-light/60 hover:text-text-light transition-colors"
               >
                 {showEmptyFields ? 'hide' : 'show'} empty fields
               </button>

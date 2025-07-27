@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useRef } from 'react';
+import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { useWorldContext } from '../contexts/WorldContext';
+import { ApiService } from '../services/ApiService';
 import { useSidebarStore } from '../stores/uiStore';
 import { CategoryIcon } from '../utils/categoryIcons';
-import { PlusIcon, SearchIcon } from './icons';
+import { PlusIcon, SearchIcon, TrashIcon } from './icons';
 
 export function CategorySidebar() {
-  const { categories } = useWorldContext();
+  const { categories, worldKey, pin, deleteElement } = useWorldContext();
   const { expandedCategories, selectedElementId, filterText, toggleCategory, selectElement, openCreateModal, setFilterText, expandAllCategories } = useSidebarStore();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
@@ -133,22 +135,50 @@ export function CategorySidebar() {
                   {(isExpanded || isSearching) && (
                     <div className="ml-4">
                       {elements.map((element: any) => (
-                        <button
-                          key={element.id}
-                          onClick={() => navigate(`/element/${element.id}`)}
-                          className={`w-full text-left px-4 py-1.5 text-sm hover:bg-icon-hover transition-colors ${
-                            selectedElementId === element.id ? 'bg-selected text-accent' : 'text-text-light'
-                          }`}
-                        >
-                          <div className="flex items-center justify-between">
-                            <span>{element.name}</span>
-                            {isSearching && element.type && (
-                              <span className="text-xs text-text-light/60 ml-1">
-                                {element.type}
-                              </span>
-                            )}
-                          </div>
-                        </button>
+                        <div key={element.id} className="group flex items-center">
+                          <button
+                            onClick={() => navigate(`/element/${element.id}`)}
+                            className={`flex-1 text-left px-4 py-1.5 text-sm hover:bg-icon-hover transition-colors ${
+                              selectedElementId === element.id ? 'bg-selected text-accent' : 'text-text-light'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <span>{element.name}</span>
+                              {isSearching && element.type && (
+                                <span className="text-xs text-text-light/60 ml-1">
+                                  {element.type}
+                                </span>
+                              )}
+                            </div>
+                          </button>
+                          <button
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              if (window.confirm(`Are you sure you want to delete "${element.name}"?`)) {
+                                try {
+                                  const success = await ApiService.deleteElement(worldKey, pin, element.id, category);
+                                  if (success) {
+                                    deleteElement(element.id);
+                                    if (selectedElementId === element.id) {
+                                      selectElement(null);
+                                      navigate('/');
+                                    }
+                                    toast.success('Element deleted');
+                                  } else {
+                                    toast.error('Failed to delete element');
+                                  }
+                                } catch (error) {
+                                  console.error('Failed to delete element:', error);
+                                  toast.error('Failed to delete element');
+                                }
+                              }
+                            }}
+                            className="opacity-0 group-hover:opacity-100 p-1.5 mr-2 hover:bg-red-500/10 text-red-500 hover:text-red-600 transition-all rounded"
+                            title={`Delete ${element.name}`}
+                          >
+                            <TrashIcon />
+                          </button>
+                        </div>
                       ))}
                     </div>
                   )}

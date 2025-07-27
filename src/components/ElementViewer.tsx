@@ -14,8 +14,6 @@ export function ElementViewer() {
   const { selectedElementId, selectElement } = useSidebarStore();
   const { selectedFieldId, selectField, getEditedValue, hasUnsavedChanges, editMode, getFieldError, isFieldVisible, toggleFieldVisibility } = useEditorStore();
   const navigate = useNavigate();
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedName, setEditedName] = useState('');
@@ -39,30 +37,6 @@ export function ElementViewer() {
   // Base fields that get different styling
   const baseFields = ['description', 'supertype', 'subtype', 'image_url'];
   
-  const handleDelete = async () => {
-    if (!selectedElement || !worldKey || !pin) return;
-    
-    setIsDeleting(true);
-    try {
-      const success = await ApiService.deleteElement(worldKey, pin, selectedElement.id, selectedElement.category || 'general');
-      if (success) {
-        // Update local state
-        deleteElement(selectedElement.id);
-        // Clear selection and navigate home
-        selectElement(null);
-        navigate('/');
-        setShowDeleteConfirm(false);
-        toast.success('element deleted successfully');
-      } else {
-        toast.error('failed to delete element. please try again.');
-      }
-    } catch (error) {
-      console.error('Error deleting element:', error);
-      toast.error('an error occurred while deleting the element.');
-    } finally {
-      setIsDeleting(false);
-    }
-  };
   
   const handleExport = async () => {
     if (!selectedElement || !selectedElementId) return;
@@ -173,14 +147,6 @@ export function ElementViewer() {
                 <span className="text-sm text-accent bg-info-bg px-3 py-1 rounded-full">
                   unsaved changes
                 </span>
-              )}
-              {editMode === 'edit' && (
-                <button
-                  onClick={() => setShowDeleteConfirm(true)}
-                  className="text-sm text-warning hover:text-warning bg-warning-bg hover:bg-warning-bg/80 px-3 py-1 rounded-full transition-colors"
-                >
-                  delete
-                </button>
               )}
               {editMode === 'showcase' && isPdfExportSupported() && (
                 <button
@@ -302,37 +268,6 @@ export function ElementViewer() {
         )}
       </div>
       
-      {/* Delete Confirmation Dialog */}
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-sand-50 rounded-lg shadow-xl max-w-md w-full mx-4 border border-sand-200">
-            <div className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                delete element
-              </h3>
-              <p className="text-gray-600 mb-4">
-                are you sure you want to delete "{selectedElement.name}"? this action cannot be undone.
-              </p>
-              <div className="flex justify-end gap-3">
-                <button
-                  onClick={() => setShowDeleteConfirm(false)}
-                  disabled={isDeleting}
-                  className="px-4 py-2 text-gray-700 bg-sand-100 hover:bg-sand-200 rounded-lg transition-colors disabled:opacity-50"
-                >
-                  cancel
-                </button>
-                <button
-                  onClick={handleDelete}
-                  disabled={isDeleting}
-                  className="px-4 py-2 text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors disabled:opacity-50"
-                >
-                  {isDeleting ? 'deleting...' : 'delete'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -109,7 +109,7 @@ export function CreateElementModal() {
     const baseClassName = `w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
       hasError 
         ? 'border-warning focus:ring-warning bg-warning-bg' 
-        : 'border-input-border focus:ring-accent'
+        : 'border-slate-300 focus:ring-accent bg-white text-slate-700 placeholder-slate-400'
     }`;
     
     // For link/links fields, use FieldRenderer which has proper filtering
@@ -262,17 +262,17 @@ export function CreateElementModal() {
       onClick={handleClose}
     >
       <div 
-        className="bg-sidebar rounded-lg p-6 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto border border-border"
+        className="bg-sidebar rounded-lg p-6 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto border border-sidebar-dark shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-lg font-semibold mb-4">
+        <h2 className="text-lg font-semibold mb-4 text-slate-800">
           Create new {schema.name.toLowerCase()}
         </h2>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           {schema.fields.map((field) => (
             <div key={field.name}>
-              <label htmlFor={field.name} className="block text-sm font-medium text-text-light mb-1">
+              <label htmlFor={field.name} className="block text-sm font-medium text-slate-700 mb-1">
                 {field.label.toLowerCase()} {field.required && '*'}
               </label>
               {renderField(field)}
@@ -297,14 +297,14 @@ export function CreateElementModal() {
               type="button"
               onClick={handleClose}
               disabled={isSubmitting}
-              className="px-4 py-2 text-text-light/60 hover:text-text-light transition-colors disabled:opacity-50"
+              className="px-4 py-2 text-slate-500 hover:text-slate-700 transition-colors disabled:opacity-50"
             >
               cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-4 py-2 bg-accent text-text-dark rounded-md hover:bg-accent-hover transition-colors disabled:opacity-50"
+              className="px-4 py-2 bg-accent text-white rounded-md hover:bg-accent-hover shadow-md transition-all disabled:opacity-50"
             >
               {isSubmitting ? 'creating...' : 'create'}
             </button>

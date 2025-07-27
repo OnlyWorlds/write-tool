@@ -66,10 +66,10 @@ export function CategorySidebar() {
   }, [categories, filterText]);
 
   return (
-    <aside className="w-64 bg-sidebar border-r border-border flex flex-col h-full">
-      <div className="p-4 border-b border-border bg-tab-bg shadow-md">
+    <aside className="w-64 bg-sidebar border-r border-sidebar-dark flex flex-col h-full">
+      <div className="p-4 border-b border-sidebar-dark bg-sidebar-dark">
         <div className="relative">
-          <div className="absolute left-3 top-2 text-text-light/60">
+          <div className="absolute left-3 top-2 text-slate-500">
             <SearchIcon />
           </div>
           <input
@@ -78,12 +78,12 @@ export function CategorySidebar() {
             placeholder="filter.."
             value={filterText}
             onChange={(e) => setFilterText(e.target.value)}
-            className="w-full pl-10 pr-8 py-1.5 text-sm border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent bg-input-bg text-text-light placeholder-text-light/60"
+            className="w-full pl-10 pr-8 py-1.5 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent bg-white text-slate-700 placeholder-slate-400"
           />
           {filterText && (
             <button
               onClick={() => setFilterText('')}
-              className="absolute right-2 top-1.5 text-text-light/60 hover:text-text-light"
+              className="absolute right-2 top-1.5 text-slate-500 hover:text-slate-700"
               title="Clear search"
             >
               ×
@@ -94,9 +94,9 @@ export function CategorySidebar() {
       
       <div className="flex-1 overflow-y-auto">
         {categories.size === 0 ? (
-          <p className="text-sm text-text-light/60 p-4">no elements loaded</p>
+          <p className="text-sm text-slate-500 p-4">no elements loaded</p>
         ) : filteredCategories.size === 0 ? (
-          <p className="text-sm text-text-light/60 p-4">no elements found matching "{filterText}"</p>
+          <p className="text-sm text-slate-500 p-4">no elements found matching "{filterText}"</p>
         ) : (
           <div className="py-2">
             {Array.from(filteredCategories.entries()).map(([category, elements]) => {
@@ -108,16 +108,16 @@ export function CategorySidebar() {
                   <div className="flex items-center">
                     <button
                       onClick={() => toggleCategory(category)}
-                      className="flex-1 flex items-center justify-between px-4 py-2 hover:bg-icon-hover transition-colors"
+                      className="flex-1 flex items-center justify-between px-4 py-2 hover:bg-sidebar-light/20 transition-colors rounded-l-md"
                     >
                       <div className="flex items-center gap-2">
-                        <CategoryIcon category={category} className={`w-4 h-4 ${isExpanded ? 'text-accent' : 'text-text-light/60'}`} />
-                        <span className="text-sm font-medium text-text-light">{category.toLowerCase()}</span>
+                        <CategoryIcon category={category} className={`w-4 h-4 ${isExpanded ? 'text-accent' : 'text-slate-500'}`} />
+                        <span className="text-sm font-medium text-slate-700">{category.toLowerCase()}</span>
                       </div>
-                      <span className="text-xs text-text-light/60">
+                      <span className="text-xs text-slate-500">
                         {elements.length}
                         {isSearching && (
-                          <span className="ml-1 text-accent">
+                          <span className="ml-1 text-field-highlight">
                             / {categories.get(category)?.length || 0}
                           </span>
                         )}
@@ -125,7 +125,7 @@ export function CategorySidebar() {
                     </button>
                     <button
                       onClick={() => openCreateModal(category)}
-                      className="p-2 hover:bg-icon-hover text-text-light/60 hover:text-accent transition-colors"
+                      className="p-2 hover:bg-sidebar-dark/20 text-slate-500 hover:text-accent transition-colors rounded-r-md"
                       title={`create new ${category}`}
                     >
                       <PlusIcon />
@@ -138,14 +138,14 @@ export function CategorySidebar() {
                         <div key={element.id} className="group flex items-center">
                           <button
                             onClick={() => navigate(`/element/${element.id}`)}
-                            className={`flex-1 text-left px-4 py-1.5 text-sm hover:bg-icon-hover transition-colors ${
-                              selectedElementId === element.id ? 'bg-selected text-accent' : 'text-text-light'
+                            className={`flex-1 text-left px-4 py-1.5 text-sm hover:bg-sidebar-light/20 transition-colors rounded-md ${
+                              selectedElementId === element.id ? 'bg-accent/10 text-accent font-medium' : 'text-slate-600'
                             }`}
                           >
                             <div className="flex items-center justify-between">
                               <span>{element.name}</span>
                               {isSearching && element.type && (
-                                <span className="text-xs text-text-light/60 ml-1">
+                                <span className="text-xs text-slate-400 ml-1">
                                   {element.type}
                                 </span>
                               )}

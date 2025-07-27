@@ -4,7 +4,7 @@ export default {
   theme: {
     extend: {
       colors: {
-        // OnlyWorlds Map Tool color palette
+        // OnlyWorlds Browse Tool - Vibrant color palette
         primary: {
           DEFAULT: '#2c3e50', // Dark blue-grey
           dark: '#1a2531',    // Darker border
@@ -14,11 +14,27 @@ export default {
           dark: '#e2e6ea',    // Darker grey for hover
         },
         sidebar: {
-          DEFAULT: '#d3d9df', // Slightly darker grey for sidebar
+          DEFAULT: '#e2e8f0', // Light slate-200
+          light: '#f1f5f9',   // Slate-100 for hover
+          dark: '#cbd5e1',    // Slate-300 for active
         },
         accent: {
-          DEFAULT: '#3498db', // Bright blue
-          hover: '#2980b9',   // Darker blue for hover
+          DEFAULT: '#3b82f6', // Bright blue
+          hover: '#2563eb',   // Darker blue for hover
+        },
+        // New vibrant colors for field sections
+        sand: {
+          50: '#fef3c7',    // Warm yellow-beige
+          100: '#fde68a',   // Soft golden yellow
+          200: '#fcd34d',   // Warm amber
+        },
+        field: {
+          // Different colors for different field sections
+          primary: '#ddd6fe',   // Light purple
+          secondary: '#bfdbfe', // Light blue
+          tertiary: '#fecaca',  // Light red/pink
+          quaternary: '#d9f99d', // Light green
+          highlight: '#fde68a',  // Warm yellow for hover
         },
         button: {
           DEFAULT: '#f8f9fa', // Light grey for buttons
@@ -66,18 +82,18 @@ export default {
           DEFAULT: 'rgba(200, 200, 200, 0.5)', // Lighter grid
         },
         icon: {
-          bg: '#d3d9df',       // Match sidebar background
-          hover: '#e2e8f0',
-          active: '#3498db',   // Use accent color
-          activeBorder: '#2980b9', // Use accent hover
+          bg: '#e2e8f0',       // Match new sidebar background
+          hover: '#cbd5e1',
+          active: '#3b82f6',   // Use accent color
+          activeBorder: '#2563eb', // Use accent hover
         },
         tab: {
-          bg: '#c8cfd4',       // Darker inactive tab background
-          activeBg: '#d3d9df', // Match sidebar
-          hover: '#f8f9fa',
-          text: '#495057',
-          activeText: '#000000',
-          border: '#dee2e6',
+          bg: '#f1f5f9',       // Slate-100 inactive tab
+          activeBg: '#e2e8f0', // Match sidebar
+          hover: '#cbd5e1',    // Slate-300
+          text: '#475569',     // Dark text
+          activeText: '#1e293b',
+          border: '#cbd5e1',
         },
       },
     },

@@ -13,23 +13,23 @@ export function FieldTypeIndicator({ fieldName, value, elementCategory }: FieldT
   const getTypeDisplay = () => {
     switch (fieldTypeInfo.type) {
       case 'text':
-        return { icon: 'S', color: 'bg-gray-100 text-gray-500', label: 'String' };
+        return { icon: 'S', color: 'bg-field-primary/40 text-purple-700', label: 'String' };
       case 'textarea':
-        return { icon: 'S⋮', color: 'bg-gray-100 text-gray-500', label: 'String (Long)' };
+        return { icon: 'S⋮', color: 'bg-field-primary/40 text-purple-700', label: 'String (Long)' };
       case 'number':
-        return { icon: '1', color: 'bg-blue-100 text-blue-600', label: 'Integer' };
+        return { icon: '1', color: 'bg-field-secondary/40 text-blue-700', label: 'Integer' };
       case 'boolean':
-        return { icon: '✓', color: 'bg-blue-100 text-blue-600', label: 'String (Boolean)' };
+        return { icon: '✓', color: 'bg-field-quaternary/40 text-green-700', label: 'String (Boolean)' };
       case 'link':
-        return { icon: '→', color: 'bg-slate-200 text-gray-600', label: `Single Link (${fieldTypeInfo.linkedCategory || 'element'})` };
+        return { icon: '→', color: 'bg-field-tertiary/40 text-red-700', label: `Single Link (${fieldTypeInfo.linkedCategory || 'element'})` };
       case 'links':
-        return { icon: '⇉', color: 'bg-slate-200 text-gray-600', label: `Multi Link (${fieldTypeInfo.linkedCategory || 'elements'})` };
+        return { icon: '⇉', color: 'bg-field-tertiary/40 text-red-700', label: `Multi Link (${fieldTypeInfo.linkedCategory || 'elements'})` };
       case 'url':
-        return { icon: '🔗', color: 'bg-gray-100 text-gray-500', label: 'String (URL)' };
+        return { icon: '🔗', color: 'bg-field-highlight/40 text-yellow-700', label: 'String (URL)' };
       case 'select':
-        return { icon: '▼', color: 'bg-gray-100 text-gray-500', label: 'String (Select)' };
+        return { icon: '▼', color: 'bg-field-secondary/40 text-blue-700', label: 'String (Select)' };
       default:
-        return { icon: 'S', color: 'bg-gray-100 text-gray-500', label: 'String' };
+        return { icon: 'S', color: 'bg-field-primary/40 text-purple-700', label: 'String' };
     }
   };
   

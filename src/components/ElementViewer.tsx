@@ -103,7 +103,7 @@ export function ElementViewer() {
     <div className={`flex-1 p-6 ${editMode === 'showcase' ? 'max-w-4xl mx-auto' : ''}`}>
       <div 
         id={editMode === 'showcase' ? `showcase-${selectedElementId}` : undefined}
-        className={`bg-sidebar rounded-lg shadow-sm border border-border ${editMode === 'showcase' ? 'shadow-lg' : ''}`}
+        className={`bg-gradient-to-br from-white to-secondary rounded-lg shadow-sm border border-border ${editMode === 'showcase' ? 'shadow-lg' : ''}`}
       >
         <div className="p-6 border-b border-border bg-tab-bg shadow-md">
           <div className="flex items-center justify-between">
@@ -171,7 +171,7 @@ export function ElementViewer() {
           )}
         </div>
         
-        <div className={`p-6 ${editMode === 'showcase' ? 'space-y-6 bg-sand-50' : 'space-y-4'}`}>
+        <div className={`p-6 ${editMode === 'showcase' ? 'space-y-6 bg-gradient-to-br from-field-primary/20 to-field-secondary/20' : 'space-y-4'}`}>
           {fields.map(([fieldName, originalValue]) => {
             const editedValue = selectedElementId ? getEditedValue(selectedElementId, fieldName) : undefined;
             const value = editedValue !== undefined ? editedValue : originalValue;
@@ -194,16 +194,16 @@ export function ElementViewer() {
               <div 
                 key={fieldName}
                 onClick={() => editMode === 'edit' && selectField(fieldName)}
-                className={`py-2 px-3 rounded transition-all relative ${
+                className={`py-2 px-3 rounded-lg transition-all relative ${
                   editMode === 'showcase' 
-                    ? 'bg-sand-100' 
+                    ? 'bg-gradient-to-r from-field-primary/40 to-field-secondary/40 shadow-sm' 
                     : error
                       ? 'bg-red-50 cursor-pointer'
                       : selectedFieldId === fieldName 
-                        ? 'bg-sand-200 cursor-pointer' 
+                        ? 'bg-gradient-to-r from-field-highlight/60 to-field-quaternary/60 shadow-md cursor-pointer' 
                         : isBaseField
-                          ? 'hover:bg-sand-200 cursor-pointer'
-                          : 'hover:bg-sand-100 cursor-pointer'
+                          ? 'bg-gradient-to-r from-field-secondary/30 to-field-primary/30 hover:from-field-secondary/50 hover:to-field-primary/50 cursor-pointer'
+                          : 'bg-gradient-to-r from-field-tertiary/20 to-field-quaternary/20 hover:from-field-tertiary/40 hover:to-field-quaternary/40 cursor-pointer'
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -213,14 +213,14 @@ export function ElementViewer() {
                     )}
                     <label className={`whitespace-nowrap ${
                       editMode === 'showcase' 
-                        ? 'text-base font-semibold text-gray-900' 
+                        ? 'text-base font-semibold text-slate-600' 
                         : isBaseField
-                          ? 'text-sm font-medium text-sand-700'
-                          : 'text-sm font-medium text-gray-800'
+                          ? 'text-sm font-medium text-blue-600'
+                          : 'text-sm font-medium text-purple-600'
                     }`}>
                       {fieldName.replace(/_/g, ' ').toLowerCase()}
                     </label>
-                    <div className={`flex-1 min-w-0 ${editMode === 'showcase' ? 'text-gray-800' : 'text-gray-900'}`}>
+                    <div className={`flex-1 min-w-0 ${editMode === 'showcase' ? 'text-slate-600' : 'text-slate-700'}`}>
                       <FieldRenderer
                         fieldName={fieldName}
                         value={value}

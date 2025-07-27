@@ -69,7 +69,7 @@ export function CategorySidebar() {
     <aside className="w-64 bg-sidebar border-r border-border flex flex-col h-full">
       <div className="p-4 border-b border-border bg-tab-bg shadow-md">
         <div className="relative">
-          <div className="absolute left-3 top-2.5 text-text-light/60">
+          <div className="absolute left-3 top-2 text-text-light/60">
             <SearchIcon />
           </div>
           <input
@@ -78,12 +78,12 @@ export function CategorySidebar() {
             placeholder="filter.."
             value={filterText}
             onChange={(e) => setFilterText(e.target.value)}
-            className="w-full pl-10 pr-8 py-2 text-sm border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent bg-input-bg text-text-light placeholder-text-light/60"
+            className="w-full pl-10 pr-8 py-1.5 text-sm border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent bg-input-bg text-text-light placeholder-text-light/60"
           />
           {filterText && (
             <button
               onClick={() => setFilterText('')}
-              className="absolute right-2 top-2 text-text-light/60 hover:text-text-light"
+              className="absolute right-2 top-1.5 text-text-light/60 hover:text-text-light"
               title="Clear search"
             >
               ×

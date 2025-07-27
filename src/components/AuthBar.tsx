@@ -1,9 +1,9 @@
-import { useState, useEffect, FormEvent } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useWorldContext } from '../contexts/WorldContext';
-import { useEditorStore } from '../stores/uiStore';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { ValidationService } from '../services/ValidationService';
+import { useEditorStore } from '../stores/uiStore';
 
 export function AuthBar() {
   const { authenticate, isLoading, error, isAuthenticated, logout, metadata, worldKey: authenticatedWorldKey, saveElement, elements } = useWorldContext();
@@ -94,7 +94,7 @@ export function AuthBar() {
       
       if (allSuccess) {
         clearEdits();
-        toast.success('all changes saved successfully!');
+        toast.success('All changes saved');
       } else {
         toast.error('some changes could not be saved. please try again.');
       }

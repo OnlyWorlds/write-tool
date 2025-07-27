@@ -1,13 +1,13 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 import { useWorldContext } from '../contexts/WorldContext';
-import { useSidebarStore, useEditorStore } from '../stores/uiStore';
+import { ApiService } from '../services/ApiService';
+import { useEditorStore, useSidebarStore } from '../stores/uiStore';
+import { exportElementToPdf, isPdfExportSupported } from '../utils/pdfExport';
 import { FieldRenderer } from './FieldRenderers';
 import { FieldTypeIndicator } from './FieldTypeIndicator';
 import { ReverseLinkSection } from './ReverseLinkSection';
-import { ApiService } from '../services/ApiService';
-import { exportElementToPdf, isPdfExportSupported } from '../utils/pdfExport';
 
 export function ElementViewer() {
   const { elements, worldKey, pin, deleteElement, updateElement } = useWorldContext();
@@ -75,7 +75,7 @@ export function ElementViewer() {
         // Update local state
         updateElement({ ...selectedElement, name: editedName.trim() });
         setIsEditingName(false);
-        toast.success('name updated successfully');
+        toast.success('Name updated');
       } else {
         toast.error('failed to update name');
       }

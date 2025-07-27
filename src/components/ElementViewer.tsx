@@ -8,16 +8,18 @@ import { exportElementToPdf, isPdfExportSupported } from '../utils/pdfExport';
 import { FieldRenderer } from './FieldRenderers';
 import { FieldTypeIndicator } from './FieldTypeIndicator';
 import { ReverseLinkSection } from './ReverseLinkSection';
+import { CategoryIcon } from '../utils/categoryIcons';
 
 export function ElementViewer() {
   const { elements, worldKey, pin, deleteElement, updateElement } = useWorldContext();
   const { selectedElementId, selectElement } = useSidebarStore();
-  const { selectedFieldId, selectField, getEditedValue, hasUnsavedChanges, editMode, getFieldError, isFieldVisible, toggleFieldVisibility } = useEditorStore();
+  const { selectedFieldId, selectField, getEditedValue, hasUnsavedChanges, editMode, getFieldError, isFieldVisible, toggleFieldVisibility, toggleMode } = useEditorStore();
   const navigate = useNavigate();
   const [isExporting, setIsExporting] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedName, setEditedName] = useState('');
   const [showEmptyFields, setShowEmptyFields] = useState(true);
+  const [expandAllFields, setExpandAllFields] = useState(false);
   
   const selectedElement = selectedElementId ? elements.get(selectedElementId) : null;
   
@@ -106,8 +108,10 @@ export function ElementViewer() {
         className={`bg-gradient-to-br from-white to-secondary rounded-lg shadow-sm border border-border ${editMode === 'showcase' ? 'shadow-lg' : ''}`}
       >
         <div className="p-6 border-b border-border bg-tab-bg shadow-md">
-          <div className="flex items-center justify-between">
-            <div>
+          <div className="flex items-start justify-between">
+            <div className="flex items-start gap-3">
+              <CategoryIcon category={selectedElement.category} className="w-6 h-6 text-accent mt-1" />
+              <div>
               {isEditingName && editMode === 'edit' ? (
                 <div className="flex items-center gap-2">
                   <input
@@ -140,7 +144,6 @@ export function ElementViewer() {
                   {selectedElement.name}
                 </h2>
               )}
-              <p className="text-sm text-text-light/60 mt-1">{selectedElement.category.toLowerCase()}</p>
             </div>
             <div className="flex items-center gap-2">
               {hasUnsavedChanges && editMode === 'edit' && (
@@ -159,104 +162,218 @@ export function ElementViewer() {
               )}
             </div>
           </div>
-          {editMode === 'edit' && (
-            <div className="mt-4">
-              <button
-                onClick={() => setShowEmptyFields(!showEmptyFields)}
-                className="text-sm text-text-light/60 hover:text-text-light transition-colors"
-              >
-                {showEmptyFields ? 'hide' : 'show'} empty fields
-              </button>
+            <div className="flex flex-col gap-2">
+              {editMode === 'edit' && (
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={showEmptyFields}
+                    onChange={(e) => setShowEmptyFields(e.target.checked)}
+                    className="w-4 h-4 text-accent rounded border-gray-300 focus:ring-accent"
+                  />
+                  <span className="text-sm text-text-light/60">show empty fields</span>
+                </label>
+              )}
+              {editMode === 'edit' && (
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={expandAllFields}
+                    onChange={(e) => setExpandAllFields(e.target.checked)}
+                    className="w-4 h-4 text-accent rounded border-gray-300 focus:ring-accent"
+                  />
+                  <span className="text-sm text-text-light/60">expand all fields</span>
+                </label>
+              )}
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={editMode === 'showcase'}
+                  onChange={toggleMode}
+                  className="w-4 h-4 text-accent rounded border-gray-300 focus:ring-accent"
+                />
+                <span className="text-sm text-text-light/60">showcase mode</span>
+              </label>
             </div>
-          )}
+          </div>
         </div>
         
-        <div className={`p-6 ${editMode === 'showcase' ? 'space-y-6 bg-gradient-to-br from-field-primary/20 to-field-secondary/20' : 'space-y-4'}`}>
-          {fields.map(([fieldName, originalValue]) => {
-            const editedValue = selectedElementId ? getEditedValue(selectedElementId, fieldName) : undefined;
-            const value = editedValue !== undefined ? editedValue : originalValue;
-            const isEdited = editedValue !== undefined;
-            const error = selectedElementId ? getFieldError(selectedElementId, fieldName) : null;
-            const fieldVisible = isFieldVisible(fieldName);
-            const isBaseField = baseFields.includes(fieldName);
-            
-            // In showcase mode, hide fields that are not visible or have no value
-            if (editMode === 'showcase' && (!fieldVisible || !value)) {
-              return null;
-            }
-            
-            // In edit mode, hide empty fields if showEmptyFields is false
-            if (editMode === 'edit' && !showEmptyFields && !value) {
-              return null;
-            }
-            
-            return (
-              <div 
-                key={fieldName}
-                onClick={() => editMode === 'edit' && selectField(fieldName)}
-                className={`py-2 px-3 rounded-lg transition-all relative ${
-                  editMode === 'showcase' 
-                    ? 'bg-gradient-to-r from-field-primary/40 to-field-secondary/40 shadow-sm' 
-                    : error
-                      ? 'bg-red-50 cursor-pointer'
-                      : selectedFieldId === fieldName 
-                        ? 'bg-gradient-to-r from-field-highlight/60 to-field-quaternary/60 shadow-md cursor-pointer' 
-                        : isBaseField
-                          ? 'bg-gradient-to-r from-field-secondary/30 to-field-primary/30 hover:from-field-secondary/50 hover:to-field-primary/50 cursor-pointer'
-                          : 'bg-gradient-to-r from-field-tertiary/20 to-field-quaternary/20 hover:from-field-tertiary/40 hover:to-field-quaternary/40 cursor-pointer'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 min-w-0">
-                    {editMode === 'edit' && (
-                      <FieldTypeIndicator fieldName={fieldName} value={value} elementCategory={selectedElement.category} />
-                    )}
-                    <label className={`whitespace-nowrap ${
-                      editMode === 'showcase' 
-                        ? 'text-base font-semibold text-slate-600' 
-                        : isBaseField
-                          ? 'text-sm font-medium text-blue-600'
-                          : 'text-sm font-medium text-purple-600'
-                    }`}>
-                      {fieldName.replace(/_/g, ' ').toLowerCase()}
-                    </label>
-                    <div className={`flex-1 min-w-0 ${editMode === 'showcase' ? 'text-slate-600' : 'text-slate-700'}`}>
-                      <FieldRenderer
-                        fieldName={fieldName}
-                        value={value}
-                        elementCategory={selectedElement.category}
-                        mode="view"
-                        className={editMode === 'showcase' ? 'text-base leading-relaxed' : 'truncate'}
-                      />
+        <div className={`px-4 pb-6 pt-0 ${editMode === 'showcase' ? 'bg-gradient-to-br from-field-primary/20 to-field-secondary/20' : ''}`}>
+          {/* Base fields section */}
+          <div className="pt-6 pb-4 border-b border-border/50">
+            {fields.filter(([fieldName]) => baseFields.includes(fieldName)).map(([fieldName, originalValue]) => {
+              const editedValue = selectedElementId ? getEditedValue(selectedElementId, fieldName) : undefined;
+              const value = editedValue !== undefined ? editedValue : originalValue;
+              const isEdited = editedValue !== undefined;
+              const error = selectedElementId ? getFieldError(selectedElementId, fieldName) : null;
+              const fieldVisible = isFieldVisible(fieldName);
+              
+              // Check if field is empty (including empty arrays for link fields)
+              const isEmpty = !value || (Array.isArray(value) && value.length === 0);
+              
+              // In showcase mode, hide fields that are not visible or have no value
+              if (editMode === 'showcase' && (!fieldVisible || isEmpty)) {
+                return null;
+              }
+              
+              // In edit mode, hide empty fields if showEmptyFields is false
+              if (editMode === 'edit' && !showEmptyFields && isEmpty) {
+                return null;
+              }
+              
+              return (
+                <div 
+                  key={fieldName}
+                  onClick={() => editMode === 'edit' && selectField(fieldName)}
+                  className={`mb-3 rounded-lg transition-all relative ${
+                    editMode === 'showcase' 
+                      ? 'bg-gradient-to-r from-field-primary/40 to-field-secondary/40 shadow-sm' 
+                      : error
+                        ? 'bg-red-50 cursor-pointer'
+                        : selectedFieldId === fieldName 
+                          ? 'bg-gradient-to-r from-field-highlight/60 to-field-quaternary/60 shadow-md cursor-pointer' 
+                          : 'bg-gradient-to-r from-field-secondary/30 to-field-primary/30 hover:from-field-secondary/50 hover:to-field-primary/50 cursor-pointer'
+                  }`}
+                >
+                  <div className="py-3 px-4">
+                    <div className="flex items-start">
+                      <label className={`block w-40 flex-shrink-0 cursor-pointer font-bold ${
+                        editMode === 'showcase' 
+                          ? 'text-base text-slate-600' 
+                          : 'text-sm text-blue-600'
+                      }`}>
+                        {fieldName.replace(/_/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                      </label>
+                      <div className={`flex-1 ${editMode === 'showcase' ? 'text-slate-800 font-medium' : 'text-slate-700'}`}>
+                        <FieldRenderer
+                          fieldName={fieldName}
+                          value={value}
+                          elementCategory={selectedElement.category}
+                          mode="view"
+                          className={`${editMode === 'showcase' ? 'text-base leading-relaxed' : ''} ${
+                            !expandAllFields && selectedFieldId !== fieldName && value && value.toString().length > 150 
+                              ? 'line-clamp-3' 
+                              : ''
+                          }`}
+                        />
+                      </div>
+                      <div className="flex items-center gap-2 flex-shrink-0 ml-4">
+                        {editMode === 'showcase' && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleFieldVisibility(fieldName);
+                            }}
+                            className="text-xs text-gray-400 hover:text-gray-600 px-1"
+                            data-exclude-from-export
+                            title="hide field from showcase"
+                          >
+                            ×
+                          </button>
+                        )}
+                        {isEdited && editMode === 'edit' && (
+                          <span className="text-xs text-blue-600">edited</span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    {editMode === 'showcase' && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleFieldVisibility(fieldName);
-                        }}
-                        className="text-xs text-gray-400 hover:text-gray-600 px-1"
-                        data-exclude-from-export
-                        title="hide field from showcase"
-                      >
-                        ×
-                      </button>
-                    )}
-                    {isEdited && editMode === 'edit' && (
-                      <span className="text-xs text-blue-600">edited</span>
+                    {error && editMode === 'edit' && (
+                      <div className="mt-1 text-sm text-red-600">
+                        {error}
+                      </div>
                     )}
                   </div>
                 </div>
-                {error && editMode === 'edit' && (
-                  <div className="mt-1 text-sm text-red-600">
-                    {error}
+              );
+            })}
+          </div>
+          
+          {/* Category-specific fields section */}
+          <div className="pt-4 space-y-3">
+            {fields.filter(([fieldName]) => !baseFields.includes(fieldName)).map(([fieldName, originalValue]) => {
+              const editedValue = selectedElementId ? getEditedValue(selectedElementId, fieldName) : undefined;
+              const value = editedValue !== undefined ? editedValue : originalValue;
+              const isEdited = editedValue !== undefined;
+              const error = selectedElementId ? getFieldError(selectedElementId, fieldName) : null;
+              const fieldVisible = isFieldVisible(fieldName);
+              
+              // Check if field is empty (including empty arrays for link fields)
+              const isEmpty = !value || (Array.isArray(value) && value.length === 0);
+              
+              // In showcase mode, hide fields that are not visible or have no value
+              if (editMode === 'showcase' && (!fieldVisible || isEmpty)) {
+                return null;
+              }
+              
+              // In edit mode, hide empty fields if showEmptyFields is false
+              if (editMode === 'edit' && !showEmptyFields && isEmpty) {
+                return null;
+              }
+              
+              return (
+                <div 
+                  key={fieldName}
+                  onClick={() => editMode === 'edit' && selectField(fieldName)}
+                  className={`rounded-lg transition-all relative ${
+                    editMode === 'showcase' 
+                      ? 'bg-gradient-to-r from-field-primary/40 to-field-secondary/40 shadow-sm' 
+                      : error
+                        ? 'bg-red-50 cursor-pointer'
+                        : selectedFieldId === fieldName 
+                          ? 'bg-gradient-to-r from-field-highlight/60 to-field-quaternary/60 shadow-md cursor-pointer' 
+                          : 'bg-gradient-to-r from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-150 cursor-pointer'
+                  }`}
+                >
+                  <div className="py-3 px-4">
+                    <div className="flex items-start">
+                      <label className={`block w-40 flex-shrink-0 cursor-pointer font-bold ${
+                        editMode === 'showcase' 
+                          ? 'text-base text-slate-600' 
+                          : 'text-sm text-blue-500'
+                      }`}>
+                        {fieldName.replace(/_/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                      </label>
+                      <div className={`flex-1 ${editMode === 'showcase' ? 'text-slate-800 font-medium' : 'text-slate-700'}`}>
+                        <FieldRenderer
+                          fieldName={fieldName}
+                          value={value}
+                          elementCategory={selectedElement.category}
+                          mode="view"
+                          className={`${editMode === 'showcase' ? 'text-base leading-relaxed' : ''} ${
+                            !expandAllFields && selectedFieldId !== fieldName && value && value.toString().length > 150 
+                              ? 'line-clamp-3' 
+                              : ''
+                          }`}
+                        />
+                      </div>
+                      <div className="flex items-center gap-2 flex-shrink-0 ml-4">
+                        {editMode === 'showcase' && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleFieldVisibility(fieldName);
+                            }}
+                            className="text-xs text-gray-400 hover:text-gray-600 px-1"
+                            data-exclude-from-export
+                            title="hide field from showcase"
+                          >
+                            ×
+                          </button>
+                        )}
+                        {isEdited && editMode === 'edit' && (
+                          <span className="text-xs text-blue-600">edited</span>
+                        )}
+                      </div>
+                    </div>
+                    {error && editMode === 'edit' && (
+                      <div className="mt-1 text-sm text-red-600">
+                        {error}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            );
-          })}
+                </div>
+              );
+            })}
+          </div>
         </div>
         
         {/* Reverse Links Section */}

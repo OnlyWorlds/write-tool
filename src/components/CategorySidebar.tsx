@@ -74,7 +74,7 @@ export function CategorySidebar() {
           <input
             ref={searchInputRef}
             type="text"
-            placeholder="filter..."
+            placeholder="filter.."
             value={filterText}
             onChange={(e) => setFilterText(e.target.value)}
             className="w-full pl-10 pr-8 py-2 text-sm border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent bg-input-bg text-text-light placeholder-text-light/60"

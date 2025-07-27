@@ -31,7 +31,15 @@ export function WorldProvider({ children }: { children: ReactNode }) {
   });
 
   const authenticate = useCallback(async (worldKey: string, pin: string): Promise<boolean> => {
-    setState(prev => ({ ...prev, isLoading: true, error: null }));
+    // Clear existing data and set loading state
+    setState(prev => ({ 
+      ...prev, 
+      isLoading: true, 
+      error: null,
+      elements: new Map(),
+      categories: new Map(),
+      metadata: null
+    }));
     
     try {
       // Validate credentials
@@ -51,6 +59,10 @@ export function WorldProvider({ children }: { children: ReactNode }) {
         ApiService.fetchWorldMetadata(worldKey, pin),
         ApiService.fetchAllElements(worldKey, pin),
       ]);
+      
+      // Debug logging
+      console.log('Fetched metadata:', metadata);
+      console.log('Metadata name:', metadata?.name);
       
       // Convert elements array to Map
       const elementsMap = new Map<string, Element>();

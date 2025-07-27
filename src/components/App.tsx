@@ -52,7 +52,7 @@ export function App() {
       
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
-        {isAuthenticated ? (
+        {isAuthenticated && !isLoading ? (
           <>
             {/* Sidebar */}
             <CategorySidebar />

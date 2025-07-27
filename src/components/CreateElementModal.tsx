@@ -1,12 +1,11 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { useSidebarStore } from '../stores/uiStore';
+import { useNavigate } from 'react-router-dom';
 import { useWorldContext } from '../contexts/WorldContext';
-import { getCategorySchema, getSimplifiedCategorySchema, validateElementData, type FieldSchema } from '../services/ElementSchemas';
-import { detectFieldType } from '../services/FieldTypeDetector';
-import { FieldRenderer } from './FieldRenderers';
+import { getSimplifiedCategorySchema, type FieldSchema } from '../services/ElementSchemas';
 import { ValidationService } from '../services/ValidationService';
+import { useSidebarStore } from '../stores/uiStore';
+import { FieldRenderer } from './FieldRenderers';
 
 export function CreateElementModal() {
   const { createModalOpen, createModalCategory, closeCreateModal } = useSidebarStore();
@@ -267,7 +266,7 @@ export function CreateElementModal() {
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-lg font-semibold mb-4">
-          create new {schema.name.toLowerCase()}
+          Create new {schema.name.toLowerCase()}
         </h2>
         
         <form onSubmit={handleSubmit} className="space-y-4">

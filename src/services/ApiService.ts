@@ -40,8 +40,38 @@ export class ApiService {
   }
 
   static async fetchWorldMetadata(worldKey: string, pin: string): Promise<WorldMetadata> {
-    // Since there's no metadata endpoint, return a placeholder
-    // The actual world name/description might come from elements
+    try {
+      // Try to fetch world metadata from the world endpoint
+      const response = await fetch(`${API_BASE_URL}/world/`, {
+        headers: { 
+          'API-Key': worldKey,
+          'API-Pin': pin,
+          'Accept': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        const worldData = await response.json();
+        console.log('World API response:', worldData);
+        
+        // If it's an array, get the first world element
+        const world = Array.isArray(worldData) ? worldData[0] : worldData;
+        
+        if (world) {
+          return {
+            id: world.id || worldKey,
+            name: world.name || 'Unnamed World',
+            description: world.description || '',
+            created_at: world.created_at || new Date().toISOString(),
+            updated_at: world.updated_at || new Date().toISOString()
+          };
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to fetch world metadata:', error);
+    }
+    
+    // Fallback if world endpoint doesn't exist or fails
     return {
       id: worldKey,
       name: 'World',

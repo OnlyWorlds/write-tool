@@ -112,7 +112,7 @@ export function CategorySidebar() {
                     >
                       <div className="flex items-center gap-2">
                         <CategoryIcon category={category} className={`w-4 h-4 ${isExpanded ? 'text-accent' : 'text-slate-500'}`} />
-                        <span className="text-sm font-medium text-slate-700 capitalize">{category.toLowerCase()}</span>
+                        <span className="text-sm font-bold text-slate-700 capitalize" style={{ fontSize: '0.95rem' }}>{category.toLowerCase()}</span>
                       </div>
                       <span className="text-xs text-slate-500">
                         {elements.length}
@@ -133,7 +133,7 @@ export function CategorySidebar() {
                   </div>
                   
                   {(isExpanded || isSearching) && (
-                    <div className="ml-4">
+                    <div className="ml-4 pl-2">
                       {elements.map((element: any) => (
                         <div key={element.id} className="group flex items-center">
                           <button

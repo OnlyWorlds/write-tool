@@ -3,12 +3,13 @@ import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { useWorldContext } from '../contexts/WorldContext';
 import { ApiService } from '../services/ApiService';
+import { detectFieldType } from '../services/FieldTypeDetector';
 import { useEditorStore, useSidebarStore } from '../stores/uiStore';
+import { CategoryIcon } from '../utils/categoryIcons';
 import { exportElementToPdf, isPdfExportSupported } from '../utils/pdfExport';
 import { FieldRenderer } from './FieldRenderers';
-import { FieldTypeIndicator } from './FieldTypeIndicator';
+import { FieldTypeIcon } from './FieldTypeIcon';
 import { ReverseLinkSection } from './ReverseLinkSection';
-import { CategoryIcon } from '../utils/categoryIcons';
 
 export function ElementViewer() {
   const { elements, worldKey, pin, deleteElement, updateElement } = useWorldContext();
@@ -20,6 +21,8 @@ export function ElementViewer() {
   const [editedName, setEditedName] = useState('');
   const [showEmptyFields, setShowEmptyFields] = useState(true);
   const [expandAllFields, setExpandAllFields] = useState(false);
+  const [showFieldIcons, setShowFieldIcons] = useState(true);
+  const [showOptions, setShowOptions] = useState(false);
   
   const selectedElement = selectedElementId ? elements.get(selectedElementId) : null;
   
@@ -107,10 +110,10 @@ export function ElementViewer() {
         id={editMode === 'showcase' ? `showcase-${selectedElementId}` : undefined}
         className={`bg-gradient-to-br from-white to-secondary rounded-lg shadow-sm border border-border ${editMode === 'showcase' ? 'shadow-lg' : ''}`}
       >
-        <div className="p-6 border-b border-border bg-tab-bg shadow-md">
+        <div className="p-6 border-b border-border bg-sidebar-dark shadow-md">
           <div className="flex items-start justify-between">
             <div className="flex items-start gap-3">
-              <CategoryIcon category={selectedElement.category} className="w-6 h-6 text-accent mt-1" />
+              <CategoryIcon category={selectedElement.category} className="w-8 h-8 text-accent mt-0.5" />
               <div>
                 {isEditingName && editMode === 'edit' ? (
                   <div className="flex items-center gap-2">
@@ -144,31 +147,51 @@ export function ElementViewer() {
                     {selectedElement.name}
                   </h2>
                 )}
-                {/* Checkboxes moved here, under the name */}
-                <div className="flex gap-4 mt-2">
-                  {editMode === 'edit' && (
-                    <>
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={showEmptyFields}
-                          onChange={(e) => setShowEmptyFields(e.target.checked)}
-                          className="w-4 h-4 text-accent rounded border-gray-300 focus:ring-accent"
-                        />
-                        <span className="text-sm text-text-light/60">show empty fields</span>
-                      </label>
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={expandAllFields}
-                          onChange={(e) => setExpandAllFields(e.target.checked)}
-                          className="w-4 h-4 text-accent rounded border-gray-300 focus:ring-accent"
-                        />
-                        <span className="text-sm text-text-light/60">expand all fields</span>
-                      </label>
-                    </>
-                  )}
-                </div>
+                {/* Options toggle and checkboxes */}
+                {editMode === 'edit' && (
+                  <div className="mt-2">
+                    <button
+                      onClick={() => setShowOptions(!showOptions)}
+                      className="text-sm text-text-light/60 hover:text-text-light flex items-center gap-1"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={showOptions ? "M19 9l-7 7-7-7" : "M9 5l7 7-7 7"} />
+                      </svg>
+                      Options
+                    </button>
+                    {showOptions && (
+                      <div className="flex flex-col gap-2 mt-2 ml-5">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={showEmptyFields}
+                            onChange={(e) => setShowEmptyFields(e.target.checked)}
+                            className="w-4 h-4 text-accent rounded border-gray-300 focus:ring-accent"
+                          />
+                          <span className="text-sm text-text-light/60">Show empty fields</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={expandAllFields}
+                            onChange={(e) => setExpandAllFields(e.target.checked)}
+                            className="w-4 h-4 text-accent rounded border-gray-300 focus:ring-accent"
+                          />
+                          <span className="text-sm text-text-light/60">Expand all fields</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={showFieldIcons}
+                            onChange={(e) => setShowFieldIcons(e.target.checked)}
+                            className="w-4 h-4 text-accent rounded border-gray-300 focus:ring-accent"
+                          />
+                          <span className="text-sm text-text-light/60">Show field type icons</span>
+                        </label>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -187,28 +210,12 @@ export function ElementViewer() {
                 </button>
               )}
               {/* View mode switcher */}
-              <div className="flex items-center bg-primary-dark rounded-full p-1">
-                <button
-                  onClick={() => editMode === 'showcase' && toggleMode()}
-                  className={`px-3 py-1 text-sm font-medium rounded-full transition-all ${
-                    editMode === 'edit' 
-                      ? 'bg-accent text-white' 
-                      : 'text-text-light/60 hover:text-text-light'
-                  }`}
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => editMode === 'edit' && toggleMode()}
-                  className={`px-3 py-1 text-sm font-medium rounded-full transition-all ${
-                    editMode === 'showcase' 
-                      ? 'bg-accent text-white' 
-                      : 'text-text-light/60 hover:text-text-light'
-                  }`}
-                >
-                  Showcase
-                </button>
-              </div>
+              <button
+                onClick={toggleMode}
+                className="px-4 py-2 text-sm font-medium rounded-lg bg-accent hover:bg-accent-hover text-white transition-colors shadow-sm"
+              >
+                {editMode === 'edit' ? 'View Showcase' : 'Edit Mode'}
+              </button>
             </div>
           </div>
         </div>
@@ -236,11 +243,13 @@ export function ElementViewer() {
                 return null;
               }
               
+              const fieldTypeInfo = detectFieldType(fieldName, value, selectedElement.category);
+              
               return (
                 <div 
                   key={fieldName}
-                  onClick={() => editMode === 'edit' && selectField(fieldName)}
-                  className={`mb-3 rounded-lg transition-all relative ${
+                  onClick={() => editMode === 'edit' && selectField(selectedFieldId === fieldName ? null : fieldName)}
+                  className={`mb-3 rounded-lg transition-all relative flex items-start ${
                     editMode === 'showcase' 
                       ? 'bg-gradient-to-r from-field-primary/40 to-field-secondary/40 shadow-sm' 
                       : error
@@ -250,7 +259,16 @@ export function ElementViewer() {
                           : 'bg-field-secondary/30 hover:bg-field-secondary/50 cursor-pointer'
                   }`}
                 >
-                  <div className="py-3 px-4">
+                  {/* Field type icon */}
+                  {showFieldIcons && editMode === 'edit' && !baseFields.includes(fieldName) && (
+                    <div className="flex items-center justify-center w-8 py-3 pl-2">
+                      <FieldTypeIcon 
+                        fieldType={fieldTypeInfo.type} 
+                        className="w-4 h-4 text-slate-400"
+                      />
+                    </div>
+                  )}
+                  <div className={`flex-1 py-3 ${showFieldIcons && editMode === 'edit' && !baseFields.includes(fieldName) ? 'pr-4' : 'px-4'}`}>
                     <div className="flex items-start">
                       <label className={`block w-40 flex-shrink-0 cursor-pointer font-bold ${
                         editMode === 'showcase' 
@@ -324,11 +342,13 @@ export function ElementViewer() {
                 return null;
               }
               
+              const fieldTypeInfo = detectFieldType(fieldName, value, selectedElement.category);
+              
               return (
                 <div 
                   key={fieldName}
-                  onClick={() => editMode === 'edit' && selectField(fieldName)}
-                  className={`rounded-lg transition-all relative ${
+                  onClick={() => editMode === 'edit' && selectField(selectedFieldId === fieldName ? null : fieldName)}
+                  className={`rounded-lg transition-all relative flex items-start ${
                     editMode === 'showcase' 
                       ? 'bg-gradient-to-r from-field-primary/40 to-field-secondary/40 shadow-sm' 
                       : error
@@ -338,7 +358,16 @@ export function ElementViewer() {
                           : 'bg-blue-50 hover:bg-blue-100 cursor-pointer'
                   }`}
                 >
-                  <div className="py-3 px-4">
+                  {/* Field type icon */}
+                  {showFieldIcons && editMode === 'edit' && (
+                    <div className="flex items-center justify-center w-8 py-3 pl-2">
+                      <FieldTypeIcon 
+                        fieldType={fieldTypeInfo.type} 
+                        className="w-4 h-4 text-slate-400"
+                      />
+                    </div>
+                  )}
+                  <div className={`flex-1 py-3 ${showFieldIcons && editMode === 'edit' ? 'pr-4' : 'px-4'}`}>
                     <div className="flex items-start">
                       <label className={`block w-40 flex-shrink-0 cursor-pointer font-bold ${
                         editMode === 'showcase' 

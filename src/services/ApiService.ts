@@ -116,7 +116,10 @@ export class ApiService {
   static async updateElement(worldKey: string, pin: string, element: Element): Promise<boolean> {
     try {
       const elementType = element.category || 'object';
-      const response = await fetch(`${API_BASE_URL}/${elementType}/${element.id}/`, {
+      const url = `${API_BASE_URL}/${elementType}/${element.id}/`;
+      console.log('Updating element:', { url, elementType, id: element.id });
+      
+      const response = await fetch(url, {
         method: 'PUT',
         headers: {
           'API-Key': worldKey,
@@ -126,6 +129,13 @@ export class ApiService {
         },
         body: JSON.stringify(element)
       });
+      
+      if (!response.ok) {
+        console.error('Update failed:', response.status, response.statusText);
+        const text = await response.text();
+        console.error('Response body:', text);
+      }
+      
       return response.ok;
     } catch (error) {
       console.error('Update error:', error);

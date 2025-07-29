@@ -119,7 +119,22 @@ export function ElementViewer() {
         <div className="p-6 border-b border-border bg-sidebar-dark shadow-md">
           <div className="flex items-start justify-between">
             <div className="flex items-start gap-3">
-              <CategoryIcon category={selectedElement.category} className="w-12 h-12 text-accent" />
+              <div className="flex flex-col items-center gap-2">
+                <CategoryIcon category={selectedElement.category} className="w-20 h-20 text-accent" />
+                {/* Options toggle button - gear icon only */}
+                {editMode === 'edit' && (
+                  <button
+                    onClick={() => setShowOptions(!showOptions)}
+                    className="p-2 text-slate-500 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-all"
+                    title="Field Options"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                  </button>
+                )}
+              </div>
               <div>
                 {isEditingName && editMode === 'edit' ? (
                   <div className="flex items-center gap-2">
@@ -153,23 +168,8 @@ export function ElementViewer() {
                     {selectedElement.name}
                   </h2>
                 )}
-                {/* Options toggle and checkboxes */}
-                {editMode === 'edit' && (
-                  <div className="mt-2">
-                    <button
-                      onClick={() => setShowOptions(!showOptions)}
-                      className="text-xs text-slate-500 hover:text-slate-700 flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition-all"
-                    >
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                      <span>Field Options</span>
-                      <svg className={`w-3 h-3 transition-transform ${showOptions ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
-                    {showOptions && (
+                {/* Options dropdown */}
+                {showOptions && editMode === 'edit' && (
                       <div className="flex flex-col gap-2 mt-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
                         <label className="flex items-center gap-2 cursor-pointer">
                           <input
@@ -208,8 +208,6 @@ export function ElementViewer() {
                           <span className="text-sm text-text-light/60">Sort fields alphabetically</span>
                         </label>
                       </div>
-                    )}
-                  </div>
                 )}
               </div>
             </div>
@@ -233,7 +231,7 @@ export function ElementViewer() {
                 onClick={toggleMode}
                 className={`px-4 py-2 text-sm font-medium rounded-lg transition-all shadow-sm flex items-center gap-2 ${
                   editMode === 'edit' 
-                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white' 
+                    ? 'bg-blue-500 hover:bg-blue-600 text-white' 
                     : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
                 }`}
               >

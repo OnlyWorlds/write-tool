@@ -13,10 +13,7 @@ export function TextIcon({ className = "w-4 h-4" }: { className?: string }) {
 export function NumberIcon({ className = "w-4 h-4" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <rect x="3" y="3" width="18" height="18" rx="2" />
-      <text x="12" y="16" textAnchor="middle" fontSize="12" fill="currentColor" stroke="none">
-        123
-      </text>
+      <path d="M18 2V10M18 14V22M6 2V10M6 14V22M2 10H10M14 10H22M2 14H10M14 14H22" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   );
 }

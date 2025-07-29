@@ -41,11 +41,6 @@ export function EditArea() {
             <h3 className="font-medium capitalize">
               {selectedFieldId.replace(/_/g, ' ')}
             </h3>
-            <FieldTypeIndicator 
-              fieldName={selectedFieldId} 
-              value={currentValue} 
-              elementCategory={selectedElement.category} 
-            />
           </div>
           {isEdited && (
             <span className="text-xs text-warning bg-warning-bg px-2 py-1 rounded">
@@ -53,9 +48,6 @@ export function EditArea() {
             </span>
           )}
         </div>
-        <p className="text-sm text-text-light/60 mt-1">
-          {editMode === 'edit' ? 'Edit this field\'s content below' : 'Viewing in showcase mode'}
-        </p>
       </div>
       
       <div className="flex-1 p-4">

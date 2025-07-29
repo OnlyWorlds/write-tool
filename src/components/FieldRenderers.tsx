@@ -384,10 +384,6 @@ const FieldEditor = memo(function FieldEditor({ fieldName, value, fieldTypeInfo,
                 </option>
               ))}
           </select>
-          
-          <div className="text-xs text-gray-500">
-            add multiple elements to create relationships
-          </div>
         </div>
       );
       

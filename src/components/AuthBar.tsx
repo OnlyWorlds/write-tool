@@ -8,8 +8,8 @@ import { useEditorStore } from '../stores/uiStore';
 export function AuthBar() {
   const { authenticate, isLoading, error, isAuthenticated, logout, metadata, worldKey: authenticatedWorldKey, saveElement, elements } = useWorldContext();
   const { hasUnsavedChanges, clearEdits, localEdits, setValidationErrors, clearValidationErrors } = useEditorStore();
-  const [worldKey, setWorldKey] = useState('');
-  const [pin, setPin] = useState('');
+  const [worldKey, setWorldKey] = useState('3550908908');
+  const [pin, setPin] = useState('1111');
   
   // Set initial values when authenticated
   useEffect(() => {
@@ -122,7 +122,7 @@ export function AuthBar() {
           value={worldKey}
           onChange={handleWorldKeyChange}
           placeholder="api key"
-          className="w-32 px-2 py-1 text-xs bg-primary-dark border border-primary-dark text-text-dark placeholder-text-dark/60 rounded"
+          className="w-24 px-2 py-1 text-xs bg-primary-dark border border-primary-dark text-text-dark placeholder-text-dark/60 rounded"
           disabled={isLoading}
           maxLength={10}
         />
@@ -131,7 +131,7 @@ export function AuthBar() {
           value={pin}
           onChange={handlePinChange}
           placeholder="pin"
-          className="w-16 px-2 py-1 text-xs bg-primary-dark border border-primary-dark text-text-dark placeholder-text-dark/60 rounded"
+          className="w-12 px-2 py-1 text-xs bg-primary-dark border border-primary-dark text-text-dark placeholder-text-dark/60 rounded"
           disabled={isLoading}
           maxLength={4}
         />

@@ -177,7 +177,7 @@ export function ElementViewer() {
                             onChange={(e) => setExpandAllFields(e.target.checked)}
                             className="w-4 h-4 text-accent rounded border-gray-300 focus:ring-accent"
                           />
-                          <span className="text-sm text-text-light/60">Expand all fields</span>
+                          <span className="text-sm text-text-light/60">Always expand fields</span>
                         </label>
                         <label className="flex items-center gap-2 cursor-pointer">
                           <input

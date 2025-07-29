@@ -48,7 +48,7 @@ export const ReverseLinkSection = memo(function ReverseLinkSection({ elementId, 
                 <button
                   key={element.id}
                   onClick={() => handleElementClick(element)}
-                  className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gradient-to-r from-accent/20 to-accent/30 text-accent hover:from-accent/30 hover:to-accent/40 transition-all shadow-sm"
+                  className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-accent/20 text-accent hover:bg-accent/30 transition-all shadow-sm"
                 >
                   <span className="text-xs text-accent/80 mr-1">
                     {element.category?.charAt(0).toUpperCase()}

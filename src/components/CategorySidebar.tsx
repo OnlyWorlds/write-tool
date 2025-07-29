@@ -112,7 +112,7 @@ export function CategorySidebar() {
                     >
                       <div className="flex items-center gap-2">
                         <CategoryIcon category={category} className={`w-4 h-4 ${isExpanded ? 'text-accent' : 'text-slate-500'}`} />
-                        <span className="text-sm font-medium text-slate-700">{category.toLowerCase()}</span>
+                        <span className="text-sm font-medium text-slate-700 capitalize">{category.toLowerCase()}</span>
                       </div>
                       <span className="text-xs text-slate-500">
                         {elements.length}

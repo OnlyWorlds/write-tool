@@ -80,7 +80,7 @@ export function App() {
                 <>
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto mb-4"></div>
                   <h2 className="text-xl font-semibold text-text-light mb-2">
-                    loading world...
+                    loading world..
                   </h2> 
                 </>
               ) : (

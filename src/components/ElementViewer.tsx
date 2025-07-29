@@ -112,38 +112,64 @@ export function ElementViewer() {
             <div className="flex items-start gap-3">
               <CategoryIcon category={selectedElement.category} className="w-6 h-6 text-accent mt-1" />
               <div>
-              {isEditingName && editMode === 'edit' ? (
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={editedName}
-                    onChange={(e) => setEditedName(e.target.value)}
-                    onKeyDown={handleNameKeyDown}
-                    className="text-2xl font-semibold text-text-light bg-input-bg border border-input-border rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-accent"
-                    autoFocus
-                  />
-                  <button
-                    onClick={handleNameSave}
-                    className="text-sm text-accent hover:text-accent-hover px-2 py-1 rounded transition-colors"
+                {isEditingName && editMode === 'edit' ? (
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={editedName}
+                      onChange={(e) => setEditedName(e.target.value)}
+                      onKeyDown={handleNameKeyDown}
+                      className="text-2xl font-semibold text-text-light bg-input-bg border border-input-border rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-accent"
+                      autoFocus
+                    />
+                    <button
+                      onClick={handleNameSave}
+                      className="text-sm text-accent hover:text-accent-hover px-2 py-1 rounded transition-colors"
+                    >
+                      ✓
+                    </button>
+                    <button
+                      onClick={handleNameCancel}
+                      className="text-sm text-text-light/60 hover:text-text-light px-2 py-1 rounded transition-colors"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ) : (
+                  <h2 
+                    className={`text-2xl font-semibold text-text-light ${editMode === 'edit' ? 'cursor-pointer hover:text-text-light/80' : ''}`}
+                    onClick={editMode === 'edit' ? handleNameEdit : undefined}
+                    title={editMode === 'edit' ? 'click to edit name' : undefined}
                   >
-                    ✓
-                  </button>
-                  <button
-                    onClick={handleNameCancel}
-                    className="text-sm text-text-light/60 hover:text-text-light px-2 py-1 rounded transition-colors"
-                  >
-                    ×
-                  </button>
+                    {selectedElement.name}
+                  </h2>
+                )}
+                {/* Checkboxes moved here, under the name */}
+                <div className="flex gap-4 mt-2">
+                  {editMode === 'edit' && (
+                    <>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={showEmptyFields}
+                          onChange={(e) => setShowEmptyFields(e.target.checked)}
+                          className="w-4 h-4 text-accent rounded border-gray-300 focus:ring-accent"
+                        />
+                        <span className="text-sm text-text-light/60">show empty fields</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={expandAllFields}
+                          onChange={(e) => setExpandAllFields(e.target.checked)}
+                          className="w-4 h-4 text-accent rounded border-gray-300 focus:ring-accent"
+                        />
+                        <span className="text-sm text-text-light/60">expand all fields</span>
+                      </label>
+                    </>
+                  )}
                 </div>
-              ) : (
-                <h2 
-                  className={`text-2xl font-semibold text-text-light ${editMode === 'edit' ? 'cursor-pointer hover:text-text-light/80' : ''}`}
-                  onClick={editMode === 'edit' ? handleNameEdit : undefined}
-                  title={editMode === 'edit' ? 'click to edit name' : undefined}
-                >
-                  {selectedElement.name}
-                </h2>
-              )}
+              </div>
             </div>
             <div className="flex items-center gap-2">
               {hasUnsavedChanges && editMode === 'edit' && (
@@ -160,40 +186,29 @@ export function ElementViewer() {
                   {isExporting ? 'exporting...' : 'export pdf'}
                 </button>
               )}
-            </div>
-          </div>
-            <div className="flex flex-col gap-2">
-              {editMode === 'edit' && (
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={showEmptyFields}
-                    onChange={(e) => setShowEmptyFields(e.target.checked)}
-                    className="w-4 h-4 text-accent rounded border-gray-300 focus:ring-accent"
-                  />
-                  <span className="text-sm text-text-light/60">show empty fields</span>
-                </label>
-              )}
-              {editMode === 'edit' && (
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={expandAllFields}
-                    onChange={(e) => setExpandAllFields(e.target.checked)}
-                    className="w-4 h-4 text-accent rounded border-gray-300 focus:ring-accent"
-                  />
-                  <span className="text-sm text-text-light/60">expand all fields</span>
-                </label>
-              )}
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={editMode === 'showcase'}
-                  onChange={toggleMode}
-                  className="w-4 h-4 text-accent rounded border-gray-300 focus:ring-accent"
-                />
-                <span className="text-sm text-text-light/60">showcase mode</span>
-              </label>
+              {/* View mode switcher */}
+              <div className="flex items-center bg-primary-dark rounded-full p-1">
+                <button
+                  onClick={() => editMode === 'showcase' && toggleMode()}
+                  className={`px-3 py-1 text-sm font-medium rounded-full transition-all ${
+                    editMode === 'edit' 
+                      ? 'bg-accent text-white' 
+                      : 'text-text-light/60 hover:text-text-light'
+                  }`}
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => editMode === 'edit' && toggleMode()}
+                  className={`px-3 py-1 text-sm font-medium rounded-full transition-all ${
+                    editMode === 'showcase' 
+                      ? 'bg-accent text-white' 
+                      : 'text-text-light/60 hover:text-text-light'
+                  }`}
+                >
+                  Showcase
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -232,7 +247,7 @@ export function ElementViewer() {
                         ? 'bg-red-50 cursor-pointer'
                         : selectedFieldId === fieldName 
                           ? 'bg-gradient-to-r from-field-highlight/60 to-field-quaternary/60 shadow-md cursor-pointer' 
-                          : 'bg-gradient-to-r from-field-secondary/30 to-field-primary/30 hover:from-field-secondary/50 hover:to-field-primary/50 cursor-pointer'
+                          : 'bg-field-secondary/30 hover:bg-field-secondary/50 cursor-pointer'
                   }`}
                 >
                   <div className="py-3 px-4">
@@ -251,7 +266,7 @@ export function ElementViewer() {
                           elementCategory={selectedElement.category}
                           mode="view"
                           className={`${editMode === 'showcase' ? 'text-base leading-relaxed' : ''} ${
-                            !expandAllFields && selectedFieldId !== fieldName && value && value.toString().length > 150 
+                            !expandAllFields && selectedFieldId !== fieldName && value && typeof value === 'string' && value.length > 0
                               ? 'line-clamp-3' 
                               : ''
                           }`}
@@ -320,7 +335,7 @@ export function ElementViewer() {
                         ? 'bg-red-50 cursor-pointer'
                         : selectedFieldId === fieldName 
                           ? 'bg-gradient-to-r from-field-highlight/60 to-field-quaternary/60 shadow-md cursor-pointer' 
-                          : 'bg-gradient-to-r from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-150 cursor-pointer'
+                          : 'bg-blue-50 hover:bg-blue-100 cursor-pointer'
                   }`}
                 >
                   <div className="py-3 px-4">
@@ -339,7 +354,7 @@ export function ElementViewer() {
                           elementCategory={selectedElement.category}
                           mode="view"
                           className={`${editMode === 'showcase' ? 'text-base leading-relaxed' : ''} ${
-                            !expandAllFields && selectedFieldId !== fieldName && value && value.toString().length > 150 
+                            !expandAllFields && selectedFieldId !== fieldName && value && typeof value === 'string' && value.length > 0
                               ? 'line-clamp-3' 
                               : ''
                           }`}

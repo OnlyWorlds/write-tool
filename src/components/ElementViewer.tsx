@@ -130,8 +130,11 @@ export function ElementViewer() {
       
       if (response) {
         // Generate the shareable URL
-        // Get the base URL up to the hash
-        const baseUrl = window.location.href.split('#')[0];
+        // Get the base URL - ensure we're using the correct path
+        const origin = window.location.origin;
+        const pathname = window.location.pathname;
+        // Make sure we keep the /browse-tool/ path if it exists
+        const baseUrl = `${origin}${pathname}`.replace(/\/$/, ''); // Remove trailing slash if any
         const shareableUrl = `${baseUrl}#/showcase/${response.showcase_id}`;
         
         // Copy to clipboard

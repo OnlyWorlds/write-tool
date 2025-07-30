@@ -189,7 +189,7 @@ const FieldEditor = memo(function FieldEditor({ fieldName, value, fieldTypeInfo,
     onChange?.(newValue);
   };
   
-  const baseInputClass = `w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${className}`;
+  const baseInputClass = `w-full px-3 py-2 bg-white border border-blue-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors hover:border-blue-300 ${className}`;
   
   switch (type) {
     case 'boolean':
@@ -375,7 +375,7 @@ const FieldEditor = memo(function FieldEditor({ fieldName, value, fieldTypeInfo,
             }}
             className={baseInputClass}
           >
-            <option value="">add element...</option>
+            <option value="">Choose element...</option>
             {filteredElementsForLinks
               .filter(element => !currentLinks.includes(element.id))
               .map(element => (
@@ -392,9 +392,10 @@ const FieldEditor = memo(function FieldEditor({ fieldName, value, fieldTypeInfo,
         <textarea
           value={localValue || ''}
           onChange={(e) => handleChange(e.target.value)}
-          className={`${baseInputClass} min-h-[100px] resize-y`}
+          className={`${baseInputClass} min-h-[100px] resize-y overflow-y-auto`}
           placeholder="enter text..."
-          rows={4}
+          rows={5}
+          style={{ maxHeight: '400px' }}
         />
       );
       
@@ -422,6 +423,19 @@ const FieldEditor = memo(function FieldEditor({ fieldName, value, fieldTypeInfo,
       );
       
     default:
+      // For longer text values, use a textarea instead of input
+      if (localValue && typeof localValue === 'string' && localValue.length > 100) {
+        return (
+          <textarea
+            value={localValue || ''}
+            onChange={(e) => handleChange(e.target.value)}
+            className={`${baseInputClass} min-h-[100px] resize-y overflow-y-auto`}
+            placeholder="enter text..."
+            rows={5}
+            style={{ maxHeight: '400px' }}
+          />
+        );
+      }
       return (
         <input
           type="text"

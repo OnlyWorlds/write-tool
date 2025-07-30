@@ -3,11 +3,14 @@ import { useWorldContext } from '../contexts/WorldContext';
 import { useSidebarStore, useEditorStore } from '../stores/uiStore';
 import { FieldRenderer } from './FieldRenderers';
 import { FieldTypeIndicator } from './FieldTypeIndicator';
+import { detectFieldType } from '../services/FieldTypeDetector';
 
 export function EditArea() {
-  const { elements } = useWorldContext();
-  const { selectedElementId } = useSidebarStore();
-  const { selectedFieldId, getEditedValue, setFieldValue, editMode, toggleMode, getFieldError } = useEditorStore();
+  const { elements, saveElement } = useWorldContext();
+  const { selectedElementId, selectedCategory } = useSidebarStore();
+  const { selectedFieldId, getEditedValue, setFieldValue, editMode, toggleMode, getFieldError, selectField } = useEditorStore();
+  const [isSaving, setIsSaving] = useState(false);
+  const [previousCategory, setPreviousCategory] = useState<string | null>(null);
   
   const selectedElement = selectedElementId ? elements.get(selectedElementId) : null;
   const originalValue = selectedElement && selectedFieldId ? selectedElement[selectedFieldId as keyof typeof selectedElement] : null;
@@ -21,10 +24,37 @@ export function EditArea() {
     }
   };
   
+  const handleSaveField = async () => {
+    if (!selectedElementId || !selectedFieldId || !selectedElement) return;
+    
+    setIsSaving(true);
+    try {
+      const updates = { [selectedFieldId]: currentValue };
+      const success = await saveElement(selectedElementId, updates);
+      
+      if (success) {
+        // Clear only this field's edit from local storage
+        setFieldValue(selectedElementId, selectedFieldId, undefined);
+      }
+    } finally {
+      setIsSaving(false);
+    }
+  };
+  
+  // Close edit area when switching categories
+  useEffect(() => {
+    if (selectedElement && previousCategory && selectedElement.category !== previousCategory) {
+      selectField(null);
+    }
+    if (selectedElement) {
+      setPreviousCategory(selectedElement.category);
+    }
+  }, [selectedElement, previousCategory, selectField]);
+  
   if (!selectedFieldId || !selectedElement) {
     return (
-      <div className="w-96 bg-secondary border-l border-border p-6 flex items-center justify-center">
-        <p className="text-text-light/60 text-center">
+      <div className="w-96 bg-gradient-to-br from-slate-50 to-blue-50 border-l border-blue-200 p-6 flex items-center justify-center">
+        <p className="text-blue-600/60 text-center">
           Click on a field to edit it here
         </p>
       </div>
@@ -32,25 +62,31 @@ export function EditArea() {
   }
   
   const isEdited = editedValue !== undefined;
+  const fieldTypeInfo = detectFieldType(selectedFieldId, currentValue, selectedElement.category);
   
   return (
-    <div className="w-96 bg-secondary border-l border-border flex flex-col">
-      <div className="p-4 border-b border-border bg-input-bg">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <h3 className="font-medium capitalize">
-              {selectedFieldId.replace(/_/g, ' ')}
-            </h3>
+    <div className="w-96 border-l border-blue-200 flex flex-col fixed right-0 top-0 h-screen z-10">
+      <div className="bg-gradient-to-r from-blue-50 to-slate-50 border-b border-blue-200">
+        <div className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-1">
+              <h3 className="font-bold text-slate-800 capitalize">
+                {selectedFieldId.replace(/_/g, ' ')}
+              </h3>
+              <span className="text-xs text-blue-600">
+                ({fieldTypeInfo.type} field)
+              </span>
+            </div>
+            {isEdited && (
+              <span className="text-xs text-amber-700 bg-amber-100 px-2 py-1 rounded-full">
+                Modified
+              </span>
+            )}
           </div>
-          {isEdited && (
-            <span className="text-xs text-warning bg-warning-bg px-2 py-1 rounded">
-              Modified
-            </span>
-          )}
         </div>
       </div>
       
-      <div className="flex-1 p-4">
+      <div className="flex-1 p-4 bg-gradient-to-b from-white to-blue-50/30 overflow-y-auto">
         <div className="h-full">
           <FieldRenderer
             fieldName={selectedFieldId}
@@ -58,43 +94,39 @@ export function EditArea() {
             elementCategory={selectedElement.category}
             mode={editMode === 'edit' ? 'edit' : 'view'}
             onChange={handleChange}
-            className="h-full"
+            className={fieldTypeInfo.type === 'number' ? 'h-auto' : 'h-full'}
           />
           {error && (
-            <div className="mt-2 p-2 bg-warning-bg border border-warning rounded text-sm text-warning">
+            <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">
               {error}
             </div>
           )}
         </div>
       </div>
       
-      <div className="p-4 border-t border-border bg-input-bg space-y-2">
-        <div className="flex items-center justify-between">
+      <div className="p-4 border-t border-blue-200 bg-gradient-to-r from-slate-50 to-blue-50">
+        {isEdited && editMode === 'edit' ? (
           <div className="flex items-center gap-2">
-            <span className="text-xs text-text-light/60">Mode:</span>
             <button
-              onClick={toggleMode}
-              className={`px-3 py-1 text-xs rounded transition-colors ${
-                editMode === 'edit' 
-                  ? 'bg-accent text-text-dark' 
-                  : 'bg-secondary-dark text-text-light'
-              }`}
+              onClick={handleSaveField}
+              disabled={isSaving}
+              className="flex-1 px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
             >
-              {editMode === 'edit' ? 'Edit' : 'Showcase'}
+              {isSaving ? 'Saving...' : 'Save Changes'}
             </button>
-          </div>
-          {isEdited && editMode === 'edit' && (
             <button
               onClick={() => selectedElementId && selectedFieldId && setFieldValue(selectedElementId, selectedFieldId, originalValue)}
-              className="text-xs text-accent hover:text-accent-hover"
+              disabled={isSaving}
+              className="flex-1 px-4 py-2 text-sm bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition-colors disabled:opacity-50"
             >
-              Reset to original
+              Cancel
             </button>
-          )}
-        </div>
-        <p className="text-xs text-gray-400">
-          Press Cmd/Ctrl+E to toggle mode
-        </p>
+          </div>
+        ) : (
+          <p className="text-xs text-slate-500 text-center">
+            Edit the field above to see save options
+          </p>
+        )}
       </div>
     </div>
   );

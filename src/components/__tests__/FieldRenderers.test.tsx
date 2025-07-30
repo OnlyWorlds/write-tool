@@ -1,8 +1,8 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { FieldRenderer } from '../FieldRenderers';
-import { WorldProvider } from '../../contexts/WorldContext';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
+import { describe, expect, it, vi } from 'vitest';
+import { WorldProvider } from '../../contexts/WorldContext';
+import { FieldRenderer } from '../FieldRenderers';
 
 // Mock the API service
 vi.mock('../../services/ApiService', () => ({
@@ -334,8 +334,8 @@ describe('FieldRenderer', () => {
       // Should render a select for adding elements
       const select = screen.getByRole('combobox');
       expect(select).toBeInTheDocument();
-      expect(screen.getByText('Add element...')).toBeInTheDocument();
-      expect(screen.getByText('Add multiple elements to create relationships')).toBeInTheDocument();
+      expect(screen.getByText('Choose element...')).toBeInTheDocument();
+      expect(screen.getByText('Choose multiple elements to create relationships')).toBeInTheDocument();
     });
 
     it('should NOT render birthplace as link field when value is text', () => {

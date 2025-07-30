@@ -129,13 +129,10 @@ export function ElementViewer() {
       const response = await ApiService.publishShowcase(worldKey, pin, request);
       
       if (response) {
-        // Generate the shareable URL
-        // Get the base URL - ensure we're using the correct path
-        const origin = window.location.origin;
-        const pathname = window.location.pathname;
-        // Make sure we keep the /browse-tool/ path if it exists
-        const baseUrl = `${origin}${pathname}`.replace(/\/$/, ''); // Remove trailing slash if any
-        const shareableUrl = `${baseUrl}#/showcase/${response.showcase_id}`;
+        // Generate the shareable URL - always use production URL
+        // This ensures the showcase link works regardless of where it's published from
+        const productionUrl = 'https://onlyworlds.github.io/browse-tool';
+        const shareableUrl = `${productionUrl}/showcase/${response.showcase_id}`;
         
         // Copy to clipboard
         await navigator.clipboard.writeText(shareableUrl);

@@ -36,6 +36,7 @@ export interface ShowcasePublishResponse {
   showcase_id: string;
   published_at: string;
   public_url: string;
+  shareable_url: string;
 }
 
 export interface ShowcaseRetrieveResponse {

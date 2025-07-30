@@ -63,58 +63,65 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-secondary flex flex-col">
-      {/* Auth Bar at top */}
-      <AuthBar />
-      
-      {/* Main Content */}
-      <div className="flex-1 flex overflow-hidden">
-        {isAuthenticated && !isLoading ? (
+      {/* Routes that handle showcase viewing */}
+      <Routes>
+        <Route path="/showcase/:showcaseId" element={<ShowcaseRoute />} />
+        <Route path="*" element={
           <>
-            {/* Sidebar */}
-            <CategorySidebar />
-
-            {/* Working Area - Split View */}
-            <div className="flex-1 flex">
-              {/* Element Viewer */}
-              <ElementViewer />
-              
-              {/* Edit Area - Only show in edit mode */}
-              {editMode === 'edit' && <EditArea />}
-            </div>
-
-            {/* Routes for element navigation */}
-            <Routes>
-              <Route path="/" element={<HomeRoute />} />
-              <Route path="/element/:elementId" element={<ElementRoute />} />
-              <Route path="/showcase/:showcaseId" element={<ShowcaseRoute />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </>
-        ) : (
-          <div className="flex-1 flex items-center justify-center">
-            <div className="text-center max-w-md">
-              {isLoading ? (
+            {/* Auth Bar at top */}
+            <AuthBar />
+            
+            {/* Main Content */}
+            <div className="flex-1 flex overflow-hidden">
+              {isAuthenticated && !isLoading ? (
                 <>
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto mb-4"></div>
-                  <h2 className="text-xl font-semibold text-text-light mb-2">
-                    loading world..
-                  </h2> 
+                  {/* Sidebar */}
+                  <CategorySidebar />
+
+                  {/* Working Area - Split View */}
+                  <div className="flex-1 flex">
+                    {/* Element Viewer */}
+                    <ElementViewer />
+                    
+                    {/* Edit Area - Only show in edit mode */}
+                    {editMode === 'edit' && <EditArea />}
+                  </div>
+
+                  {/* Routes for element navigation */}
+                  <Routes>
+                    <Route path="/" element={<HomeRoute />} />
+                    <Route path="/element/:elementId" element={<ElementRoute />} />
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                  </Routes>
                 </>
               ) : (
-                <> 
-                  <p className="text-text-light mb-2">
-                    load a world using the API key and PIN field above
-                  </p>
-    
-                </>
+                <div className="flex-1 flex items-center justify-center">
+                  <div className="text-center max-w-md">
+                    {isLoading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto mb-4"></div>
+                        <h2 className="text-xl font-semibold text-text-light mb-2">
+                          loading world..
+                        </h2> 
+                      </>
+                    ) : (
+                      <> 
+                        <p className="text-text-light mb-2">
+                          load a world using the API key and PIN field above
+                        </p>
+        
+                      </>
+                    )}
+                  </div>
+                </div>
               )}
             </div>
-          </div>
-        )}
-      </div>
-      
-      {/* Create Element Modal */}
-      <CreateElementModal />
+            
+            {/* Create Element Modal */}
+            <CreateElementModal />
+          </>
+        } />
+      </Routes>
     </div>
   );
 }

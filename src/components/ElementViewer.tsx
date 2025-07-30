@@ -308,7 +308,7 @@ export function ElementViewer() {
                         ? 'bg-red-50 cursor-pointer'
                         : selectedFieldId === fieldName 
                           ? 'bg-gradient-to-r from-field-highlight/60 to-field-quaternary/60 shadow-md cursor-pointer' 
-                          : 'bg-field-secondary/30 hover:bg-field-secondary/50 cursor-pointer'
+                          : 'bg-slate-100 hover:bg-slate-50 hover:shadow-sm cursor-pointer'
                   }`}
                 >
                   {/* Field type icon */}
@@ -407,7 +407,7 @@ export function ElementViewer() {
                         ? 'bg-red-50 cursor-pointer'
                         : selectedFieldId === fieldName 
                           ? 'bg-gradient-to-r from-field-highlight/60 to-field-quaternary/60 shadow-md cursor-pointer' 
-                          : 'bg-blue-50 hover:bg-blue-100 cursor-pointer'
+                          : 'bg-blue-50 hover:bg-blue-50/50 hover:shadow-sm cursor-pointer'
                   }`}
                 >
                   {/* Field type icon */}

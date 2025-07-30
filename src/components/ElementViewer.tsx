@@ -389,7 +389,7 @@ export function ElementViewer() {
                   )}
                   <div className={`flex-1 py-3 ${!hideFieldIcons && editMode === 'edit' && !baseFields.includes(fieldName) ? 'pr-4' : 'px-4'}`}>
                     <div className="flex items-start">
-                      <label className={`block w-40 flex-shrink-0 cursor-pointer font-bold ${
+                      <label className={`block w-32 flex-shrink-0 cursor-pointer font-bold ${
                         editMode === 'showcase' 
                           ? 'text-base text-gray-700 font-medium' 
                           : 'text-sm text-blue-600'
@@ -488,7 +488,7 @@ export function ElementViewer() {
                   )}
                   <div className={`flex-1 py-3 ${!hideFieldIcons && editMode === 'edit' ? 'pr-4' : 'px-4'}`}>
                     <div className="flex items-start">
-                      <label className={`block w-40 flex-shrink-0 cursor-pointer font-bold ${
+                      <label className={`block w-32 flex-shrink-0 cursor-pointer font-bold ${
                         editMode === 'showcase' 
                           ? 'text-base text-gray-700 font-medium' 
                           : 'text-sm text-blue-500'

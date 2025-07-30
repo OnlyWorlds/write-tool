@@ -116,9 +116,10 @@ export function ElementViewer() {
         id={editMode === 'showcase' ? `showcase-${selectedElementId}` : undefined}
         className={`bg-gradient-to-br from-white to-secondary rounded-lg shadow-sm border border-border ${editMode === 'showcase' ? 'shadow-lg' : ''}`}
       >
-        <div className="p-6 border-b border-border bg-sidebar-dark shadow-md">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-6">
+        <div className="relative border-b border-border bg-sidebar-dark shadow-md">
+          <div className="p-6 pb-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-6">
               <div className="w-20 h-20 overflow-hidden rounded-xl bg-white/10 flex items-center justify-center">
                 {selectedElement.image_url ? (
                   <img 
@@ -170,47 +171,6 @@ export function ElementViewer() {
                   </h2>
                 )}
                 <div className="text-sm text-text-light/60 mt-1 capitalize">{selectedElement.category}</div>
-                {/* Options dropdown */}
-                {showOptions && editMode === 'edit' && (
-                      <div className="flex flex-col gap-2 mt-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
-                        <label className="flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={hideEmptyFields}
-                            onChange={(e) => setHideEmptyFields(e.target.checked)}
-                            className="w-4 h-4 text-accent rounded border-gray-300 focus:ring-accent"
-                          />
-                          <span className="text-sm text-text-light/60">Hide empty fields</span>
-                        </label>
-                        <label className="flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={expandAllFields}
-                            onChange={(e) => setExpandAllFields(e.target.checked)}
-                            className="w-4 h-4 text-accent rounded border-gray-300 focus:ring-accent"
-                          />
-                          <span className="text-sm text-text-light/60">Always expand fields</span>
-                        </label>
-                        <label className="flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={hideFieldIcons}
-                            onChange={(e) => setHideFieldIcons(e.target.checked)}
-                            className="w-4 h-4 text-accent rounded border-gray-300 focus:ring-accent"
-                          />
-                          <span className="text-sm text-text-light/60">Hide field type icons</span>
-                        </label>
-                        <label className="flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={sortAlphabetically}
-                            onChange={(e) => setSortAlphabetically(e.target.checked)}
-                            className="w-4 h-4 text-accent rounded border-gray-300 focus:ring-accent"
-                          />
-                          <span className="text-sm text-text-light/60">Sort fields alphabetically</span>
-                        </label>
-                      </div>
-                )}
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -218,7 +178,7 @@ export function ElementViewer() {
               {editMode === 'edit' && (
                 <button
                   onClick={() => setShowOptions(!showOptions)}
-                  className="p-2 text-slate-500 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-all"
+                  className="p-2 text-slate-500 hover:text-slate-700 hover:bg-white/20 rounded-lg transition-all"
                   title="Field Options"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -267,6 +227,47 @@ export function ElementViewer() {
                   </>
                 )}
               </button>
+            </div>
+          </div>
+          {/* Options row at bottom - always takes up space */}
+          <div className="h-10 px-6 flex items-center">
+            <div className={`flex items-center gap-6 justify-end w-full transition-opacity duration-200 ${showOptions && editMode === 'edit' ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+                <label className="flex items-center gap-2 cursor-pointer text-sm">
+                  <input
+                    type="checkbox"
+                    checked={hideEmptyFields}
+                    onChange={(e) => setHideEmptyFields(e.target.checked)}
+                    className="w-4 h-4 text-accent rounded border-gray-300 focus:ring-accent"
+                  />
+                  <span className="text-text-light/60">Hide empty</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer text-sm">
+                  <input
+                    type="checkbox"
+                    checked={expandAllFields}
+                    onChange={(e) => setExpandAllFields(e.target.checked)}
+                    className="w-4 h-4 text-accent rounded border-gray-300 focus:ring-accent"
+                  />
+                  <span className="text-text-light/60">Expand all</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer text-sm">
+                  <input
+                    type="checkbox"
+                    checked={hideFieldIcons}
+                    onChange={(e) => setHideFieldIcons(e.target.checked)}
+                    className="w-4 h-4 text-accent rounded border-gray-300 focus:ring-accent"
+                  />
+                  <span className="text-text-light/60">Hide icons</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer text-sm">
+                  <input
+                    type="checkbox"
+                    checked={sortAlphabetically}
+                    onChange={(e) => setSortAlphabetically(e.target.checked)}
+                    className="w-4 h-4 text-accent rounded border-gray-300 focus:ring-accent"
+                  />
+                  <span className="text-text-light/60">Sort A-Z</span>
+                </label>
             </div>
           </div>
         </div>
@@ -479,7 +480,7 @@ export function ElementViewer() {
           />
         )}
       </div>
-      
+      </div>
     </div>
   );
 }

@@ -16,7 +16,7 @@ export const MaterialIcon = ({
                     "material-icons-outlined";
   
   return (
-    <span className={`${iconClass} ${className}`} style={{ fontSize: 'inherit' }}>
+    <span className={`${iconClass} ${className}`}>
       {icon}
     </span>
   );
@@ -74,7 +74,7 @@ const categoryIconMap: Record<string, string> = {
 
 export const CategoryIcon = ({ 
   category, 
-  className = "w-4 h-4" 
+  className = "text-base" 
 }: { 
   category: string; 
   className?: string;

@@ -111,7 +111,7 @@ export function CategorySidebar() {
                       className="flex-1 flex items-center justify-between px-4 py-2 hover:bg-sidebar-light/20 transition-colors rounded-l-md"
                     >
                       <div className="flex items-center gap-2">
-                        <CategoryIcon category={category} className={`w-4 h-4 ${isExpanded ? 'text-accent' : 'text-slate-500'}`} />
+                        <CategoryIcon category={category} className={`text-base ${isExpanded ? 'text-accent' : 'text-slate-500'}`} />
                         <span className="text-sm font-bold text-slate-700 capitalize" style={{ fontSize: '0.95rem' }}>{category.toLowerCase()}</span>
                       </div>
                       <span className="text-xs text-slate-500">

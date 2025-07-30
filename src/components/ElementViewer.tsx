@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { useWorldContext } from '../contexts/WorldContext';
@@ -164,7 +164,7 @@ export function ElementViewer() {
       handleNameCancel();
     }
   };
-  
+  //
   
   return (
     <div className={`flex-1 p-6 ${editMode === 'showcase' ? 'max-w-4xl mx-auto' : ''}`}>

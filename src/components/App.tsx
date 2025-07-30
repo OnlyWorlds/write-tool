@@ -7,6 +7,7 @@ import { CategorySidebar } from './CategorySidebar';
 import { CreateElementModal } from './CreateElementModal';
 import { EditArea } from './EditArea';
 import { ElementViewer } from './ElementViewer';
+import { ShowcaseViewer } from './ShowcaseViewer';
 
 // Element route component that handles URL params
 function ElementRoute() {
@@ -41,6 +42,21 @@ function HomeRoute() {
   return null;
 }
 
+// Showcase route component that loads and displays showcase
+function ShowcaseRoute() {
+  const { showcaseId } = useParams<{ showcaseId: string }>();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (showcaseId) {
+      // The ShowcaseViewer will handle loading the showcase
+      // For now, we just need the route to exist
+    }
+  }, [showcaseId]);
+
+  return <ShowcaseViewer showcaseId={showcaseId} />;
+}
+
 export function App() {
   const { isAuthenticated, isLoading } = useWorldContext();
   const { editMode } = useEditorStore();
@@ -70,6 +86,7 @@ export function App() {
             <Routes>
               <Route path="/" element={<HomeRoute />} />
               <Route path="/element/:elementId" element={<ElementRoute />} />
+              <Route path="/showcase/:showcaseId" element={<ShowcaseRoute />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </>

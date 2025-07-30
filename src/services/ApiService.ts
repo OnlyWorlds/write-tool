@@ -21,6 +21,37 @@ const ELEMENT_TYPES = [
   'phenomenon'
 ];
 
+// Showcase API types
+export interface ShowcasePublishRequest {
+  element_type: string;
+  element_id: string;
+  element_data: Element;
+  showcase_config?: {
+    hidden_fields?: string[];
+    view_mode?: string;
+  };
+}
+
+export interface ShowcasePublishResponse {
+  showcase_id: string;
+  published_at: string;
+  public_url: string;
+}
+
+export interface ShowcaseRetrieveResponse {
+  element_data: Element;
+  showcase_config: {
+    hidden_fields?: string[];
+    view_mode?: string;
+  };
+  metadata: {
+    published_at: string;
+    world_name: string;
+    element_type: string;
+    view_count: number;
+  };
+}
+
 export class ApiService {
   static async validateCredentials(worldKey: string, pin: string): Promise<boolean> {
     try {
@@ -183,6 +214,70 @@ export class ApiService {
     } catch (error) {
       console.error('Delete error:', error);
       return false;
+    }
+  }
+
+  // Showcase API methods
+  static async publishShowcase(
+    worldKey: string, 
+    pin: string, 
+    request: ShowcasePublishRequest
+  ): Promise<ShowcasePublishResponse | null> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/showcase/publish/`, {
+        method: 'POST',
+        headers: {
+          'API-Key': worldKey,
+          'API-Pin': pin,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(request)
+      });
+
+      if (!response.ok) {
+        let errorData = null;
+        let errorText = '';
+        try {
+          errorText = await response.text();
+          errorData = JSON.parse(errorText);
+        } catch (e) {
+          console.error('Failed to parse error response:', errorText);
+        }
+        console.error('Publish showcase error:', response.status, errorData || errorText);
+        console.error('Request was:', request);
+        throw new Error(errorData?.detail || errorData?.error || errorText || `Failed to publish: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Showcase publish error:', error);
+      throw error;
+    }
+  }
+
+  static async retrieveShowcase(showcaseId: string): Promise<ShowcaseRetrieveResponse | null> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/showcase/${showcaseId}/`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error('Showcase not found');
+        } else if (response.status === 410) {
+          throw new Error('Showcase has expired');
+        }
+        throw new Error(`Failed to retrieve showcase: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Showcase retrieve error:', error);
+      throw error;
     }
   }
 }

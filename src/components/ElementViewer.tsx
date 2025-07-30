@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { useWorldContext } from '../contexts/WorldContext';
-import { ApiService } from '../services/ApiService';
+import { ApiService, type ShowcasePublishRequest } from '../services/ApiService';
 import { detectFieldType } from '../services/FieldTypeDetector';
 import { useEditorStore, useSidebarStore } from '../stores/uiStore';
 import { CategoryIcon } from '../utils/categoryIcons';
@@ -14,7 +14,7 @@ import { ReverseLinkSection } from './ReverseLinkSection';
 export function ElementViewer() {
   const { elements, worldKey, pin, deleteElement, updateElement } = useWorldContext();
   const { selectedElementId, selectElement } = useSidebarStore();
-  const { selectedFieldId, selectField, getEditedValue, hasUnsavedChanges, editMode, getFieldError, isFieldVisible, toggleFieldVisibility, toggleMode, resetHiddenFields } = useEditorStore();
+  const { selectedFieldId, selectField, getEditedValue, hasUnsavedChanges, editMode, getFieldError, isFieldVisible, toggleFieldVisibility, toggleMode, resetHiddenFields, hiddenFields } = useEditorStore();
   const navigate = useNavigate();
   const [isExporting, setIsExporting] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
@@ -24,6 +24,7 @@ export function ElementViewer() {
   const [hideFieldIcons, setHideFieldIcons] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
   const [sortAlphabetically, setSortAlphabetically] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
   
   const selectedElement = selectedElementId ? elements.get(selectedElementId) : null;
   
@@ -100,6 +101,56 @@ export function ElementViewer() {
       toast.error('error updating name');
     }
   };
+
+  const handlePublishShowcase = async () => {
+    if (!selectedElement || !worldKey || !pin) return;
+    
+    setIsPublishing(true);
+    try {
+      // Clean up element data - remove null/undefined values
+      const cleanElementData = Object.entries(selectedElement).reduce((acc, [key, value]) => {
+        if (value !== null && value !== undefined) {
+          acc[key] = value;
+        }
+        return acc;
+      }, {} as any);
+
+      const request: ShowcasePublishRequest = {
+        element_type: selectedElement.category || '',
+        element_id: selectedElement.id,
+        element_data: cleanElementData,
+        showcase_config: {
+          hidden_fields: Array.from(hiddenFields),
+          view_mode: 'showcase'
+        }
+      };
+
+      console.log('Publishing showcase with request:', JSON.stringify(request, null, 2));
+      const response = await ApiService.publishShowcase(worldKey, pin, request);
+      
+      if (response) {
+        // Generate the shareable URL
+        // Get the base URL up to the hash
+        const baseUrl = window.location.href.split('#')[0];
+        const shareableUrl = `${baseUrl}#/showcase/${response.showcase_id}`;
+        
+        // Copy to clipboard
+        await navigator.clipboard.writeText(shareableUrl);
+        
+        toast.success(
+          <div>
+            <p>Showcase published!</p>
+            <p className="text-sm">URL copied to clipboard</p>
+          </div>
+        );
+      }
+    } catch (error) {
+      console.error('Publish error:', error);
+      toast.error('Failed to publish showcase');
+    } finally {
+      setIsPublishing(false);
+    }
+  };
   
   const handleNameCancel = () => {
     setIsEditingName(false);
@@ -138,7 +189,7 @@ export function ElementViewer() {
                   />
                 ) : null}
                 <CategoryIcon 
-                  category={selectedElement.category} 
+                  category={selectedElement.category || ''} 
                   className={`text-[48px] text-accent ${selectedElement.image_url ? 'hidden' : ''}`} 
                 />
               </div>
@@ -197,14 +248,25 @@ export function ElementViewer() {
                   unsaved changes
                 </span>
               )}
-              {editMode === 'showcase' && isPdfExportSupported() && (
-                <button
-                  onClick={handleExport}
-                  disabled={isExporting}
-                  className="text-sm text-accent hover:text-accent-hover bg-info-bg hover:bg-info-bg/80 px-3 py-1 rounded-full transition-colors disabled:opacity-50"
-                >
-                  {isExporting ? 'exporting...' : 'export pdf'}
-                </button>
+              {editMode === 'showcase' && (
+                <>
+                  <button
+                    onClick={handlePublishShowcase}
+                    disabled={isPublishing}
+                    className="text-sm text-white bg-accent hover:bg-accent-hover px-3 py-1 rounded-full transition-colors disabled:opacity-50"
+                  >
+                    {isPublishing ? 'publishing...' : 'publish'}
+                  </button>
+                  {isPdfExportSupported() && (
+                    <button
+                      onClick={handleExport}
+                      disabled={isExporting}
+                      className="text-sm text-accent hover:text-accent-hover bg-info-bg hover:bg-info-bg/80 px-3 py-1 rounded-full transition-colors disabled:opacity-50"
+                    >
+                      {isExporting ? 'exporting...' : 'export pdf'}
+                    </button>
+                  )}
+                </>
               )}
               {/* View mode switcher */}
               <button

@@ -12,9 +12,9 @@ import { FieldTypeIcon } from './FieldTypeIcon';
 import { ReverseLinkSection } from './ReverseLinkSection';
 
 export function ElementViewer() {
-  const { elements, worldKey, pin, deleteElement, updateElement } = useWorldContext();
-  const { selectedElementId, selectElement } = useSidebarStore();
-  const { selectedFieldId, selectField, getEditedValue, hasUnsavedChanges, editMode, getFieldError, isFieldVisible, toggleFieldVisibility, toggleMode, resetHiddenFields, hiddenFields } = useEditorStore();
+  const { elements, worldKey, pin, deleteElement, updateElement, saveElement } = useWorldContext();
+  const { selectedElementId } = useSidebarStore();
+  const { selectedFieldId, selectField, getEditedValue, editMode, getFieldError, isFieldVisible, toggleFieldVisibility, toggleMode, resetHiddenFields, hiddenFields, setFieldValue } = useEditorStore();
   const navigate = useNavigate();
   const [isExporting, setIsExporting] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
@@ -25,8 +25,20 @@ export function ElementViewer() {
   const [showOptions, setShowOptions] = useState(false);
   const [sortAlphabetically, setSortAlphabetically] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
+  const [isSavingAll, setIsSavingAll] = useState(false);
   
   const selectedElement = selectedElementId ? elements.get(selectedElementId) : null;
+  
+  // Get all unsaved edits for current element by checking each field
+  const unsavedFieldsForElement: Array<{ fieldName: string; value: any }> = [];
+  if (selectedElementId && selectedElement) {
+    Object.keys(selectedElement).forEach(fieldName => {
+      const editedValue = getEditedValue(selectedElementId, fieldName);
+      if (editedValue !== undefined) {
+        unsavedFieldsForElement.push({ fieldName, value: editedValue });
+      }
+    });
+  }
   
   // Reset hidden fields when element changes
   useEffect(() => {
@@ -157,6 +169,45 @@ export function ElementViewer() {
     setEditedName('');
   };
   
+  const handleSaveAll = async () => {
+    if (!selectedElementId || !selectedElement || unsavedFieldsForElement.length === 0) return;
+    
+    setIsSavingAll(true);
+    try {
+      // Collect all unsaved changes into a single update object
+      const updates: any = {};
+      unsavedFieldsForElement.forEach(({ fieldName, value }) => {
+        updates[fieldName] = value;
+      });
+      
+      const success = await saveElement(selectedElementId, updates);
+      if (success) {
+        // Clear all edits for this element
+        unsavedFieldsForElement.forEach(({ fieldName }) => {
+          setFieldValue(selectedElementId, fieldName, undefined);
+        });
+        toast.success('All changes saved');
+      } else {
+        toast.error('Failed to save changes');
+      }
+    } catch (error) {
+      console.error('Error saving all changes:', error);
+      toast.error('Error saving changes');
+    } finally {
+      setIsSavingAll(false);
+    }
+  };
+  
+  const handleDiscardAll = () => {
+    if (!selectedElementId || unsavedFieldsForElement.length === 0) return;
+    
+    // Clear all edits for this element
+    unsavedFieldsForElement.forEach(({ fieldName }) => {
+      setFieldValue(selectedElementId, fieldName, undefined);
+    });
+    toast.success('All changes discarded');
+  };
+  
   const handleNameKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleNameSave();
@@ -168,7 +219,7 @@ export function ElementViewer() {
   
   return (
     <div className={`flex-1 overflow-y-auto h-screen ${editMode === 'showcase' ? 'max-w-4xl mx-auto' : ''}`}>
-      <div className="p-6">
+      <div className={`p-6 ${editMode === 'edit' && selectedFieldId ? 'mr-96' : ''}`}>
         <div 
           id={editMode === 'showcase' ? `showcase-${selectedElementId}` : undefined}
           className={`bg-gradient-to-br from-white to-secondary rounded-lg shadow-sm border border-border ${editMode === 'showcase' ? 'shadow-lg' : ''}`}
@@ -244,10 +295,26 @@ export function ElementViewer() {
                       </svg>
                     </button>
                   )}
-                  {hasUnsavedChanges && editMode === 'edit' && (
-                    <span className="text-sm text-accent bg-info-bg px-3 py-1 rounded-full">
-                      unsaved changes
-                    </span>
+                  {unsavedFieldsForElement.length > 0 && editMode === 'edit' && (
+                    <>
+                      <span className="text-sm text-accent bg-info-bg px-3 py-1 rounded-full">
+                        {unsavedFieldsForElement.length} unsaved {unsavedFieldsForElement.length === 1 ? 'change' : 'changes'}
+                      </span>
+                      <button
+                        onClick={handleSaveAll}
+                        disabled={isSavingAll}
+                        className="text-sm text-white bg-green-600 hover:bg-green-700 px-3 py-1 rounded-full transition-colors disabled:opacity-50"
+                      >
+                        {isSavingAll ? 'Saving...' : 'Save All'}
+                      </button>
+                      <button
+                        onClick={handleDiscardAll}
+                        disabled={isSavingAll}
+                        className="text-sm text-slate-600 bg-slate-200 hover:bg-slate-300 px-3 py-1 rounded-full transition-colors disabled:opacity-50"
+                      >
+                        Discard All
+                      </button>
+                    </>
                   )}
                   {editMode === 'showcase' && (
                     <>
@@ -350,6 +417,7 @@ export function ElementViewer() {
                 const isEdited = editedValue !== undefined;
                 const error = selectedElementId ? getFieldError(selectedElementId, fieldName) : null;
                 const fieldVisible = isFieldVisible(fieldName);
+                const hasUnsavedEdit = unsavedFieldsForElement.some(({ fieldName: fn }) => fn === fieldName);
                 
                 // Check if field is empty (including empty arrays for link fields)
                 const isEmpty = !value || (Array.isArray(value) && value.length === 0);
@@ -428,6 +496,9 @@ export function ElementViewer() {
                           {isEdited && editMode === 'edit' && (
                             <span className="text-xs text-blue-600">edited</span>
                           )}
+                          {hasUnsavedEdit && editMode === 'edit' && (
+                            <span className="inline-flex w-2 h-2 bg-amber-500 rounded-full ml-1" title="Unsaved changes"></span>
+                          )}
                         </div>
                       </div>
                       {error && editMode === 'edit' && (
@@ -449,6 +520,7 @@ export function ElementViewer() {
                 const isEdited = editedValue !== undefined;
                 const error = selectedElementId ? getFieldError(selectedElementId, fieldName) : null;
                 const fieldVisible = isFieldVisible(fieldName);
+                const hasUnsavedEdit = unsavedFieldsForElement.some(({ fieldName: fn }) => fn === fieldName);
                 
                 // Check if field is empty (including empty arrays for link fields)
                 const isEmpty = !value || (Array.isArray(value) && value.length === 0);
@@ -526,6 +598,9 @@ export function ElementViewer() {
                           )}
                           {isEdited && editMode === 'edit' && (
                             <span className="text-xs text-blue-600">edited</span>
+                          )}
+                          {hasUnsavedEdit && editMode === 'edit' && (
+                            <span className="inline-flex w-2 h-2 bg-amber-500 rounded-full ml-1" title="Unsaved changes"></span>
                           )}
                         </div>
                       </div>

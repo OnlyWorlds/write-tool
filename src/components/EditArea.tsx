@@ -2,13 +2,12 @@ import { useState, useEffect } from 'react';
 import { useWorldContext } from '../contexts/WorldContext';
 import { useSidebarStore, useEditorStore } from '../stores/uiStore';
 import { FieldRenderer } from './FieldRenderers';
-import { FieldTypeIndicator } from './FieldTypeIndicator';
 import { detectFieldType } from '../services/FieldTypeDetector';
 
 export function EditArea() {
   const { elements, saveElement } = useWorldContext();
-  const { selectedElementId, selectedCategory } = useSidebarStore();
-  const { selectedFieldId, getEditedValue, setFieldValue, editMode, toggleMode, getFieldError, selectField } = useEditorStore();
+  const { selectedElementId } = useSidebarStore();
+  const { selectedFieldId, getEditedValue, setFieldValue, editMode, getFieldError, selectField } = useEditorStore();
   const [isSaving, setIsSaving] = useState(false);
   const [previousCategory, setPreviousCategory] = useState<string | null>(null);
   
@@ -47,18 +46,12 @@ export function EditArea() {
       selectField(null);
     }
     if (selectedElement) {
-      setPreviousCategory(selectedElement.category);
+      setPreviousCategory(selectedElement.category || null);
     }
   }, [selectedElement, previousCategory, selectField]);
   
   if (!selectedFieldId || !selectedElement) {
-    return (
-      <div className="w-96 bg-gradient-to-br from-slate-50 to-blue-50 border-l border-blue-200 p-6 flex items-center justify-center">
-        <p className="text-blue-600/60 text-center">
-          Click on a field to edit it here
-        </p>
-      </div>
-    );
+    return null; // Don't show anything when no field is selected
   }
   
   const isEdited = editedValue !== undefined;

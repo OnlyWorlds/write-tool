@@ -59,7 +59,7 @@ function ShowcaseRoute() {
 
 export function App() {
   const { isAuthenticated, isLoading } = useWorldContext();
-  const { editMode } = useEditorStore();
+  const { editMode, selectedFieldId } = useEditorStore();
 
   return (
     <div className="min-h-screen bg-secondary flex flex-col">
@@ -79,12 +79,12 @@ export function App() {
                   <CategorySidebar />
 
                   {/* Working Area - Split View */}
-                  <div className="flex-1 flex">
+                  <div className="flex-1 flex relative">
                     {/* Element Viewer */}
                     <ElementViewer />
                     
-                    {/* Edit Area - Only show in edit mode */}
-                    {editMode === 'edit' && <EditArea />}
+                    {/* Edit Area - Only show in edit mode when a field is selected */}
+                    {editMode === 'edit' && selectedFieldId && <EditArea />}
                   </div>
 
                   {/* Routes for element navigation */}

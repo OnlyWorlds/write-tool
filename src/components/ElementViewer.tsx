@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { useWorldContext } from '../contexts/WorldContext';
@@ -14,7 +14,7 @@ import { ReverseLinkSection } from './ReverseLinkSection';
 export function ElementViewer() {
   const { elements, worldKey, pin, deleteElement, updateElement } = useWorldContext();
   const { selectedElementId, selectElement } = useSidebarStore();
-  const { selectedFieldId, selectField, getEditedValue, hasUnsavedChanges, editMode, getFieldError, isFieldVisible, toggleFieldVisibility, toggleMode } = useEditorStore();
+  const { selectedFieldId, selectField, getEditedValue, hasUnsavedChanges, editMode, getFieldError, isFieldVisible, toggleFieldVisibility, toggleMode, resetHiddenFields } = useEditorStore();
   const navigate = useNavigate();
   const [isExporting, setIsExporting] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
@@ -26,6 +26,11 @@ export function ElementViewer() {
   const [sortAlphabetically, setSortAlphabetically] = useState(false);
   
   const selectedElement = selectedElementId ? elements.get(selectedElementId) : null;
+  
+  // Reset hidden fields when element changes
+  useEffect(() => {
+    resetHiddenFields();
+  }, [selectedElementId, resetHiddenFields]);
   
   if (!selectedElement) {
     return (
@@ -272,7 +277,7 @@ export function ElementViewer() {
           </div>
         </div>
         
-        <div className={`px-4 pb-6 pt-0 ${editMode === 'showcase' ? 'bg-gradient-to-br from-field-primary/20 to-field-secondary/20' : 'bg-gradient-to-b from-slate-50/50 to-blue-50/30'}`}>
+        <div className={`px-4 pb-6 pt-0 ${editMode === 'showcase' ? 'bg-white' : 'bg-gradient-to-b from-slate-50/50 to-blue-50/30'}`}>
           {/* Base fields section */}
           <div className="pt-6 pb-4 border-b border-border/50">
             {fields.filter(([fieldName]) => baseFields.includes(fieldName)).map(([fieldName, originalValue]) => {
@@ -303,7 +308,7 @@ export function ElementViewer() {
                   onClick={() => editMode === 'edit' && selectField(selectedFieldId === fieldName ? null : fieldName)}
                   className={`mb-3 rounded-lg transition-all relative flex items-start ${
                     editMode === 'showcase' 
-                      ? 'bg-gradient-to-r from-field-primary/40 to-field-secondary/40 shadow-sm' 
+                      ? 'bg-gray-50 border border-gray-200' 
                       : error
                         ? 'bg-red-50 cursor-pointer'
                         : selectedFieldId === fieldName 
@@ -324,7 +329,7 @@ export function ElementViewer() {
                     <div className="flex items-start">
                       <label className={`block w-40 flex-shrink-0 cursor-pointer font-bold ${
                         editMode === 'showcase' 
-                          ? 'text-base text-slate-600' 
+                          ? 'text-base text-gray-700 font-medium' 
                           : 'text-sm text-blue-600'
                       }`}>
                         {fieldName.replace(/_/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
@@ -402,7 +407,7 @@ export function ElementViewer() {
                   onClick={() => editMode === 'edit' && selectField(selectedFieldId === fieldName ? null : fieldName)}
                   className={`rounded-lg transition-all relative flex items-start ${
                     editMode === 'showcase' 
-                      ? 'bg-gradient-to-r from-field-primary/40 to-field-secondary/40 shadow-sm' 
+                      ? 'bg-gray-50 border border-gray-200' 
                       : error
                         ? 'bg-red-50 cursor-pointer'
                         : selectedFieldId === fieldName 
@@ -423,7 +428,7 @@ export function ElementViewer() {
                     <div className="flex items-start">
                       <label className={`block w-40 flex-shrink-0 cursor-pointer font-bold ${
                         editMode === 'showcase' 
-                          ? 'text-base text-slate-600' 
+                          ? 'text-base text-gray-700 font-medium' 
                           : 'text-sm text-blue-500'
                       }`}>
                         {fieldName.replace(/_/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}

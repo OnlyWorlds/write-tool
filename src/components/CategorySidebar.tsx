@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useRef } from 'react';
+import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { useWorldContext } from '../contexts/WorldContext';
+import { ApiService } from '../services/ApiService';
 import { useSidebarStore } from '../stores/uiStore';
 import { CategoryIcon } from '../utils/categoryIcons';
-import { ChevronDownIcon, ChevronRightIcon, PlusIcon, SearchIcon } from './icons';
+import { PlusIcon, SearchIcon, TrashIcon } from './icons';
 
 export function CategorySidebar() {
-  const { categories } = useWorldContext();
+  const { categories, worldKey, pin, deleteElement } = useWorldContext();
   const { expandedCategories, selectedElementId, filterText, toggleCategory, selectElement, openCreateModal, setFilterText, expandAllCategories } = useSidebarStore();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
@@ -64,25 +66,24 @@ export function CategorySidebar() {
   }, [categories, filterText]);
 
   return (
-    <aside className="w-64 bg-sand-50 border-r border-sand-200 flex flex-col h-full">
-      <div className="p-4 border-b border-sand-200 space-y-3 bg-sand-200 shadow-md">
-        <h2 className="text-lg font-semibold text-sand-800">categories</h2>
+    <aside className="w-64 bg-sidebar border-r border-sidebar-dark flex flex-col h-full">
+      <div className="p-4 border-b border-sidebar-dark bg-sidebar-dark">
         <div className="relative">
-          <div className="absolute left-3 top-2.5 text-gray-500">
+          <div className="absolute left-3 top-2 text-slate-500">
             <SearchIcon />
           </div>
           <input
             ref={searchInputRef}
             type="text"
-            placeholder="filter..."
+            placeholder="filter.."
             value={filterText}
             onChange={(e) => setFilterText(e.target.value)}
-            className="w-full pl-10 pr-8 py-2 text-sm border border-sand-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-sand-50 text-gray-800 placeholder-gray-500"
+            className="w-full pl-10 pr-8 py-1.5 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent bg-white text-slate-700 placeholder-slate-400"
           />
           {filterText && (
             <button
               onClick={() => setFilterText('')}
-              className="absolute right-2 top-2 text-gray-400 hover:text-gray-600"
+              className="absolute right-2 top-1.5 text-slate-500 hover:text-slate-700"
               title="Clear search"
             >
               ×
@@ -93,9 +94,9 @@ export function CategorySidebar() {
       
       <div className="flex-1 overflow-y-auto">
         {categories.size === 0 ? (
-          <p className="text-sm text-gray-500 p-4">no elements loaded</p>
+          <p className="text-sm text-slate-500 p-4">no elements loaded</p>
         ) : filteredCategories.size === 0 ? (
-          <p className="text-sm text-gray-500 p-4">no elements found matching "{filterText}"</p>
+          <p className="text-sm text-slate-500 p-4">no elements found matching "{filterText}"</p>
         ) : (
           <div className="py-2">
             {Array.from(filteredCategories.entries()).map(([category, elements]) => {
@@ -107,17 +108,16 @@ export function CategorySidebar() {
                   <div className="flex items-center">
                     <button
                       onClick={() => toggleCategory(category)}
-                      className="flex-1 flex items-center justify-between px-4 py-2 hover:bg-sand-100 transition-colors"
+                      className="flex-1 flex items-center justify-between px-4 py-2 hover:bg-sidebar-light/20 transition-colors rounded-l-md"
                     >
                       <div className="flex items-center gap-2">
-                        {isExpanded ? <ChevronDownIcon /> : <ChevronRightIcon />}
-                        <CategoryIcon category={category} className="w-4 h-4 text-blue-600" />
-                        <span className="text-sm font-medium text-gray-800">{category.toLowerCase()}</span>
+                        <CategoryIcon category={category} className={`text-base ${isExpanded ? 'text-accent' : 'text-slate-500'}`} />
+                        <span className="text-sm font-bold text-slate-700 capitalize" style={{ fontSize: '0.95rem' }}>{category.toLowerCase()}</span>
                       </div>
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-slate-500">
                         {elements.length}
                         {isSearching && (
-                          <span className="ml-1 text-blue-600">
+                          <span className="ml-1 text-field-highlight">
                             / {categories.get(category)?.length || 0}
                           </span>
                         )}
@@ -125,7 +125,7 @@ export function CategorySidebar() {
                     </button>
                     <button
                       onClick={() => openCreateModal(category)}
-                      className="p-2 hover:bg-sand-100 text-gray-500 hover:text-blue-700 transition-colors"
+                      className="p-2 hover:bg-sidebar-dark/20 text-slate-500 hover:text-accent transition-colors rounded-r-md"
                       title={`create new ${category}`}
                     >
                       <PlusIcon />
@@ -133,24 +133,52 @@ export function CategorySidebar() {
                   </div>
                   
                   {(isExpanded || isSearching) && (
-                    <div className="ml-4">
+                    <div className="ml-4 pl-2">
                       {elements.map((element: any) => (
-                        <button
-                          key={element.id}
-                          onClick={() => navigate(`/element/${element.id}`)}
-                          className={`w-full text-left px-4 py-1.5 text-sm hover:bg-sand-100 transition-colors ${
-                            selectedElementId === element.id ? 'bg-blue-200 text-blue-800' : 'text-gray-800'
-                          }`}
-                        >
-                          <div className="flex items-center justify-between">
-                            <span>{element.name}</span>
-                            {isSearching && element.type && (
-                              <span className="text-xs text-gray-500 ml-1">
-                                {element.type}
-                              </span>
-                            )}
-                          </div>
-                        </button>
+                        <div key={element.id} className="group flex items-center">
+                          <button
+                            onClick={() => navigate(`/element/${element.id}`)}
+                            className={`flex-1 text-left px-4 py-1.5 text-sm hover:bg-sidebar-light/20 transition-colors rounded-md ${
+                              selectedElementId === element.id ? 'bg-accent/10 text-accent font-medium' : 'text-slate-600'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <span>{element.name}</span>
+                              {isSearching && element.type && (
+                                <span className="text-xs text-slate-400 ml-1">
+                                  {element.type}
+                                </span>
+                              )}
+                            </div>
+                          </button>
+                          <button
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              if (window.confirm(`Are you sure you want to delete "${element.name}"?`)) {
+                                try {
+                                  const success = await ApiService.deleteElement(worldKey, pin, element.id, category);
+                                  if (success) {
+                                    deleteElement(element.id);
+                                    if (selectedElementId === element.id) {
+                                      selectElement(null);
+                                      navigate('/');
+                                    }
+                                    toast.success('Element deleted');
+                                  } else {
+                                    toast.error('Failed to delete element');
+                                  }
+                                } catch (error) {
+                                  console.error('Failed to delete element:', error);
+                                  toast.error('Failed to delete element');
+                                }
+                              }
+                            }}
+                            className="opacity-0 group-hover:opacity-100 p-1.5 mr-2 hover:bg-red-500/10 text-red-500 hover:text-red-600 transition-all rounded"
+                            title={`Delete ${element.name}`}
+                          >
+                            <TrashIcon />
+                          </button>
+                        </div>
                       ))}
                     </div>
                   )}

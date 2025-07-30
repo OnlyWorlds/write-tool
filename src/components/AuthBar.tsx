@@ -1,23 +1,35 @@
-import { useState, FormEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { FormEvent, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useWorldContext } from '../contexts/WorldContext';
-import { useEditorStore } from '../stores/uiStore';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { ValidationService } from '../services/ValidationService';
+import { useEditorStore } from '../stores/uiStore';
 
 export function AuthBar() {
   const { authenticate, isLoading, error, isAuthenticated, logout, metadata, worldKey: authenticatedWorldKey, saveElement, elements } = useWorldContext();
-  const { hasUnsavedChanges, clearEdits, localEdits, editMode, toggleMode, setValidationErrors, clearValidationErrors } = useEditorStore();
-  const [worldKey, setWorldKey] = useState('');
-  const [pin, setPin] = useState('');
+  const { hasUnsavedChanges, clearEdits, localEdits, setValidationErrors, clearValidationErrors } = useEditorStore();
+  const [worldKey, setWorldKey] = useState('3550908908');
+  const [pin, setPin] = useState('1111');
+  
+  // Set initial values when authenticated
+  useEffect(() => {
+    if (isAuthenticated && authenticatedWorldKey) {
+      setWorldKey(authenticatedWorldKey);
+    }
+  }, [isAuthenticated, authenticatedWorldKey]);
+  
+  // Debug logging for metadata
+  useEffect(() => {
+    if (metadata) {
+      console.log('World metadata:', metadata);
+      console.log('World name:', metadata.name);
+    }
+  }, [metadata]);
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (worldKey && pin) {
-      await authenticate(worldKey, pin);
-    }
+    handleValidate();
   };
 
   const handleWorldKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -82,7 +94,7 @@ export function AuthBar() {
       
       if (allSuccess) {
         clearEdits();
-        toast.success('all changes saved successfully!');
+        toast.success('All changes saved');
       } else {
         toast.error('some changes could not be saved. please try again.');
       }
@@ -96,73 +108,21 @@ export function AuthBar() {
   
   useKeyboardShortcuts(isAuthenticated && hasUnsavedChanges ? handleSave : undefined);
 
-  if (isAuthenticated) {
-    return (
-      <div className="flex items-center justify-between p-4 bg-blue-700 text-gray-50 shadow-lg">
-        <div className="flex items-center gap-4">
-          <Link to="/" className="text-sm font-bold hover:text-blue-300 transition-colors">
-            OnlyWorlds Browse Tool
-          </Link>
-          <span className="text-xs text-gray-400">|</span>
-          <span className="text-sm">
-            {metadata?.name || `World ${authenticatedWorldKey}`}
-          </span>
-          <button
-            onClick={logout}
-            className="text-xs text-gray-400 hover:text-gray-50 transition-colors"
-          >
-            logout
-          </button>
-          <div className="flex items-center gap-2 ml-6">
-            <span className="text-xs text-gray-400">mode:</span>
-            <button
-              onClick={toggleMode}
-              className={`px-2 py-0.5 text-xs rounded transition-colors ${
-                editMode === 'showcase' 
-                  ? 'bg-blue-600 text-gray-50' 
-                  : 'bg-gray-700 text-gray-300'
-              }`}
-            >
-              {editMode === 'showcase' ? 'showcase' : 'edit'}
-            </button>
-          </div>
-        </div>
-        
-        {hasUnsavedChanges && (
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-blue-400">unsaved changes</span>
-            <button
-              onClick={() => clearEdits()}
-              className="px-3 py-1 text-xs bg-gray-700 hover:bg-gray-600 rounded transition-colors"
-            >
-              discard
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={isSaving}
-              className={`px-3 py-1 text-xs rounded transition-colors ${
-                isSaving 
-                  ? 'bg-gray-600 cursor-not-allowed' 
-                  : 'bg-blue-600 hover:bg-blue-700'
-              }`}
-            >
-              {isSaving ? 'saving...' : 'save'}
-            </button>
-          </div>
-        )}
-      </div>
-    );
-  }
+  const handleValidate = async () => {
+    if (worldKey.length === 10 && pin.length === 4) {
+      await authenticate(worldKey, pin);
+    }
+  };
 
   return (
-    <div className="p-4 bg-gradient-to-r from-blue-900 to-blue-800 text-gray-50 shadow-lg">
+    <div className="flex items-center justify-between p-4 bg-primary text-text-dark shadow-lg">
       <form onSubmit={handleSubmit} className="flex items-center gap-2">
         <input
           type="text"
           value={worldKey}
           onChange={handleWorldKeyChange}
           placeholder="api key"
-          className="w-24 px-2 py-1 text-xs bg-gray-800 border border-gray-600 rounded focus:outline-none focus:border-blue-500 text-gray-50 placeholder-gray-400"
+          className="w-24 px-2 py-1 text-xs bg-primary-dark border border-primary-dark text-text-dark placeholder-text-dark/60 rounded"
           disabled={isLoading}
           maxLength={10}
         />
@@ -171,25 +131,58 @@ export function AuthBar() {
           value={pin}
           onChange={handlePinChange}
           placeholder="pin"
-          className="w-16 px-2 py-1 text-xs bg-gray-800 border border-gray-600 rounded focus:outline-none focus:border-blue-500 text-gray-50 placeholder-gray-400"
+          className="w-12 px-2 py-1 text-xs bg-primary-dark border border-primary-dark text-text-dark placeholder-text-dark/60 rounded"
           disabled={isLoading}
           maxLength={4}
         />
         <button
-          type="submit"
-          disabled={isLoading || !worldKey || !pin}
-          className={`px-3 py-1 text-xs rounded transition-colors ${
-            isLoading || !worldKey || !pin
-              ? 'bg-gray-700 cursor-not-allowed'
-              : 'bg-blue-600 hover:bg-blue-700'
+          type="button"
+          onClick={handleValidate}
+          disabled={isLoading || worldKey.length !== 10 || pin.length !== 4}
+          className={`px-4 py-1 text-xs rounded transition-colors ${
+            isLoading
+              ? 'bg-primary-dark text-text-dark/60 cursor-not-allowed'
+              : isAuthenticated
+              ? 'bg-accent hover:bg-accent-hover text-text-dark cursor-pointer'
+              : worldKey.length === 10 && pin.length === 4
+              ? 'bg-primary-dark hover:bg-primary-dark/80 text-text-dark cursor-pointer'
+              : 'bg-primary-dark text-text-dark/60 cursor-not-allowed'
           }`}
         >
-          {isLoading ? 'loading...' : 'validate'}
+          {isLoading ? 'loading...' : isAuthenticated ? 'validated' : 'validate'}
         </button>
         {error && (
-          <span className="text-xs text-red-300 ml-2">{error}</span>
+          <span className="text-xs text-warning ml-2">{error}</span>
+        )}
+        {isAuthenticated && metadata && (
+          <span className="text-sm ml-4">
+            {metadata.name || 'No name found'}
+          </span>
         )}
       </form>
+      
+      {hasUnsavedChanges && (
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-accent">unsaved changes</span>
+          <button
+            onClick={() => clearEdits()}
+            className="px-3 py-1 text-xs bg-primary-dark hover:bg-primary-dark/80 rounded transition-colors"
+          >
+            discard
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={isSaving}
+            className={`px-3 py-1 text-xs rounded transition-colors ${
+              isSaving 
+                ? 'bg-primary-dark/60 cursor-not-allowed' 
+                : 'bg-accent hover:bg-accent-hover'
+            }`}
+          >
+            {isSaving ? 'saving...' : 'save'}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

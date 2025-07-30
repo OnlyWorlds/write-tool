@@ -54,6 +54,7 @@ interface EditorState {
   getFieldError: (elementId: string, fieldName: string) => string | null;
   toggleFieldVisibility: (fieldName: string) => void;
   isFieldVisible: (fieldName: string) => boolean;
+  resetHiddenFields: () => void;
 }
 
 export const useEditorStore = create<EditorState>((set, get) => ({
@@ -65,7 +66,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   hiddenFields: new Set(),
   selectField: (id) => set({ selectedFieldId: id }),
   toggleMode: () => set((state) => ({ 
-    editMode: state.editMode === 'edit' ? 'showcase' : 'edit' 
+    editMode: state.editMode === 'edit' ? 'showcase' : 'edit',
+    hiddenFields: new Set() // Reset hidden fields when toggling mode
   })),
   setFieldValue: (elementId, fieldName, value) => set((state) => {
     const newEdits = new Map(state.localEdits);
@@ -111,5 +113,6 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   }),
   isFieldVisible: (fieldName) => {
     return !get().hiddenFields.has(fieldName);
-  }
+  },
+  resetHiddenFields: () => set({ hiddenFields: new Set() })
 }));

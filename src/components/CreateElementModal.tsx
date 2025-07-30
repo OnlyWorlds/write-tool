@@ -1,12 +1,11 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { useSidebarStore } from '../stores/uiStore';
+import { useNavigate } from 'react-router-dom';
 import { useWorldContext } from '../contexts/WorldContext';
-import { getCategorySchema, getSimplifiedCategorySchema, validateElementData, type FieldSchema } from '../services/ElementSchemas';
-import { detectFieldType } from '../services/FieldTypeDetector';
-import { FieldRenderer } from './FieldRenderers';
+import { getSimplifiedCategorySchema, type FieldSchema } from '../services/ElementSchemas';
 import { ValidationService } from '../services/ValidationService';
+import { useSidebarStore } from '../stores/uiStore';
+import { FieldRenderer } from './FieldRenderers';
 
 export function CreateElementModal() {
   const { createModalOpen, createModalCategory, closeCreateModal } = useSidebarStore();
@@ -109,8 +108,8 @@ export function CreateElementModal() {
     const hasError = fieldErrors[field.name];
     const baseClassName = `w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
       hasError 
-        ? 'border-red-500 focus:ring-red-500 bg-red-50' 
-        : 'border-gray-300 focus:ring-blue-500'
+        ? 'border-warning focus:ring-warning bg-warning-bg' 
+        : 'border-slate-300 focus:ring-accent bg-white text-slate-700 placeholder-slate-400'
     }`;
     
     // For link/links fields, use FieldRenderer which has proper filtering
@@ -200,11 +199,11 @@ export function CreateElementModal() {
               id={field.name}
               checked={!!value}
               onChange={(e) => handleFieldChange(field.name, e.target.checked)}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              className="h-4 w-4 text-accent focus:ring-accent border-input-border rounded"
               disabled={isSubmitting}
             />
             {field.description && (
-              <span className="ml-2 text-sm text-gray-600">{field.description.toLowerCase()}</span>
+              <span className="ml-2 text-sm text-text-light/60">{field.description.toLowerCase()}</span>
             )}
             {field.name === 'is_public' && (
               <div className="ml-2 text-xs text-gray-500">
@@ -259,26 +258,26 @@ export function CreateElementModal() {
 
   return (
     <div 
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
       onClick={handleClose}
     >
       <div 
-        className="bg-sand-50 rounded-lg p-6 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto border border-sand-200"
+        className="bg-sidebar rounded-lg p-6 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto border border-sidebar-dark shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-lg font-semibold mb-4">
-          create new {schema.name.toLowerCase()}
+        <h2 className="text-lg font-semibold mb-4 text-slate-800">
+          Create new {schema.name.toLowerCase()}
         </h2>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           {schema.fields.map((field) => (
             <div key={field.name}>
-              <label htmlFor={field.name} className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor={field.name} className="block text-sm font-medium text-slate-700 mb-1">
                 {field.label.toLowerCase()} {field.required && '*'}
               </label>
               {renderField(field)}
               {fieldErrors[field.name] && (
-                <div className="mt-1 text-sm text-red-600">
+                <div className="mt-1 text-sm text-warning">
                   {fieldErrors[field.name]}
                 </div>
               )}
@@ -288,7 +287,7 @@ export function CreateElementModal() {
           {errors.length > 0 && (
             <div className="space-y-1">
               {errors.map((error, index) => (
-                <div key={index} className="text-red-600 text-sm">{error}</div>
+                <div key={index} className="text-warning text-sm">{error}</div>
               ))}
             </div>
           )}
@@ -298,14 +297,14 @@ export function CreateElementModal() {
               type="button"
               onClick={handleClose}
               disabled={isSubmitting}
-              className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50"
+              className="px-4 py-2 text-slate-500 hover:text-slate-700 transition-colors disabled:opacity-50"
             >
               cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
+              className="px-4 py-2 bg-accent text-white rounded-md hover:bg-accent-hover shadow-md transition-all disabled:opacity-50"
             >
               {isSubmitting ? 'creating...' : 'create'}
             </button>

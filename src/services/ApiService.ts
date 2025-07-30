@@ -21,6 +21,37 @@ const ELEMENT_TYPES = [
   'phenomenon'
 ];
 
+// Showcase API types
+export interface ShowcasePublishRequest {
+  element_type: string;
+  element_id: string;
+  element_data: Element;
+  showcase_config?: {
+    hidden_fields?: string[];
+    view_mode?: string;
+  };
+}
+
+export interface ShowcasePublishResponse {
+  showcase_id: string;
+  published_at: string;
+  public_url: string;
+}
+
+export interface ShowcaseRetrieveResponse {
+  element_data: Element;
+  showcase_config: {
+    hidden_fields?: string[];
+    view_mode?: string;
+  };
+  metadata: {
+    published_at: string;
+    world_name: string;
+    element_type: string;
+    view_count: number;
+  };
+}
+
 export class ApiService {
   static async validateCredentials(worldKey: string, pin: string): Promise<boolean> {
     try {
@@ -40,8 +71,38 @@ export class ApiService {
   }
 
   static async fetchWorldMetadata(worldKey: string, pin: string): Promise<WorldMetadata> {
-    // Since there's no metadata endpoint, return a placeholder
-    // The actual world name/description might come from elements
+    try {
+      // Try to fetch world metadata from the world endpoint
+      const response = await fetch(`${API_BASE_URL}/world/`, {
+        headers: { 
+          'API-Key': worldKey,
+          'API-Pin': pin,
+          'Accept': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        const worldData = await response.json();
+        console.log('World API response:', worldData);
+        
+        // If it's an array, get the first world element
+        const world = Array.isArray(worldData) ? worldData[0] : worldData;
+        
+        if (world) {
+          return {
+            id: world.id || worldKey,
+            name: world.name || 'Unnamed World',
+            description: world.description || '',
+            created_at: world.created_at || new Date().toISOString(),
+            updated_at: world.updated_at || new Date().toISOString()
+          };
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to fetch world metadata:', error);
+    }
+    
+    // Fallback if world endpoint doesn't exist or fails
     return {
       id: worldKey,
       name: 'World',
@@ -86,7 +147,10 @@ export class ApiService {
   static async updateElement(worldKey: string, pin: string, element: Element): Promise<boolean> {
     try {
       const elementType = element.category || 'object';
-      const response = await fetch(`${API_BASE_URL}/${elementType}/${element.id}/`, {
+      const url = `${API_BASE_URL}/${elementType}/${element.id}/`;
+      console.log('Updating element:', { url, elementType, id: element.id });
+      
+      const response = await fetch(url, {
         method: 'PUT',
         headers: {
           'API-Key': worldKey,
@@ -96,6 +160,13 @@ export class ApiService {
         },
         body: JSON.stringify(element)
       });
+      
+      if (!response.ok) {
+        console.error('Update failed:', response.status, response.statusText);
+        const text = await response.text();
+        console.error('Response body:', text);
+      }
+      
       return response.ok;
     } catch (error) {
       console.error('Update error:', error);
@@ -143,6 +214,70 @@ export class ApiService {
     } catch (error) {
       console.error('Delete error:', error);
       return false;
+    }
+  }
+
+  // Showcase API methods
+  static async publishShowcase(
+    worldKey: string, 
+    pin: string, 
+    request: ShowcasePublishRequest
+  ): Promise<ShowcasePublishResponse | null> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/showcase/publish/`, {
+        method: 'POST',
+        headers: {
+          'API-Key': worldKey,
+          'API-Pin': pin,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(request)
+      });
+
+      if (!response.ok) {
+        let errorData = null;
+        let errorText = '';
+        try {
+          errorText = await response.text();
+          errorData = JSON.parse(errorText);
+        } catch (e) {
+          console.error('Failed to parse error response:', errorText);
+        }
+        console.error('Publish showcase error:', response.status, errorData || errorText);
+        console.error('Request was:', request);
+        throw new Error(errorData?.detail || errorData?.error || errorText || `Failed to publish: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Showcase publish error:', error);
+      throw error;
+    }
+  }
+
+  static async retrieveShowcase(showcaseId: string): Promise<ShowcaseRetrieveResponse | null> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/showcase/${showcaseId}/`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error('Showcase not found');
+        } else if (response.status === 410) {
+          throw new Error('Showcase has expired');
+        }
+        throw new Error(`Failed to retrieve showcase: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Showcase retrieve error:', error);
+      throw error;
     }
   }
 }

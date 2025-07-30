@@ -60,7 +60,7 @@ const FieldViewer = memo(function FieldViewer({ fieldName, value, fieldTypeInfo,
       return (
         <div className={`flex items-center gap-2 ${className}`}>
           <div className={`w-4 h-4 rounded-full border-2 ${
-            value ? 'bg-green-500 border-green-500' : 'bg-gray-300 border-gray-300'
+            value ? 'bg-field-quaternary border-field-quaternary' : 'bg-field-primary/40 border-field-primary/40'
           }`}>
             {value && (
               <div className="w-full h-full rounded-full bg-white scale-50"></div>
@@ -146,7 +146,7 @@ const FieldViewer = memo(function FieldViewer({ fieldName, value, fieldTypeInfo,
       
     case 'json':
       return (
-        <pre className={`text-sm bg-gray-50 p-2 rounded border overflow-auto ${className}`}>
+        <pre className={`text-sm bg-field-primary/20 p-2 rounded-lg border border-field-primary/30 overflow-auto ${className}`}>
           {JSON.stringify(value, null, 2)}
         </pre>
       );
@@ -348,7 +348,7 @@ const FieldEditor = memo(function FieldEditor({ fieldName, value, fieldTypeInfo,
             {currentLinks.map((linkId, index) => {
               const linkedElement = elements.get(linkId);
               return (
-                <div key={index} className="flex items-center gap-2 p-2 bg-gray-50 rounded">
+                <div key={index} className="flex items-center gap-2 p-2 bg-field-secondary/30 rounded-lg">
                   <span className="flex-1">
                     {linkedElement ? `${linkedElement.name} (${linkedElement.category})` : `Unknown: ${linkId}`}
                   </span>
@@ -384,10 +384,6 @@ const FieldEditor = memo(function FieldEditor({ fieldName, value, fieldTypeInfo,
                 </option>
               ))}
           </select>
-          
-          <div className="text-xs text-gray-500">
-            add multiple elements to create relationships
-          </div>
         </div>
       );
       

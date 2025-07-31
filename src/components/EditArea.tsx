@@ -4,6 +4,7 @@ import { useSidebarStore, useEditorStore } from '../stores/uiStore';
 import { FieldRenderer } from './FieldRenderers';
 import { detectFieldType } from '../services/FieldTypeDetector';
 import { ReverseRelationsPanel } from './ReverseRelationsPanel';
+import { TypeManagementService } from '../services/TypeManagementService';
 
 export function EditArea() {
   const { elements, saveElement } = useWorldContext();
@@ -50,6 +51,14 @@ export function EditArea() {
       setPreviousCategory(selectedElement.category || null);
     }
   }, [selectedElement, previousCategory, selectField]);
+  
+  // Preload type data when element is selected
+  useEffect(() => {
+    if (selectedElement?.category) {
+      TypeManagementService.preloadTypingData(selectedElement.category)
+        .catch(error => console.error('Failed to preload typing data:', error));
+    }
+  }, [selectedElement?.category]);
   
   // Always show the sidebar
   // Case 1: No element selected - show empty state
@@ -127,6 +136,7 @@ export function EditArea() {
             mode={editMode === 'edit' ? 'edit' : 'view'}
             onChange={handleChange}
             className="h-auto"
+            selectedElement={selectedElement}
           />
           {error && (
             <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">

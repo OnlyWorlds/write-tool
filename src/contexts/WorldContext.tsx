@@ -174,6 +174,7 @@ export function WorldProvider({ children }: { children: ReactNode }) {
         description: elementData.description,
         category: elementData.category || 'general',
         type: elementData.type,
+        supertype: elementData.supertype,
         subtype: elementData.subtype,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),

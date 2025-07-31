@@ -18,6 +18,7 @@ export interface Element {
   is_public?: boolean;
   category?: string;
   type?: string;
+  supertype?: string;
   subtype?: string;
   [key: string]: any;
 }

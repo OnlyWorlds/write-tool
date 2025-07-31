@@ -112,8 +112,8 @@ export function CreateElementModal() {
         : 'border-slate-300 focus:ring-accent bg-white text-slate-700 placeholder-slate-400'
     }`;
     
-    // For link/links fields, use FieldRenderer which has proper filtering
-    if (field.type === 'link' || field.type === 'links') {
+    // For link/links/select fields, use FieldRenderer which has proper filtering and ComboBox for types
+    if (field.type === 'link' || field.type === 'links' || (field.type === 'select' && (field.name === 'supertype' || field.name === 'subtype'))) {
       return (
         <FieldRenderer
           fieldName={field.name}
@@ -121,6 +121,7 @@ export function CreateElementModal() {
           elementCategory={createModalCategory || undefined}
           mode="edit"
           onChange={(newValue) => handleFieldChange(field.name, newValue)}
+          selectedElement={formData}
         />
       );
     }

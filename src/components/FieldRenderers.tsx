@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useWorldContext } from '../contexts/WorldContext';
 import { detectFieldType, type FieldTypeInfo } from '../services/FieldTypeDetector';
 import { useSidebarStore } from '../stores/uiStore';
+import { ComboBox } from './ComboBox';
+import { TypeManagementService } from '../services/TypeManagementService';
 
 interface FieldRendererProps {
   fieldName: string;
@@ -11,9 +13,10 @@ interface FieldRendererProps {
   mode: 'view' | 'edit';
   onChange?: (value: any) => void;
   className?: string;
+  selectedElement?: any; // For accessing supertype when editing subtype
 }
 
-export const FieldRenderer = memo(function FieldRenderer({ fieldName, value, elementCategory, mode, onChange, className }: FieldRendererProps) {
+export const FieldRenderer = memo(function FieldRenderer({ fieldName, value, elementCategory, mode, onChange, className, selectedElement }: FieldRendererProps) {
   const fieldTypeInfo = useMemo(() => 
     detectFieldType(fieldName, value, elementCategory), 
     [fieldName, value, elementCategory]
@@ -22,7 +25,7 @@ export const FieldRenderer = memo(function FieldRenderer({ fieldName, value, ele
   if (mode === 'view') {
     return <FieldViewer fieldName={fieldName} value={value} fieldTypeInfo={fieldTypeInfo} className={className} />;
   } else {
-    return <FieldEditor fieldName={fieldName} value={value} fieldTypeInfo={fieldTypeInfo} onChange={onChange} className={className} />;
+    return <FieldEditor fieldName={fieldName} value={value} fieldTypeInfo={fieldTypeInfo} onChange={onChange} className={className} elementCategory={elementCategory} selectedElement={selectedElement} />;
   }
 });
 
@@ -173,16 +176,55 @@ interface FieldEditorProps {
   fieldTypeInfo: FieldTypeInfo;
   onChange?: (value: any) => void;
   className?: string;
+  elementCategory?: string;
+  selectedElement?: any;
 }
 
-const FieldEditor = memo(function FieldEditor({ fieldName, value, fieldTypeInfo, onChange, className }: FieldEditorProps) {
+const FieldEditor = memo(function FieldEditor({ fieldName, value, fieldTypeInfo, onChange, className, elementCategory, selectedElement }: FieldEditorProps) {
   const { type, options, allowCustom, linkedCategory } = fieldTypeInfo;
   const [localValue, setLocalValue] = useState(value);
   const { elements } = useWorldContext();
+  const [supertypes, setSupertypes] = useState<string[]>([]);
+  const [subtypes, setSubtypes] = useState<string[]>([]);
+  const [isLoadingTypes, setIsLoadingTypes] = useState(false);
   
   useEffect(() => {
     setLocalValue(value);
   }, [value]);
+  
+  // Load supertypes when category changes
+  useEffect(() => {
+    if (fieldName === 'supertype' && elementCategory) {
+      setIsLoadingTypes(true);
+      TypeManagementService.getSupertypesAsync(elementCategory)
+        .then(types => {
+          setSupertypes(types);
+          setIsLoadingTypes(false);
+        })
+        .catch(error => {
+          console.error('Failed to load supertypes:', error);
+          setIsLoadingTypes(false);
+        });
+    }
+  }, [fieldName, elementCategory]);
+  
+  // Load subtypes when supertype changes
+  useEffect(() => {
+    if (fieldName === 'subtype' && elementCategory && selectedElement?.supertype) {
+      setIsLoadingTypes(true);
+      TypeManagementService.getSubtypesAsync(elementCategory, selectedElement.supertype)
+        .then(types => {
+          setSubtypes(types);
+          setIsLoadingTypes(false);
+        })
+        .catch(error => {
+          console.error('Failed to load subtypes:', error);
+          setIsLoadingTypes(false);
+        });
+    } else if (fieldName === 'subtype') {
+      setSubtypes([]);
+    }
+  }, [fieldName, elementCategory, selectedElement?.supertype]);
   
   const handleChange = (newValue: any) => {
     setLocalValue(newValue);
@@ -190,6 +232,34 @@ const FieldEditor = memo(function FieldEditor({ fieldName, value, fieldTypeInfo,
   };
   
   const baseInputClass = `w-full px-3 py-2 bg-white border border-blue-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors hover:border-blue-300 ${className}`;
+  
+  // Special handling for supertype and subtype fields
+  if (fieldName === 'supertype' && elementCategory) {
+    return (
+      <ComboBox
+        value={localValue}
+        onChange={handleChange}
+        options={supertypes}
+        placeholder={isLoadingTypes ? "Loading..." : "Select or enter supertype"}
+        className={baseInputClass}
+        disabled={isLoadingTypes}
+      />
+    );
+  }
+  
+  if (fieldName === 'subtype' && elementCategory) {
+    const currentSupertype = selectedElement?.supertype;
+    return (
+      <ComboBox
+        value={localValue}
+        onChange={handleChange}
+        options={subtypes}
+        placeholder={isLoadingTypes ? "Loading..." : (currentSupertype ? "Select or enter subtype" : "Select supertype first")}
+        className={baseInputClass}
+        disabled={isLoadingTypes || !currentSupertype}
+      />
+    );
+  }
   
   switch (type) {
     case 'boolean':

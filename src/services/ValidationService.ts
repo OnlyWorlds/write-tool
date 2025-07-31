@@ -79,8 +79,8 @@ export class ValidationService {
       // Skip null/undefined values (they're optional)
       if (value === null || value === undefined) continue;
       
-      // Skip empty strings for required field check (already handled above)
-      if (value === '' && requiredFields.includes(fieldName)) continue;
+      // Skip empty strings - they're allowed for optional fields
+      if (value === '') continue;
       
       // Get field info from OnlyWorlds analyzer
       const fieldInfo = analyzeOnlyWorldsField(fieldName, value, element.category);
@@ -102,7 +102,7 @@ export class ValidationService {
               message: `${fieldName} must be no more than ${rules.maxLength} characters`,
             });
           }
-          if (rules.pattern && !rules.pattern.test(value)) {
+          if (rules.pattern && value !== '' && !rules.pattern.test(value)) {
             errors.push({
               field: fieldName,
               message: `${fieldName} has an invalid format`,
@@ -167,7 +167,7 @@ export class ValidationService {
           break;
           
         case 'string':
-          if (fieldInfo.format === 'url' && value) {
+          if (fieldInfo.format === 'url' && value && value !== '') {
             const urlPattern = /^https?:\/\/.+/;
             if (!urlPattern.test(value as string)) {
               errors.push({

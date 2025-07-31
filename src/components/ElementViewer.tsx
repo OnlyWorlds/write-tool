@@ -222,7 +222,7 @@ export function ElementViewer() {
       <div className={`p-6 ${editMode === 'edit' && selectedFieldId ? 'mr-96' : ''}`}>
         <div 
           id={editMode === 'showcase' ? `showcase-${selectedElementId}` : undefined}
-          className={`bg-gradient-to-br from-white to-secondary rounded-lg shadow-sm border border-border ${editMode === 'showcase' ? 'shadow-lg' : ''}`}
+          className={`bg-gradient-to-br from-gray-50 to-secondary rounded-lg shadow-sm border border-border ${editMode === 'showcase' ? 'shadow-lg' : ''}`}
         >
           <div className="sticky top-0 z-10 border-b border-border bg-sidebar-dark shadow-md rounded-t-lg">
             <div className="p-6 pb-2">
@@ -408,7 +408,7 @@ export function ElementViewer() {
             </div>
           </div>
           
-          <div className={`px-4 pb-6 pt-0 ${editMode === 'showcase' ? 'bg-white' : 'bg-gradient-to-b from-slate-50/50 to-blue-50/30'}`}>
+          <div className={`px-4 pb-6 pt-0 ${editMode === 'showcase' ? 'bg-gray-200' : 'bg-gradient-to-b from-slate-100 to-blue-100/30'}`}>
             {/* Base fields section */}
             <div className="pt-6 pb-4 border-b border-border/50">
               {fields.filter(([fieldName]) => baseFields.includes(fieldName)).map(([fieldName, originalValue]) => {

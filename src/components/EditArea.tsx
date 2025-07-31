@@ -79,7 +79,7 @@ export function EditArea() {
         </div>
       </div>
       
-      <div className="flex-1 p-4 bg-gradient-to-b from-white to-blue-50/30 overflow-y-auto">
+      <div className="flex-1 p-4 bg-gradient-to-b from-gray-50 to-blue-50/30 overflow-y-auto">
         <div className="h-full">
           <FieldRenderer
             fieldName={selectedFieldId}

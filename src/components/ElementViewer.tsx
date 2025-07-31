@@ -9,7 +9,6 @@ import { CategoryIcon } from '../utils/categoryIcons';
 import { exportElementToPdf, isPdfExportSupported } from '../utils/pdfExport';
 import { FieldRenderer } from './FieldRenderers';
 import { FieldTypeIcon } from './FieldTypeIcon';
-import { ReverseLinkSection } from './ReverseLinkSection';
 
 export function ElementViewer() {
   const { elements, worldKey, pin, deleteElement, updateElement, saveElement } = useWorldContext();
@@ -218,7 +217,7 @@ export function ElementViewer() {
   
   
   return (
-    <div className={`flex-1 overflow-y-auto h-screen pb-32 ${editMode === 'showcase' ? 'max-w-4xl mx-auto' : ''}`}>
+    <div className={`flex-1 overflow-y-auto h-screen pb-32 pr-96 ${editMode === 'showcase' ? 'max-w-4xl mx-auto' : ''}`}>
       <div className="p-6 max-w-5xl">
         <div 
           id={editMode === 'showcase' ? `showcase-${selectedElementId}` : undefined}
@@ -616,13 +615,6 @@ export function ElementViewer() {
             </div>
           </div>
           
-          {/* Reverse Links Section */}
-          {selectedElementId && (
-            <ReverseLinkSection 
-              elementId={selectedElementId} 
-              className="m-6 mt-0"
-            />
-          )}
         </div>
       </div>
     </div>

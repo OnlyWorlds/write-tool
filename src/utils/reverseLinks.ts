@@ -1,15 +1,28 @@
 import type { Element } from '../types/world';
 
-// Maps field names to friendly labels
+// Maps field names to friendly labels with enhanced context
 const FIELD_LABELS: Record<string, string> = {
-  location: 'Located in',
-  locationId: 'Located in',
-  birthplace: 'Born in',
-  birthplaceId: 'Born in',
-  members: 'Member of',
-  memberIds: 'Member of',
-  inhabitants: 'Inhabits',
-  inhabitantIds: 'Inhabits',
+  // Location references
+  location: 'Currently at',
+  locationId: 'Currently at',
+  birthplace: 'Birthplace of',
+  birthplaceId: 'Birthplace of',
+  parentLocation: 'Contains location',
+  parent_location: 'Contains location',
+  parentLocationId: 'Contains location',
+  parent_location_id: 'Contains location',
+  zone: 'Zone contains',
+  zoneId: 'Zone contains',
+  zones: 'Has zones',
+  zoneIds: 'Has zones',
+  
+  // Character relationships
+  members: 'Has member',
+  memberIds: 'Has member',
+  inhabitants: 'Home to',
+  inhabitantIds: 'Home to',
+  populations: 'Populated by',
+  populationIds: 'Populated by',
   species: 'Species of',
   speciesId: 'Species of',
   speciesIds: 'Species of',
@@ -17,26 +30,89 @@ const FIELD_LABELS: Record<string, string> = {
   parentId: 'Parent of',
   children: 'Child of',
   childIds: 'Child of',
-  creator: 'Created by',
-  creatorId: 'Created by',
-  owner: 'Owned by',
-  ownerId: 'Owned by',
-  items: 'Contains',
-  itemIds: 'Contains',
-  participants: 'Participates in',
-  participantIds: 'Participates in',
+  family: 'Family member',
+  familyIds: 'Family member',
+  friends: 'Friend of',
+  friendsIds: 'Friend of',
+  rivals: 'Rival of',
+  rivalsIds: 'Rival of',
+  
+  // Ownership and creation
+  creator: 'Created',
+  creatorId: 'Created',
+  owner: 'Owns',
+  ownerId: 'Owns',
+  leader: 'Leads',
+  leaderId: 'Leads',
+  ruler: 'Rules',
+  rulerId: 'Rules',
+  
+  // Objects and items
+  items: 'Contains item',
+  itemIds: 'Contains item',
+  objects: 'Has object',
+  objectsIds: 'Has object',
+  materials: 'Uses material',
+  materialIds: 'Uses material',
+  technology: 'Uses technology',
+  technologyIds: 'Uses technology',
+  
+  // Groups and institutions
+  institutions: 'Has institution',
+  institutionIds: 'Has institution',
+  institutionsIds: 'Has institution',
+  faction: 'Faction member',
+  factionId: 'Faction member',
+  cults: 'Has cult',
+  cultIds: 'Has cult',
+  
+  // Events and activities
+  participants: 'Participant in',
+  participantIds: 'Participant in',
+  events: 'Related event',
+  eventIds: 'Related event',
+  
+  // Combat and conflict
   allies: 'Allied with',
   allyIds: 'Allied with',
   enemies: 'Enemy of',
   enemyIds: 'Enemy of',
+  fighters: 'Fighter in',
+  fighterIds: 'Fighter in',
+  
+  // Abilities and traits
+  abilities: 'Has ability',
+  abilitiesIds: 'Has ability',
+  traits: 'Has trait',
+  traitsIds: 'Has trait',
+  languages: 'Speaks language',
+  languagesIds: 'Speaks language',
+  
+  // Titles and power
+  primaryPower: 'Primary power',
+  primary_power: 'Primary power',
+  primaryPowerId: 'Primary power',
+  primary_power_id: 'Primary power',
+  secondaryPowers: 'Secondary power',
+  secondary_powers: 'Secondary power',
+  secondaryPowerIds: 'Secondary power',
+  secondary_power_ids: 'Secondary power',
+  governingTitle: 'Governing title',
+  governing_title: 'Governing title',
+  governingTitleId: 'Governing title',
+  governing_title_id: 'Governing title',
+  
+  // Other relationships
   religion: 'Worshipped by',
   religionId: 'Worshipped by',
-  faction: 'Member of faction',
-  factionId: 'Member of faction',
   homeworld: 'Homeworld of',
   homeworldId: 'Homeworld of',
-  ruler: 'Rules over',
-  rulerId: 'Rules over',
+  actor: 'Actor in',
+  actorId: 'Actor in',
+  partner: 'Partner of',
+  partnerId: 'Partner of',
+  rival: 'Rival to',
+  rivalId: 'Rival to',
 };
 
 // Get a friendly label for a field name

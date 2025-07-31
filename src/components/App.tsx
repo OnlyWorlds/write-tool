@@ -83,8 +83,8 @@ export function App() {
                     {/* Element Viewer */}
                     <ElementViewer />
                     
-                    {/* Edit Area - Only show in edit mode when a field is selected */}
-                    {editMode === 'edit' && selectedFieldId && <EditArea />}
+                    {/* Edit Area - Always visible sidebar */}
+                    <EditArea />
                   </div>
 
                   {/* Routes for element navigation */}

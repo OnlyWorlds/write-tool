@@ -58,7 +58,7 @@ export function EditArea() {
   const fieldTypeInfo = detectFieldType(selectedFieldId, currentValue, selectedElement.category);
   
   return (
-    <div className="w-96 border-l border-blue-200 flex flex-col fixed right-0 top-0 h-screen z-10">
+    <div className="w-96 border-l border-blue-200 flex flex-col absolute right-0 top-0 z-10 max-h-screen">
       <div className="bg-sidebar-dark border-b border-border">
         <div className="p-4">
           <div className="flex items-center justify-between">
@@ -66,7 +66,7 @@ export function EditArea() {
               <h3 className="font-bold text-slate-800 capitalize">
                 {selectedFieldId.replace(/_/g, ' ')}
               </h3>
-              <span className="text-xs text-blue-600">
+              <span className="text-xs text-accent">
                 ({fieldTypeInfo.type === 'textarea' ? 'text' : fieldTypeInfo.type} field)
               </span>
             </div>
@@ -79,15 +79,15 @@ export function EditArea() {
         </div>
       </div>
       
-      <div className="flex-1 p-4 bg-gradient-to-b from-gray-50 to-blue-50/30 overflow-y-auto">
-        <div className="h-full">
+      <div className="p-4 bg-gradient-to-b from-gray-50 to-blue-50/30 overflow-y-auto min-h-[200px] max-h-[500px]">
+        <div>
           <FieldRenderer
             fieldName={selectedFieldId}
             value={currentValue}
             elementCategory={selectedElement.category}
             mode={editMode === 'edit' ? 'edit' : 'view'}
             onChange={handleChange}
-            className={fieldTypeInfo.type === 'number' ? 'h-auto' : 'h-full'}
+            className="h-auto"
           />
           {error && (
             <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">
@@ -115,11 +115,7 @@ export function EditArea() {
               Cancel
             </button>
           </div>
-        ) : (
-          <p className="text-xs text-slate-500 text-center">
-            Edit the field above to see save options
-          </p>
-        )}
+        ) : null}
       </div>
     </div>
   );

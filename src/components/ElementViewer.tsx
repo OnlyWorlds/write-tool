@@ -218,13 +218,13 @@ export function ElementViewer() {
   
   
   return (
-    <div className={`flex-1 overflow-y-auto h-screen ${editMode === 'showcase' ? 'max-w-4xl mx-auto' : ''}`}>
+    <div className={`flex-1 overflow-y-auto h-screen pb-32 ${editMode === 'showcase' ? 'max-w-4xl mx-auto' : ''}`}>
       <div className="p-6 max-w-5xl">
         <div 
           id={editMode === 'showcase' ? `showcase-${selectedElementId}` : undefined}
           className={`bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg shadow-md border border-slate-200 ${editMode === 'showcase' ? 'shadow-lg' : ''}`}
         >
-          <div className="sticky top-0 z-10 border-b border-border bg-sidebar-dark shadow-md rounded-t-lg">
+          <div className="sticky top-6 z-10 border-b border-border bg-sidebar-dark shadow-md rounded-t-lg">
             <div className="p-6 pb-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-6">

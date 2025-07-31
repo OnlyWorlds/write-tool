@@ -59,7 +59,7 @@ export function EditArea() {
   
   return (
     <div className="w-96 border-l border-blue-200 flex flex-col fixed right-0 top-0 h-screen z-10">
-      <div className="bg-gradient-to-r from-blue-50 to-slate-50 border-b border-blue-200">
+      <div className="bg-sidebar-dark border-b border-border">
         <div className="p-4">
           <div className="flex items-center justify-between">
             <div className="flex flex-col gap-1">
@@ -67,7 +67,7 @@ export function EditArea() {
                 {selectedFieldId.replace(/_/g, ' ')}
               </h3>
               <span className="text-xs text-blue-600">
-                ({fieldTypeInfo.type} field)
+                ({fieldTypeInfo.type === 'textarea' ? 'text' : fieldTypeInfo.type} field)
               </span>
             </div>
             {isEdited && (

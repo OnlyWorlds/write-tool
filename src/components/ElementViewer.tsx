@@ -219,10 +219,10 @@ export function ElementViewer() {
   
   return (
     <div className={`flex-1 overflow-y-auto h-screen ${editMode === 'showcase' ? 'max-w-4xl mx-auto' : ''}`}>
-      <div className={`p-6 ${editMode === 'edit' && selectedFieldId ? 'mr-96' : ''}`}>
+      <div className="p-6 max-w-5xl">
         <div 
           id={editMode === 'showcase' ? `showcase-${selectedElementId}` : undefined}
-          className={`bg-gradient-to-br from-gray-50 to-secondary rounded-lg shadow-sm border border-border ${editMode === 'showcase' ? 'shadow-lg' : ''}`}
+          className={`bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg shadow-md border border-slate-200 ${editMode === 'showcase' ? 'shadow-lg' : ''}`}
         >
           <div className="sticky top-0 z-10 border-b border-border bg-sidebar-dark shadow-md rounded-t-lg">
             <div className="p-6 pb-2">
@@ -408,7 +408,7 @@ export function ElementViewer() {
             </div>
           </div>
           
-          <div className={`px-4 pb-6 pt-0 ${editMode === 'showcase' ? 'bg-gray-200' : 'bg-gradient-to-b from-slate-100 to-blue-100/30'}`}>
+          <div className={`px-4 pb-6 pt-0 ${editMode === 'showcase' ? 'bg-slate-100' : 'bg-gradient-to-b from-slate-100 to-slate-50'}`}>
             {/* Base fields section */}
             <div className="pt-6 pb-4 border-b border-border/50">
               {fields.filter(([fieldName]) => baseFields.includes(fieldName)).map(([fieldName, originalValue]) => {
@@ -440,12 +440,12 @@ export function ElementViewer() {
                     onClick={() => editMode === 'edit' && selectField(selectedFieldId === fieldName ? null : fieldName)}
                     className={`mb-3 rounded-lg transition-all relative flex items-start ${
                       editMode === 'showcase' 
-                        ? 'bg-gray-50 border border-gray-200' 
+                        ? 'bg-zinc-50 border border-slate-200 shadow-sm' 
                         : error
                           ? 'bg-red-50 cursor-pointer'
                           : selectedFieldId === fieldName 
-                            ? 'bg-gradient-to-r from-field-highlight/60 to-field-quaternary/60 shadow-md cursor-pointer' 
-                            : 'bg-slate-100 hover:bg-slate-50 hover:shadow-sm cursor-pointer'
+                            ? 'bg-blue-100 border-blue-300 shadow-md cursor-pointer' 
+                            : 'bg-zinc-50 hover:bg-zinc-100 shadow-sm hover:shadow-md cursor-pointer'
                     }`}
                   >
                     {/* Field type icon */}
@@ -543,12 +543,12 @@ export function ElementViewer() {
                     onClick={() => editMode === 'edit' && selectField(selectedFieldId === fieldName ? null : fieldName)}
                     className={`rounded-lg transition-all relative flex items-start ${
                       editMode === 'showcase' 
-                        ? 'bg-gray-50 border border-gray-200' 
+                        ? 'bg-zinc-50 border border-slate-200 shadow-sm' 
                         : error
                           ? 'bg-red-50 cursor-pointer'
                           : selectedFieldId === fieldName 
-                            ? 'bg-gradient-to-r from-field-highlight/60 to-field-quaternary/60 shadow-md cursor-pointer' 
-                            : 'bg-blue-50 hover:bg-blue-50/50 hover:shadow-sm cursor-pointer'
+                            ? 'bg-blue-100 border-blue-300 shadow-md cursor-pointer' 
+                            : 'bg-zinc-50 hover:bg-zinc-100 shadow-sm hover:shadow-md cursor-pointer'
                     }`}
                   >
                     {/* Field type icon */}

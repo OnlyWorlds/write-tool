@@ -45,6 +45,9 @@ const FieldViewer = memo(function FieldViewer({ fieldName, value, fieldTypeInfo,
   const { selectElement } = useSidebarStore();
   const navigate = useNavigate();
   
+  // Determine if we're in showcase mode (no WorldContext access)
+  const isShowcaseMode = !elements || elements.size === 0;
+  
   if (value === null || value === undefined || value === '') {
     return <span className={className}></span>;
   }
@@ -107,6 +110,11 @@ const FieldViewer = memo(function FieldViewer({ fieldName, value, fieldTypeInfo,
         // First try linkedElements (for showcase mode), then fall back to WorldContext
         const linkedElement = linkedElements?.[value] || elements.get(value);
         if (linkedElement) {
+          // In showcase mode, display as plain text without link
+          if (isShowcaseMode) {
+            return <span className={`text-gray-800 ${className}`}>{linkedElement.name}</span>;
+          }
+          // In normal mode, display as clickable link
           return (
             <button
               onClick={(e) => {
@@ -125,14 +133,21 @@ const FieldViewer = memo(function FieldViewer({ fieldName, value, fieldTypeInfo,
       
     case 'links':
       if (Array.isArray(value) && value.length > 0) {
-        console.log(`[FieldRenderer] Rendering ${fieldName} with linkedElements:`, linkedElements);
         return (
           <div className={`space-y-1 ${className}`}>
             {value.map((linkId, index) => {
               // First try linkedElements (for showcase mode), then fall back to WorldContext
               const linkedElement = linkedElements?.[linkId] || elements.get(linkId);
-              console.log(`[FieldRenderer] Looking up ${linkId}:`, linkedElement, 'from linkedElements:', linkedElements?.[linkId]);
               if (linkedElement) {
+                // In showcase mode, display as plain text without link
+                if (isShowcaseMode) {
+                  return (
+                    <span key={index} className="block text-gray-800">
+                      {linkedElement.name}
+                    </span>
+                  );
+                }
+                // In normal mode, display as clickable link
                 return (
                   <button
                     key={index}

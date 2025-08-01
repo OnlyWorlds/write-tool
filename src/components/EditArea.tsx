@@ -68,7 +68,7 @@ export function EditArea() {
   // Case 1: No element selected - show empty state
   if (!selectedElement || !selectedElementId) {
     return (
-      <div className="w-96 border-l border-blue-200 flex flex-col absolute right-0 top-0 z-10 h-full bg-white">
+      <div className="w-96 border-l border-blue-200 flex flex-col fixed right-0 top-[58px] z-10 h-[calc(100vh-58px)] bg-white">
         <div className="h-full flex flex-col">
           <div className="bg-sidebar-dark border-b border-border p-4">
             <h3 className="font-bold text-slate-800">Element Details</h3>
@@ -87,7 +87,7 @@ export function EditArea() {
   // Case 2: Element selected but no field - show reverse relations
   if (!selectedFieldId) {
     return (
-      <div className="w-96 border-l border-blue-200 flex flex-col absolute right-0 top-0 z-10 h-full bg-white">
+      <div className="w-96 border-l border-blue-200 flex flex-col fixed right-0 top-[58px] z-10 h-[calc(100vh-58px)] bg-white">
         <ReverseRelationsPanel elementId={selectedElementId} />
       </div>
     );
@@ -99,7 +99,7 @@ export function EditArea() {
   const fieldTypeInfo = detectFieldType(selectedFieldId, currentValue, selectedElement.category);
   
   return (
-    <div className="w-96 border-l border-blue-200 flex flex-col absolute right-0 top-0 z-10 h-full bg-white">
+    <div className="w-96 border-l border-blue-200 flex flex-col fixed right-0 top-[58px] z-10 h-[calc(100vh-58px)] bg-white">
       <div className="bg-sidebar-dark border-b border-border">
         <div className="p-4">
           <div className="flex items-center justify-between">

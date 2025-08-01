@@ -1,4 +1,5 @@
 import type { Element, WorldMetadata } from '../types/world';
+import { analyzeOnlyWorldsField } from './OnlyWorldsFieldTypes';
 
 const API_BASE_URL = 'https://www.onlyworlds.com/api/worldapi';
 
@@ -20,6 +21,116 @@ const ELEMENT_TYPES = [
   'narrative',
   'phenomenon'
 ];
+
+// Helper function to extract ID from URL
+function extractIdFromUrl(url: string): string {
+  const match = url.match(/\/([a-f0-9-]+)\/?$/);
+  return match ? match[1] : url;
+}
+
+// Transform link fields from API format (objects with URLs or full element objects) to simple IDs
+function transformElementFromApi(element: any): any {
+  const transformed = { ...element };
+  
+  // Process each field
+  for (const [key, value] of Object.entries(element)) {
+    // Skip null/undefined values
+    if (value === null || value === undefined) {
+      continue;
+    }
+    
+    // Handle single link fields (objects with url property OR full element objects with id)
+    // Make sure it's a plain object, not a Date, Array, etc.
+    if (value && 
+        typeof value === 'object' && 
+        !Array.isArray(value) && 
+        !(value instanceof Date) &&
+        value.constructor === Object) {
+      
+      // Check if it's a URL object
+      if ('url' in value && typeof value.url === 'string') {
+        transformed[key] = extractIdFromUrl(value.url);
+      }
+      // Check if it's a full element object (has id, name, etc.)
+      else if ('id' in value && typeof value.id === 'string') {
+        // This is a nested element object, just extract the ID
+        transformed[key] = value.id;
+      }
+    }
+    // Handle multi-link fields (arrays of objects)
+    else if (Array.isArray(value)) {
+      transformed[key] = value.map(item => {
+        if (item && 
+            typeof item === 'object' && 
+            !Array.isArray(item) &&
+            !(item instanceof Date) &&
+            item.constructor === Object) {
+          
+          // Check if it's a URL object
+          if ('url' in item && typeof item.url === 'string') {
+            return extractIdFromUrl(item.url);
+          }
+          // Check if it's a full element object
+          else if ('id' in item && typeof item.id === 'string') {
+            return item.id;
+          }
+        }
+        return item;
+      });
+    }
+  }
+  
+  return transformed;
+}
+
+// Transform link fields to API format with proper field naming
+function transformElementForApi(element: any, allElements?: Map<string, Element>): any {
+  const transformed = { ...element };
+  
+  // The API expects field names with _id suffix for single links and _ids suffix for arrays
+  // We need to rename fields that don't have the proper suffix
+  const keysToDelete: string[] = [];
+  
+  for (const [key, value] of Object.entries(element)) {
+    // Skip null/undefined values
+    if (value == null) continue;
+    
+    // Analyze field to determine if it's a link
+    const fieldInfo = analyzeOnlyWorldsField(key, value, element.category);
+    
+    // Handle single link fields
+    if (fieldInfo.type === 'single_link' && typeof value === 'string' && value) {
+      // Check if field name needs _id suffix
+      if (!key.endsWith('_id') && !key.endsWith('Id')) {
+        // Rename field to have _id suffix
+        transformed[`${key}_id`] = value;
+        keysToDelete.push(key);
+      }
+      // Field already has proper suffix, keep the ID value
+      else {
+        transformed[key] = value;
+      }
+    }
+    // Handle multi-link fields
+    else if (fieldInfo.type === 'multi_link' && Array.isArray(value)) {
+      // Check if field name needs _ids suffix
+      if (!key.endsWith('_ids') && !key.endsWith('Ids')) {
+        // Rename field to have _ids suffix
+        transformed[`${key}_ids`] = value.filter(id => typeof id === 'string' && id);
+        keysToDelete.push(key);
+      }
+      // Field already has proper suffix, keep the array of IDs
+      else {
+        transformed[key] = value.filter(id => typeof id === 'string' && id);
+      }
+    }
+  }
+  
+  // Remove fields that were renamed
+  keysToDelete.forEach(key => delete transformed[key]);
+  
+  return transformed;
+}
 
 // Showcase API types
 export interface ShowcasePublishRequest {
@@ -130,10 +241,19 @@ export class ApiService {
         if (response.ok) {
           const elements = await response.json();
           // Add category to each element based on the endpoint
-          const categorizedElements = elements.map((el: any) => ({
-            ...el,
-            category: elementType
-          }));
+          const categorizedElements = elements.map((el: any) => {
+            const transformed = transformElementFromApi(el);
+            // Log if we see any object values that might display as [object Object]
+            for (const [key, value] of Object.entries(transformed)) {
+              if (value && typeof value === 'object' && !Array.isArray(value) && !(value instanceof Date)) {
+                console.warn(`Found object value in field ${key} after transformation:`, value, 'in element:', el.name || el.id);
+              }
+            }
+            return {
+              ...transformed,
+              category: elementType
+            };
+          });
           allElements.push(...categorizedElements);
         }
         // Continue even if one endpoint fails
@@ -145,11 +265,20 @@ export class ApiService {
     return allElements;
   }
 
-  static async updateElement(worldKey: string, pin: string, element: Element): Promise<boolean> {
+  static async updateElement(worldKey: string, pin: string, element: Element, allElements?: Map<string, Element>): Promise<Element | null> {
     try {
       const elementType = element.category || 'object';
       const url = `${API_BASE_URL}/${elementType}/${element.id}/`;
+      
+      // Transform the element for API
+      const transformedElement = transformElementForApi(element, allElements);
+      
       console.log('Updating element:', { url, elementType, id: element.id });
+      console.log('Original element:', element);
+      console.log('Transformed for API:', transformedElement);
+      
+      const requestBody = JSON.stringify(transformedElement);
+      console.log('Request body being sent:', requestBody);
       
       const response = await fetch(url, {
         method: 'PUT',
@@ -159,23 +288,29 @@ export class ApiService {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
-        body: JSON.stringify(element)
+        body: requestBody
       });
       
       if (!response.ok) {
         console.error('Update failed:', response.status, response.statusText);
         const text = await response.text();
         console.error('Response body:', text);
+        return null;
       }
       
-      return response.ok;
+      // Return the updated element from the API, properly transformed
+      const updatedElement = await response.json();
+      console.log('API response:', updatedElement);
+      const transformed = transformElementFromApi(updatedElement);
+      console.log('Transformed response:', transformed);
+      return transformed;
     } catch (error) {
       console.error('Update error:', error);
-      return false;
+      return null;
     }
   }
 
-  static async createElement(worldKey: string, pin: string, element: Element): Promise<Element> {
+  static async createElement(worldKey: string, pin: string, element: Element, allElements?: Map<string, Element>): Promise<Element> {
     try {
       const elementType = element.category || 'object';
       const response = await fetch(`${API_BASE_URL}/${elementType}/`, {
@@ -186,11 +321,13 @@ export class ApiService {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
-        body: JSON.stringify(element)
+        body: JSON.stringify(transformElementForApi(element, allElements))
       });
       
       if (response.ok) {
-        return await response.json();
+        const createdElement = await response.json();
+        // Transform the API response to our internal format
+        return transformElementFromApi(createdElement);
       }
       
       const errorText = await response.text();

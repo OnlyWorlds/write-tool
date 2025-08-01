@@ -103,7 +103,7 @@ export function ReverseRelationsPanel({ elementId }: ReverseRelationsPanelProps)
   const totalReferences = Array.from(reverseLinks.values()).reduce((sum, elements) => sum + elements.length, 0);
   
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-screen flex flex-col">
       <div className="bg-sidebar-dark border-b border-border p-4">
         <h3 className="font-bold text-slate-800">Reverse Relations</h3>
         <p className="text-xs text-accent mt-1">

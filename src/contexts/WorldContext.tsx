@@ -183,7 +183,7 @@ export function WorldProvider({ children }: { children: ReactNode }) {
       };
       
       // Call API to create element
-      const createdElement = await ApiService.createElement(state.worldKey, state.pin, newElement);
+      const createdElement = await ApiService.createElement(state.worldKey, state.pin, newElement, state.elements);
       
       // Ensure the created element has the correct category
       const elementWithCategory = {
@@ -198,7 +198,7 @@ export function WorldProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       throw new Error(error instanceof Error ? error.message : 'Failed to create element');
     }
-  }, [state.worldKey, state.pin, updateElement]);
+  }, [state.worldKey, state.pin, state.elements, updateElement]);
 
   const deleteElement = useCallback((elementId: string) => {
     setState(prev => {
@@ -238,10 +238,11 @@ export function WorldProvider({ children }: { children: ReactNode }) {
     const updatedElement = { ...element, ...updates };
     
     try {
-      const success = await ApiService.updateElement(state.worldKey, state.pin, updatedElement);
-      if (success) {
-        // Update local state
-        updateElement(updatedElement);
+      const returnedElement = await ApiService.updateElement(state.worldKey, state.pin, updatedElement, state.elements);
+      if (returnedElement) {
+        // Update local state with the server-returned element
+        // This ensures any server-side transformations or additions are reflected
+        updateElement({ ...returnedElement, category: element.category });
         return true;
       }
       return false;

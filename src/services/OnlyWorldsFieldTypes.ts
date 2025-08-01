@@ -50,7 +50,10 @@ export function analyzeOnlyWorldsField(
     'location', 'birthplace', 'parentLocation', 'parent_location',
     'zone', 'actor', 'leader', 'creator', 'owner', 'rival', 'partner',
     'primaryPower', 'primary_power', 'governingTitle', 'governing_title',
-    'parentObject', 'parent_object'
+    'parentObject', 'parent_object', 'custodian', 'operator', 'narrator',
+    'conservator', 'antagonist', 'protagonist', 'author', 'founder', 'issuer',
+    'parent_institution', 'parent_law', 'parent_species', 'parent_narrative',
+    'superior_title', 'anti_trait', 'parent_map'
   ];
   
   const knownMultiLinkFields = [
@@ -74,6 +77,13 @@ export function analyzeOnlyWorldsField(
     }
     // If value is a string that looks like UUID, it's a link
     if (typeof value === 'string' && isUuidLike(value)) {
+      return {
+        type: 'single_link',
+        linkedCategory: guessLinkedCategory(fieldName)
+      };
+    }
+    // If value is an object with URL property (API format not yet transformed)
+    if (value && typeof value === 'object' && 'url' in value && typeof value.url === 'string') {
       return {
         type: 'single_link',
         linkedCategory: guessLinkedCategory(fieldName)
@@ -125,8 +135,24 @@ export function analyzeOnlyWorldsField(
     };
   }
   
+  // Check if value is an object with URL property (API format not yet transformed)
+  if (value && typeof value === 'object' && !Array.isArray(value) && 'url' in value && typeof value.url === 'string') {
+    return {
+      type: 'single_link',
+      linkedCategory: guessLinkedCategory(fieldName)
+    };
+  }
+  
   // Check if value is array of UUIDs (multi link)
   if (Array.isArray(value) && value.length > 0 && value.every(v => typeof v === 'string' && isUuidLike(v))) {
+    return {
+      type: 'multi_link',
+      linkedCategory: guessLinkedCategory(fieldName)
+    };
+  }
+  
+  // Check if value is array of objects with URL property (API format not yet transformed)
+  if (Array.isArray(value) && value.length > 0 && value.every(v => v && typeof v === 'object' && 'url' in v && typeof v.url === 'string')) {
     return {
       type: 'multi_link',
       linkedCategory: guessLinkedCategory(fieldName)

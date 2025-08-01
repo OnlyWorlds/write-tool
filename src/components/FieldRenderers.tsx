@@ -162,6 +162,18 @@ const FieldViewer = memo(function FieldViewer({ fieldName, value, fieldTypeInfo,
       );
       
     default:
+      // Check if the value is an object that shouldn't be stringified
+      if (value && typeof value === 'object' && !Array.isArray(value) && !(value instanceof Date)) {
+        console.error(`Unexpected object value for field "${fieldName}":`, value);
+        // Try to extract ID if it looks like a link object
+        if ('url' in value && typeof value.url === 'string') {
+          const match = value.url.match(/\/([a-f0-9-]+)\/?$/);
+          const id = match ? match[1] : 'Unknown';
+          return <span className={`text-red-500 ${className}`}>[Link: {id}]</span>;
+        }
+        return <span className={`text-red-500 ${className}`}>[Invalid Object]</span>;
+      }
+      
       return (
         <span className={className}>
           {String(value)}
@@ -290,8 +302,16 @@ const FieldEditor = memo(function FieldEditor({ fieldName, value, fieldTypeInfo,
       return (
         <input
           type="number"
-          value={localValue || ''}
-          onChange={(e) => handleChange(e.target.value ? Number(e.target.value) : '')}
+          value={localValue === null || localValue === undefined ? '' : localValue}
+          onChange={(e) => {
+            const val = e.target.value;
+            if (val === '') {
+              handleChange(null);
+            } else {
+              const num = Number(val);
+              handleChange(isNaN(num) ? val : num);
+            }
+          }}
           className={baseInputClass}
           placeholder="enter number"
         />

@@ -241,10 +241,10 @@ export class ApiService {
   }
 
   static async fetchAllElements(worldKey: string, pin: string): Promise<Element[]> {
-    const allElements: Element[] = [];
+    console.time('fetchAllElements');
     
-    // Fetch elements from each endpoint
-    for (const elementType of ELEMENT_TYPES) {
+    // Create all fetch promises in parallel
+    const fetchPromises = ELEMENT_TYPES.map(async (elementType) => {
       try {
         const response = await fetch(`${API_BASE_URL}/${elementType}/`, {
           headers: { 
@@ -257,7 +257,7 @@ export class ApiService {
         if (response.ok) {
           const elements = await response.json();
           // Add category to each element based on the endpoint
-          const categorizedElements = elements.map((el: any) => {
+          return elements.map((el: any) => {
             const transformed = transformElementFromApi(el);
             // Log if we see any object values that might display as [object Object]
             for (const [key, value] of Object.entries(transformed)) {
@@ -270,13 +270,22 @@ export class ApiService {
               category: elementType
             };
           });
-          allElements.push(...categorizedElements);
         }
-        // Continue even if one endpoint fails
+        return [];
       } catch (error) {
         console.warn(`Failed to fetch ${elementType} elements:`, error);
+        return [];
       }
-    }
+    });
+    
+    // Wait for all fetches to complete
+    const results = await Promise.all(fetchPromises);
+    
+    // Flatten the results
+    const allElements = results.flat();
+    
+    console.timeEnd('fetchAllElements');
+    console.log(`Fetched ${allElements.length} elements across ${ELEMENT_TYPES.length} categories`);
     
     return allElements;
   }

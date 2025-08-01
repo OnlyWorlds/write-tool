@@ -42,19 +42,9 @@ export function WorldProvider({ children }: { children: ReactNode }) {
     }));
     
     try {
-      // Validate credentials
-      const isValid = await ApiService.validateCredentials(worldKey, pin);
+      console.time('Total authentication time');
       
-      if (!isValid) {
-        setState(prev => ({
-          ...prev,
-          error: 'Invalid World Key or Pin',
-          isLoading: false,
-        }));
-        return false;
-      }
-      
-      // Fetch world data
+      // Fetch world data directly - if credentials are invalid, these will fail
       const [metadata, elementsArray] = await Promise.all([
         ApiService.fetchWorldMetadata(worldKey, pin),
         ApiService.fetchAllElements(worldKey, pin),
@@ -88,6 +78,7 @@ export function WorldProvider({ children }: { children: ReactNode }) {
         error: null,
       });
       
+      console.timeEnd('Total authentication time');
       return true;
     } catch (error) {
       setState(prev => ({

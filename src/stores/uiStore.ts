@@ -49,13 +49,14 @@ export const useSidebarStore = create<SidebarState>((set) => ({
 
 interface EditorState {
   selectedFieldId: string | null;
-  editMode: 'edit' | 'showcase';
+  editMode: 'edit' | 'showcase' | 'network';
   localEdits: Map<string, any>; // elementId:fieldName -> value
   hasUnsavedChanges: boolean;
   validationErrors: Map<string, ValidationError[]>; // elementId -> errors
   hiddenFields: Set<string>; // fieldNames to hide in showcase mode
   selectField: (id: string | null) => void;
   toggleMode: () => void;
+  setMode: (mode: 'edit' | 'showcase' | 'network') => void;
   setFieldValue: (elementId: string, fieldName: string, value: any) => void;
   clearEdits: () => void;
   getEditedValue: (elementId: string, fieldName: string) => any | undefined;
@@ -75,10 +76,20 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   validationErrors: new Map(),
   hiddenFields: new Set(),
   selectField: (id) => set({ selectedFieldId: id }),
-  toggleMode: () => set((state) => ({ 
-    editMode: state.editMode === 'edit' ? 'showcase' : 'edit',
-    hiddenFields: new Set() // Reset hidden fields when toggling mode
-  })),
+  toggleMode: () => set((state) => {
+    // Cycle through modes: edit -> showcase -> network -> edit
+    const modes: Array<'edit' | 'showcase' | 'network'> = ['edit', 'showcase', 'network'];
+    const currentIndex = modes.indexOf(state.editMode);
+    const nextIndex = (currentIndex + 1) % modes.length;
+    return {
+      editMode: modes[nextIndex],
+      hiddenFields: new Set() // Reset hidden fields when toggling mode
+    };
+  }),
+  setMode: (mode) => set({ 
+    editMode: mode,
+    hiddenFields: new Set() // Reset hidden fields when changing mode
+  }),
   setFieldValue: (elementId, fieldName, value) => set((state) => {
     const newEdits = new Map(state.localEdits);
     const key = `${elementId}:${fieldName}`;

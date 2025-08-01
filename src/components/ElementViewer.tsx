@@ -12,11 +12,12 @@ import { exportElementToPdf, isPdfExportSupported } from '../utils/pdfExport';
 import { FieldRenderer } from './FieldRenderers';
 import { FieldTypeIcon } from './FieldTypeIcon';
 import { CollapseAllIcon, ExpandAllIcon } from './icons';
+import { NetworkView } from './NetworkView';
 
 export function ElementViewer() {
   const { elements, worldKey, pin, deleteElement, updateElement, saveElement } = useWorldContext();
   const { selectedElementId } = useSidebarStore();
-  const { selectedFieldId, selectField, getEditedValue, editMode, getFieldError, isFieldVisible, toggleFieldVisibility, toggleMode, resetHiddenFields, hiddenFields, setFieldValue } = useEditorStore();
+  const { selectedFieldId, selectField, getEditedValue, editMode, getFieldError, isFieldVisible, toggleFieldVisibility, toggleMode, setMode, resetHiddenFields, hiddenFields, setFieldValue } = useEditorStore();
   const navigate = useNavigate();
   const [isExporting, setIsExporting] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
@@ -429,33 +430,52 @@ export function ElementViewer() {
                       )}
                     </>
                   )}
-                  {/* View mode switcher */}
-                  <button
-                    onClick={toggleMode}
-                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-all shadow-sm flex items-center gap-2 ${
-                      editMode === 'edit' 
-                        ? 'bg-blue-500 hover:bg-blue-600 text-white' 
-                        : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                    }`}
-                    data-exclude-from-export
-                  >
-                    {editMode === 'edit' ? (
-                      <>
+                  {/* View mode switcher - always show 2 inactive buttons */}
+                  <div className="flex items-center gap-2">
+                    {editMode !== 'edit' && (
+                      <button
+                        onClick={() => setMode('edit')}
+                        className="px-4 py-2 text-sm font-medium rounded-lg transition-all shadow-sm flex items-center gap-2 bg-blue-100 hover:bg-blue-200 text-blue-900"
+                        data-exclude-from-export
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        <span>Edit</span>
+                      </button>
+                    )}
+                    {editMode !== 'showcase' && (
+                      <button
+                        onClick={() => setMode('showcase')}
+                        className="px-4 py-2 text-sm font-medium rounded-lg transition-all shadow-sm flex items-center gap-2 bg-blue-100 hover:bg-blue-200 text-blue-900"
+                        data-exclude-from-export
+                      >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                         </svg>
                         <span>Showcase</span>
-                      </>
-                    ) : (
-                      <>
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                        <span>Edit</span>
-                      </>
+                      </button>
                     )}
-                  </button>
+                    {editMode !== 'network' && (
+                      <button
+                        onClick={() => setMode('network')}
+                        className="px-4 py-2 text-sm font-medium rounded-lg transition-all shadow-sm flex items-center gap-2 bg-blue-100 hover:bg-blue-200 text-blue-900"
+                        data-exclude-from-export
+                        title="View element relationships as a network graph"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <circle cx="12" cy="12" r="3" strokeWidth={2} />
+                          <circle cx="4" cy="8" r="2" strokeWidth={2} />
+                          <circle cx="4" cy="16" r="2" strokeWidth={2} />
+                          <circle cx="20" cy="8" r="2" strokeWidth={2} />
+                          <circle cx="20" cy="16" r="2" strokeWidth={2} />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 11L4 8M9 13L4 16M15 11L20 8M15 13L20 16" />
+                        </svg>
+                        <span>Network</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -511,6 +531,13 @@ export function ElementViewer() {
             </div>
           </div>
           
+          {/* Conditional rendering based on mode */}
+          {editMode === 'network' ? (
+            <NetworkView 
+              selectedElement={selectedElement} 
+              className="h-[600px]"
+            />
+          ) : (
           <div className={`px-4 pb-6 pt-0 ${editMode === 'showcase' ? 'bg-slate-100' : 'bg-gradient-to-b from-slate-100 to-slate-50'}`}>
             {/* Base fields section */}
             <div className="pt-6 pb-4 border-b border-border/50">
@@ -766,6 +793,7 @@ export function ElementViewer() {
               })}
             </div>
           </div>
+          )}
           
         </div>
       </div>

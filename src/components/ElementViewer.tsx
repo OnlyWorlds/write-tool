@@ -11,6 +11,7 @@ import { FieldRenderer } from './FieldRenderers';
 import { FieldTypeIcon } from './FieldTypeIcon';
 import { useElementSections } from '../hooks/useElementSections';
 import { ChevronDownIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
+import { ExpandAllIcon, CollapseAllIcon } from './icons';
 
 export function ElementViewer() {
   const { elements, worldKey, pin, deleteElement, updateElement, saveElement } = useWorldContext();
@@ -62,6 +63,27 @@ export function ElementViewer() {
     });
   };
   
+  if (!selectedElement) {
+    return (
+      <div className="flex-1 flex items-center justify-center text-text-light/60">
+        <p>select an element from the sidebar to view its details</p>
+      </div>
+    );
+  }
+  
+  // Get all fields except system fields and name (name is now editable in header)
+  let fields = Object.entries(selectedElement).filter(([key]) => 
+    !['id', 'created_at', 'updated_at', 'name', 'category'].includes(key)
+  );
+  
+  // Sort fields alphabetically if enabled
+  if (sortAlphabetically) {
+    fields = fields.sort(([a], [b]) => a.localeCompare(b));
+  }
+  
+  // Base fields that get different styling
+  const baseFields = ['description', 'supertype', 'subtype', 'image_url'];
+  
   // Organize fields by sections
   const organizeFieldsBySection = () => {
     const categoryFields = fields.filter(([fieldName]) => !baseFields.includes(fieldName));
@@ -108,27 +130,8 @@ export function ElementViewer() {
     return organizedSections.sort((a, b) => a.order - b.order);
   };
   
-  if (!selectedElement) {
-    return (
-      <div className="flex-1 flex items-center justify-center text-text-light/60">
-        <p>select an element from the sidebar to view its details</p>
-      </div>
-    );
-  }
-  
-  // Get all fields except system fields and name (name is now editable in header)
-  let fields = Object.entries(selectedElement).filter(([key]) => 
-    !['id', 'created_at', 'updated_at', 'name', 'category'].includes(key)
-  );
-  
-  // Sort fields alphabetically if enabled
-  if (sortAlphabetically) {
-    fields = fields.sort(([a], [b]) => a.localeCompare(b));
-  }
-  
-  // Base fields that get different styling
-  const baseFields = ['description', 'supertype', 'subtype', 'image_url'];
-  
+  // Move organizeFieldsBySection here to ensure fields is defined
+  const organizedSections = organizeFieldsBySection();
   
   const handleExport = async () => {
     if (!selectedElement || !selectedElementId) return;
@@ -345,6 +348,27 @@ export function ElementViewer() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
+                  {/* Collapse/Expand all sections button */}
+                  {editMode === 'edit' && sections && sections.length > 0 && !hideSections && (
+                    <button
+                      onClick={() => {
+                        const allSectionNames = sections.map(s => s.name);
+                        const allCollapsed = allSectionNames.length > 0 && allSectionNames.every(name => collapsedSections.has(name));
+                        
+                        if (allCollapsed) {
+                          // All sections are collapsed, expand all
+                          setCollapsedSections(new Set());
+                        } else {
+                          // Some or none are collapsed, collapse all
+                          setCollapsedSections(new Set(allSectionNames));
+                        }
+                      }}
+                      className="p-2 text-slate-500 hover:text-slate-700 hover:bg-white/20 rounded-lg transition-all"
+                      title={collapsedSections.size > 0 ? "Expand all sections" : "Collapse all sections"}
+                    >
+                      {collapsedSections.size > 0 ? <ExpandAllIcon /> : <CollapseAllIcon />}
+                    </button>
+                  )}
                   {/* Options toggle button - gear icon only */}
                   {editMode === 'edit' && (
                     <button
@@ -586,7 +610,7 @@ export function ElementViewer() {
             
             {/* Category-specific fields section */}
             <div className="pt-4">
-              {organizeFieldsBySection().map(section => {
+              {organizedSections.map(section => {
                 const isCollapsed = collapsedSections.has(section.name);
                 const hasVisibleFields = section.fields.some(([fieldName, value]) => {
                   const isEmpty = !value || (Array.isArray(value) && value.length === 0);

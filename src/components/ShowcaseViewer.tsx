@@ -34,6 +34,12 @@ export function ShowcaseViewer({ showcaseId }: ShowcaseViewerProps) {
       
       const data = await ApiService.retrieveShowcase(showcaseId);
       if (data) {
+        console.log('Full showcase response:', data);
+        console.log('linked_elements field:', data.linked_elements);
+        console.log('Type of linked_elements:', typeof data.linked_elements);
+        if (data.linked_elements) {
+          console.log('linked_elements keys:', Object.keys(data.linked_elements));
+        }
         setShowcase(data);
       }
     } catch (err) {
@@ -149,6 +155,7 @@ export function ShowcaseViewer({ showcaseId }: ShowcaseViewerProps) {
                           elementCategory={element.category}
                           mode="view"
                           className="text-base leading-relaxed"
+                          linkedElements={showcase.linked_elements}
                         />
                       </div>
                     </div>
@@ -180,6 +187,7 @@ export function ShowcaseViewer({ showcaseId }: ShowcaseViewerProps) {
                           elementCategory={element.category}
                           mode="view"
                           className="text-base leading-relaxed"
+                          linkedElements={showcase.linked_elements}
                         />
                       </div>
                     </div>

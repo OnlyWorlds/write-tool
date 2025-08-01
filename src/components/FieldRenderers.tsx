@@ -5,6 +5,7 @@ import { detectFieldType, type FieldTypeInfo } from '../services/FieldTypeDetect
 import { useSidebarStore } from '../stores/uiStore';
 import { ComboBox } from './ComboBox';
 import { TypeManagementService } from '../services/TypeManagementService';
+import type { LinkedElement } from '../services/ApiService';
 
 interface FieldRendererProps {
   fieldName: string;
@@ -14,16 +15,17 @@ interface FieldRendererProps {
   onChange?: (value: any) => void;
   className?: string;
   selectedElement?: any; // For accessing supertype when editing subtype
+  linkedElements?: Record<string, LinkedElement>; // For showcase mode
 }
 
-export const FieldRenderer = memo(function FieldRenderer({ fieldName, value, elementCategory, mode, onChange, className, selectedElement }: FieldRendererProps) {
+export const FieldRenderer = memo(function FieldRenderer({ fieldName, value, elementCategory, mode, onChange, className, selectedElement, linkedElements }: FieldRendererProps) {
   const fieldTypeInfo = useMemo(() => 
     detectFieldType(fieldName, value, elementCategory), 
     [fieldName, value, elementCategory]
   );
   
   if (mode === 'view') {
-    return <FieldViewer fieldName={fieldName} value={value} fieldTypeInfo={fieldTypeInfo} className={className} />;
+    return <FieldViewer fieldName={fieldName} value={value} fieldTypeInfo={fieldTypeInfo} className={className} linkedElements={linkedElements} />;
   } else {
     return <FieldEditor fieldName={fieldName} value={value} fieldTypeInfo={fieldTypeInfo} onChange={onChange} className={className} elementCategory={elementCategory} selectedElement={selectedElement} />;
   }
@@ -34,9 +36,10 @@ interface FieldViewerProps {
   value: any;
   fieldTypeInfo: FieldTypeInfo;
   className?: string;
+  linkedElements?: Record<string, LinkedElement>;
 }
 
-const FieldViewer = memo(function FieldViewer({ fieldName, value, fieldTypeInfo, className }: FieldViewerProps) {
+const FieldViewer = memo(function FieldViewer({ fieldName, value, fieldTypeInfo, className, linkedElements }: FieldViewerProps) {
   const { type } = fieldTypeInfo;
   const { elements } = useWorldContext();
   const { selectElement } = useSidebarStore();
@@ -101,7 +104,8 @@ const FieldViewer = memo(function FieldViewer({ fieldName, value, fieldTypeInfo,
       
     case 'link':
       if (typeof value === 'string' && value) {
-        const linkedElement = elements.get(value);
+        // First try linkedElements (for showcase mode), then fall back to WorldContext
+        const linkedElement = linkedElements?.[value] || elements.get(value);
         if (linkedElement) {
           return (
             <button
@@ -121,10 +125,13 @@ const FieldViewer = memo(function FieldViewer({ fieldName, value, fieldTypeInfo,
       
     case 'links':
       if (Array.isArray(value) && value.length > 0) {
+        console.log(`[FieldRenderer] Rendering ${fieldName} with linkedElements:`, linkedElements);
         return (
           <div className={`space-y-1 ${className}`}>
             {value.map((linkId, index) => {
-              const linkedElement = elements.get(linkId);
+              // First try linkedElements (for showcase mode), then fall back to WorldContext
+              const linkedElement = linkedElements?.[linkId] || elements.get(linkId);
+              console.log(`[FieldRenderer] Looking up ${linkId}:`, linkedElement, 'from linkedElements:', linkedElements?.[linkId]);
               if (linkedElement) {
                 return (
                   <button

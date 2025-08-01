@@ -160,6 +160,11 @@ export interface ShowcasePublishResponse {
   shareable_url: string;
 }
 
+export interface LinkedElement {
+  name: string;
+  category: string;
+}
+
 export interface ShowcaseRetrieveResponse {
   element_data: Element;
   showcase_config: {
@@ -172,6 +177,7 @@ export interface ShowcaseRetrieveResponse {
     element_type: string;
     view_count: number;
   };
+  linked_elements?: Record<string, LinkedElement>;
 }
 
 export class ApiService {

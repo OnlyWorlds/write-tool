@@ -101,12 +101,14 @@ export function NetworkView({ selectedElement, className = '' }: NetworkViewProp
   const [highlightNodes, setHighlightNodes] = useState(new Set<string>());
   const [highlightLinks, setHighlightLinks] = useState(new Set<string>());
   const [hoverNode, setHoverNode] = useState<string | null>(null);
+  const [maxDepth, setMaxDepth] = useState(1); // Control how many levels deep to show
 
   // Build graph data from element relationships
   const graphData = useMemo(() => {
     const nodes: GraphNode[] = [];
     const links: GraphLink[] = [];
     const addedNodes = new Set<string>();
+    const nodesToProcess: Array<{id: string, level: number}> = [];
 
     // Add center node at origin
     nodes.push({
@@ -118,10 +120,11 @@ export function NetworkView({ selectedElement, className = '' }: NetworkViewProp
       y: 0,
     });
     addedNodes.add(selectedElement.id);
+    nodesToProcess.push({id: selectedElement.id, level: 0});
 
     // Helper to add a node if not already added
     const addNode = (elementId: string, level: number, relationshipType: string): boolean => {
-      if (addedNodes.has(elementId)) return false;
+      if (addedNodes.has(elementId) || level > maxDepth) return false;
       
       const element = elements.get(elementId);
       if (!element) return false;
@@ -134,21 +137,36 @@ export function NetworkView({ selectedElement, className = '' }: NetworkViewProp
         relationshipType,
       });
       addedNodes.add(elementId);
+      
+      // Add to processing queue if we haven't reached max depth
+      if (level < maxDepth) {
+        nodesToProcess.push({id: elementId, level});
+      }
+      
       return true;
     };
 
     // Helper to add a link
     const addLink = (source: string, target: string, type: string) => {
-      links.push({
-        source,
-        target,
-        type,
-        color: RELATIONSHIP_COLORS[type] || RELATIONSHIP_COLORS.default,
-      });
+      // Only add link if both nodes exist
+      if (addedNodes.has(source) && addedNodes.has(target)) {
+        links.push({
+          source,
+          target,
+          type,
+          color: RELATIONSHIP_COLORS[type] || RELATIONSHIP_COLORS.default,
+        });
+      }
     };
 
-    // Extract all relationships from the selected element
-    const processRelationships = () => {
+    // Process relationships for a specific element
+    const processElementRelationships = (elementId: string, currentLevel: number) => {
+      const element = elements.get(elementId);
+      if (!element) return;
+      
+      const nextLevel = currentLevel + 1;
+      if (nextLevel > maxDepth) return;
+
       // Single link fields
       const singleLinkFields = ['location', 'birthplace', 'supertype'];
       
@@ -160,36 +178,36 @@ export function NetworkView({ selectedElement, className = '' }: NetworkViewProp
 
       // Process single link fields
       for (const field of singleLinkFields) {
-        const value = (selectedElement as any)[field];
+        const value = (element as any)[field];
         if (value && typeof value === 'string') {
-          if (addNode(value, 1, field)) {
-            addLink(selectedElement.id, value, field);
+          if (addNode(value, nextLevel, field)) {
+            addLink(elementId, value, field);
           }
         }
       }
 
       // Process array link fields
       for (const field of arrayLinkFields) {
-        const values = (selectedElement as any)[field];
+        const values = (element as any)[field];
         if (Array.isArray(values)) {
           for (const value of values) {
-            if (typeof value === 'string' && addNode(value, 1, field)) {
-              addLink(selectedElement.id, value, field);
+            if (typeof value === 'string' && addNode(value, nextLevel, field)) {
+              addLink(elementId, value, field);
             }
           }
         }
       }
 
       // Find reverse relationships - elements that link TO this element
-      elements.forEach((element) => {
-        if (element.id !== selectedElement.id) {
+      elements.forEach((otherElement) => {
+        if (otherElement.id !== elementId) {
           // Check single link fields
           const reverseFields = ['location', 'birthplace', 'supertype'];
           for (const field of reverseFields) {
-            const value = (element as any)[field];
-            if (value === selectedElement.id) {
-              if (addNode(element.id, 1, `has-${field}`)) {
-                addLink(selectedElement.id, element.id, field);
+            const value = (otherElement as any)[field];
+            if (value === elementId) {
+              if (addNode(otherElement.id, nextLevel, `has-${field}`)) {
+                addLink(elementId, otherElement.id, field);
               }
             }
           }
@@ -200,10 +218,10 @@ export function NetworkView({ selectedElement, className = '' }: NetworkViewProp
             'abilities', 'traits', 'objects', 'institutions', 'members'
           ];
           for (const field of reverseArrayFields) {
-            const values = (element as any)[field];
-            if (Array.isArray(values) && values.includes(selectedElement.id)) {
-              if (addNode(element.id, 1, `is-${field}`)) {
-                addLink(selectedElement.id, element.id, field);
+            const values = (otherElement as any)[field];
+            if (Array.isArray(values) && values.includes(elementId)) {
+              if (addNode(otherElement.id, nextLevel, `is-${field}`)) {
+                addLink(elementId, otherElement.id, field);
               }
             }
           }
@@ -211,43 +229,60 @@ export function NetworkView({ selectedElement, className = '' }: NetworkViewProp
       });
 
       // Special handling for location - show other elements at the same location
-      const location = (selectedElement as any).location;
-      if (location && typeof location === 'string') {
-        // Find all other elements at this location
-        elements.forEach((element) => {
-          if (element.id !== selectedElement.id && 
-              (element as any).location === location &&
-              addNode(element.id, 2, 'co-located')) {
-            addLink(location, element.id, 'contains');
-          }
-        });
+      if (currentLevel === 0) { // Only for the center element
+        const location = (element as any).location;
+        if (location && typeof location === 'string' && maxDepth >= 2) {
+          // Find all other elements at this location
+          elements.forEach((otherElement) => {
+            if (otherElement.id !== elementId && 
+                (otherElement as any).location === location &&
+                addNode(otherElement.id, 2, 'co-located')) {
+              addLink(location, otherElement.id, 'contains');
+            }
+          });
+        }
       }
     };
 
-    processRelationships();
+    // Process nodes level by level
+    let currentIndex = 0;
+    while (currentIndex < nodesToProcess.length) {
+      const { id, level } = nodesToProcess[currentIndex];
+      processElementRelationships(id, level);
+      currentIndex++;
+    }
 
     // Initialize positions for better starting layout
-    const angleStep = (2 * Math.PI) / Math.max(1, nodes.length - 1);
-    nodes.forEach((node, index) => {
-      if (node.level === 0) {
+    // Group nodes by level for better positioning
+    const nodesByLevel = new Map<number, GraphNode[]>();
+    nodes.forEach(node => {
+      const level = node.level;
+      if (!nodesByLevel.has(level)) {
+        nodesByLevel.set(level, []);
+      }
+      nodesByLevel.get(level)!.push(node);
+    });
+    
+    // Position nodes by level
+    nodesByLevel.forEach((levelNodes, level) => {
+      if (level === 0) {
         // Center node at origin
-        node.x = 0;
-        node.y = 0;
-      } else if (node.level === 1) {
-        // First level in inner circle
-        const angle = angleStep * (index - 1);
-        node.x = Math.cos(angle) * 100;
-        node.y = Math.sin(angle) * 100;
+        levelNodes[0].x = 0;
+        levelNodes[0].y = 0;
       } else {
-        // Second level in outer circle
-        const angle = angleStep * (index - 1);
-        node.x = Math.cos(angle) * 150;
-        node.y = Math.sin(angle) * 150;
+        // Position nodes in concentric circles
+        const radius = level * 80; // Increase radius by 80 for each level
+        const angleStep = (2 * Math.PI) / levelNodes.length;
+        levelNodes.forEach((node, index) => {
+          const angle = angleStep * index;
+          node.x = Math.cos(angle) * radius;
+          node.y = Math.sin(angle) * radius;
+        });
       }
     });
 
     return { nodes, links };
-  }, [selectedElement, elements]);
+  }, [selectedElement, elements, maxDepth]);
 
   // Handle node click - navigate to element
   const handleNodeClick = useCallback((node: any) => {
@@ -282,7 +317,8 @@ export function NetworkView({ selectedElement, className = '' }: NetworkViewProp
   const paintNode = useCallback((node: GraphNode, ctx: CanvasRenderingContext2D) => {
     const isHighlighted = hoverNode === null || highlightNodes.has(node.id);
     const isCenter = node.level === 0;
-    const size = isCenter ? 20 : node.level === 1 ? 16 : 12;
+    // Gradually decrease size as we go deeper
+    const size = isCenter ? 20 : Math.max(8, 18 - node.level * 2);
     
     // Draw node circle with gradient
     ctx.beginPath();
@@ -413,19 +449,31 @@ export function NetworkView({ selectedElement, className = '' }: NetworkViewProp
         centerForce.x(0).y(0);
       }
       
+      // Group nodes by level for initial positioning
+      const nodesByLevel = new Map<number, typeof graphData.nodes>();
+      graphData.nodes.forEach(node => {
+        const level = node.level;
+        if (!nodesByLevel.has(level)) {
+          nodesByLevel.set(level, []);
+        }
+        nodesByLevel.get(level)!.push(node);
+      });
+      
       // Initialize node positions around center
-      const angleStep = (2 * Math.PI) / (graphData.nodes.length - 1);
-      graphData.nodes.forEach((node, index) => {
-        if (node.level === 0) {
+      nodesByLevel.forEach((levelNodes, level) => {
+        if (level === 0) {
           // Center node stays at origin
-          node.x = 0;
-          node.y = 0;
+          levelNodes[0].x = 0;
+          levelNodes[0].y = 0;
         } else {
-          // Position other nodes in a circle around center
-          const angle = angleStep * (index - 1);
-          const radius = node.level === 1 ? 100 : 150;
-          node.x = Math.cos(angle) * radius;
-          node.y = Math.sin(angle) * radius;
+          // Position nodes in concentric circles
+          const radius = level * 80;
+          const angleStep = (2 * Math.PI) / levelNodes.length;
+          levelNodes.forEach((node, index) => {
+            const angle = angleStep * index;
+            node.x = Math.cos(angle) * radius;
+            node.y = Math.sin(angle) * radius;
+          });
         }
       });
       
@@ -472,7 +520,7 @@ export function NetworkView({ selectedElement, className = '' }: NetworkViewProp
           nodePointerAreaPaint={(node, color, ctx) => {
             ctx.fillStyle = color;
             ctx.beginPath();
-            const size = node.level === 0 ? 20 : node.level === 1 ? 16 : 12;
+            const size = node.level === 0 ? 20 : Math.max(8, 18 - node.level * 2);
             ctx.arc(node.x || 0, node.y || 0, size, 0, 2 * Math.PI);
             ctx.fill();
           }}
@@ -534,8 +582,33 @@ export function NetworkView({ selectedElement, className = '' }: NetworkViewProp
         </div>
       </div>
 
-      {/* Instructions and Reset */}
+      {/* Controls */}
       <div className="absolute top-4 right-4 flex flex-col gap-2">
+        {/* Depth control */}
+        <div className="bg-slate-100/95 backdrop-blur-sm rounded-lg p-3 shadow-lg">
+          <label className="text-xs font-semibold text-gray-700 block mb-2">
+            Network Depth: {maxDepth}
+          </label>
+          <input
+            type="range"
+            min="1"
+            max="5"
+            value={maxDepth}
+            onChange={(e) => setMaxDepth(parseInt(e.target.value))}
+            className="w-32 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+            style={{
+              background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${((maxDepth - 1) / 4) * 100}%, #e5e7eb ${((maxDepth - 1) / 4) * 100}%, #e5e7eb 100%)`
+            }}
+          />
+          <div className="flex justify-between text-xs text-gray-500 mt-1">
+            <span>1</span>
+            <span>2</span>
+            <span>3</span>
+            <span>4</span>
+            <span>5</span>
+          </div>
+        </div>
+        
         {/* Reset button */}
         <button
           onClick={() => {

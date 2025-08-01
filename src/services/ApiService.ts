@@ -4,22 +4,32 @@ import { analyzeOnlyWorldsField } from './OnlyWorldsFieldTypes';
 const API_BASE_URL = 'https://www.onlyworlds.com/api/worldapi';
 
 // Element types that have their own endpoints
+// Based on the complete list from src/constants/categories.ts
+// TODO: Consider fetching available categories dynamically from API if such endpoint exists
 const ELEMENT_TYPES = [
   'character',
-  'location', 
   'object',
-  'trait',
-  'ability',
-  'institution',
-  'event',
-  'collective',
-  'construct',
-  'creature',
+  'location',
   'family',
+  'creature',
+  'institution',
+  'trait',
+  'species',
+  'zone',
+  'ability',
+  'collective',
+  'title',
   'language',
+  'phenomenon',
   'law',
+  'relation',
+  'event',
+  'construct',
+  'marker',
+  'pin',
   'narrative',
-  'phenomenon'
+  'map',
+  'world'
 ];
 
 // Helper function to extract ID from URL

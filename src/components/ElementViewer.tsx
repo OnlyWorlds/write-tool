@@ -9,6 +9,8 @@ import { CategoryIcon } from '../utils/categoryIcons';
 import { exportElementToPdf, isPdfExportSupported } from '../utils/pdfExport';
 import { FieldRenderer } from './FieldRenderers';
 import { FieldTypeIcon } from './FieldTypeIcon';
+import { useElementSections } from '../hooks/useElementSections';
+import { ChevronDownIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 
 export function ElementViewer() {
   const { elements, worldKey, pin, deleteElement, updateElement, saveElement } = useWorldContext();
@@ -25,8 +27,11 @@ export function ElementViewer() {
   const [sortAlphabetically, setSortAlphabetically] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [isSavingAll, setIsSavingAll] = useState(false);
+  const [hideSections, setHideSections] = useState(false);
+  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
   
   const selectedElement = selectedElementId ? elements.get(selectedElementId) : null;
+  const { sections } = useElementSections(selectedElement?.category);
   
   // Get all unsaved edits for current element by checking each field
   const unsavedFieldsForElement: Array<{ fieldName: string; value: any }> = [];
@@ -42,7 +47,66 @@ export function ElementViewer() {
   // Reset hidden fields when element changes
   useEffect(() => {
     resetHiddenFields();
+    setCollapsedSections(new Set());
   }, [selectedElementId, resetHiddenFields]);
+  
+  const toggleSection = (sectionName: string) => {
+    setCollapsedSections(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(sectionName)) {
+        newSet.delete(sectionName);
+      } else {
+        newSet.add(sectionName);
+      }
+      return newSet;
+    });
+  };
+  
+  // Organize fields by sections
+  const organizeFieldsBySection = () => {
+    const categoryFields = fields.filter(([fieldName]) => !baseFields.includes(fieldName));
+    
+    if (!sections || hideSections) {
+      // Return single section with all fields
+      return [{ name: 'Fields', fields: categoryFields, order: 0 }];
+    }
+    
+    const fieldMap = new Map(categoryFields);
+    const organizedSections: Array<{ name: string; fields: Array<[string, any]>; order: number }> = [];
+    
+    // Add fields according to sections
+    sections.forEach(section => {
+      const sectionFields: Array<[string, any]> = [];
+      section.fields.forEach(fieldName => {
+        const normalizedFieldName = fieldName.replace(/_/g, '').toLowerCase();
+        
+        // Find matching field (handle different naming conventions)
+        const matchingField = categoryFields.find(([fn]) => {
+          const normalizedFn = fn.replace(/_/g, '').toLowerCase();
+          return normalizedFn === normalizedFieldName || 
+                 normalizedFn === normalizedFieldName + 'ids' ||
+                 normalizedFn === normalizedFieldName + 'id';
+        });
+        
+        if (matchingField) {
+          sectionFields.push(matchingField);
+          fieldMap.delete(matchingField[0]);
+        }
+      });
+      
+      if (sectionFields.length > 0) {
+        organizedSections.push({ name: section.name, fields: sectionFields, order: section.order });
+      }
+    });
+    
+    // Add remaining fields to "Other" section
+    const remainingFields = Array.from(fieldMap.entries());
+    if (remainingFields.length > 0) {
+      organizedSections.push({ name: 'Other', fields: remainingFields, order: 999 });
+    }
+    
+    return organizedSections.sort((a, b) => a.order - b.order);
+  };
   
   if (!selectedElement) {
     return (
@@ -54,7 +118,7 @@ export function ElementViewer() {
   
   // Get all fields except system fields and name (name is now editable in header)
   let fields = Object.entries(selectedElement).filter(([key]) => 
-    !['id', 'created_at', 'updated_at', 'name'].includes(key)
+    !['id', 'created_at', 'updated_at', 'name', 'category'].includes(key)
   );
   
   // Sort fields alphabetically if enabled
@@ -403,6 +467,15 @@ export function ElementViewer() {
                     />
                     <span className="text-text-light/60">Sort A-Z</span>
                   </label>
+                  <label className="flex items-center gap-2 cursor-pointer text-sm">
+                    <input
+                      type="checkbox"
+                      checked={hideSections}
+                      onChange={(e) => setHideSections(e.target.checked)}
+                      className="w-4 h-4 text-accent rounded border-gray-300 focus:ring-accent"
+                    />
+                    <span className="text-text-light/60">Hide sections</span>
+                  </label>
               </div>
             </div>
           </div>
@@ -512,8 +585,50 @@ export function ElementViewer() {
             </div>
             
             {/* Category-specific fields section */}
-            <div className="pt-4 space-y-3">
-              {fields.filter(([fieldName]) => !baseFields.includes(fieldName)).map(([fieldName, originalValue]) => {
+            <div className="pt-4">
+              {organizeFieldsBySection().map(section => {
+                const isCollapsed = collapsedSections.has(section.name);
+                const hasVisibleFields = section.fields.some(([fieldName, value]) => {
+                  const isEmpty = !value || (Array.isArray(value) && value.length === 0);
+                  const fieldVisible = isFieldVisible(fieldName);
+                  
+                  if (editMode === 'showcase' && (!fieldVisible || isEmpty)) {
+                    return false;
+                  }
+                  if (editMode === 'edit' && hideEmptyFields && isEmpty) {
+                    return false;
+                  }
+                  return true;
+                });
+                
+                if (!hasVisibleFields) return null;
+                
+                return (
+                  <div key={section.name} className="mb-4">
+                    {/* Section header - only show if we have sections and this isn't the fallback "Fields" section */}
+                    {(!hideSections && sections && section.name !== 'Fields') && (
+                      <button
+                        onClick={() => toggleSection(section.name)}
+                        className="flex items-center gap-2 w-full text-left mb-3 px-3 py-2 bg-sidebar-dark hover:bg-sidebar-dark/80 rounded-lg transition-all group"
+                      >
+                        {isCollapsed ? (
+                          <ChevronRightIcon className="w-4 h-4 text-slate-600 group-hover:text-slate-700" />
+                        ) : (
+                          <ChevronDownIcon className="w-4 h-4 text-slate-600 group-hover:text-slate-700" />
+                        )}
+                        <span className="text-base font-semibold text-slate-800 flex-1">
+                          {section.name}
+                        </span>
+                        <span className="text-sm text-slate-600 font-medium">
+                          {section.fields.length}
+                        </span>
+                      </button>
+                    )}
+                    
+                    {/* Section fields */}
+                    {!isCollapsed && (
+                      <div className={`space-y-3 ${(!hideSections && sections && section.name !== 'Fields') ? 'pl-2' : ''}`}>
+                        {section.fields.map(([fieldName, originalValue]) => {
                 const editedValue = selectedElementId ? getEditedValue(selectedElementId, fieldName) : undefined;
                 const value = editedValue !== undefined ? editedValue : originalValue;
                 const isEdited = editedValue !== undefined;
@@ -609,6 +724,11 @@ export function ElementViewer() {
                         </div>
                       )}
                     </div>
+                  </div>
+                );
+                        })}
+                      </div>
+                    )}
                   </div>
                 );
               })}

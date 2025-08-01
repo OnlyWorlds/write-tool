@@ -13,6 +13,7 @@ interface SidebarState {
   openCreateModal: (category: string) => void;
   closeCreateModal: () => void;
   expandAllCategories: (categories: string[]) => void;
+  toggleAllCategories: (categories: string[]) => void;
 }
 
 export const useSidebarStore = create<SidebarState>((set) => ({
@@ -35,6 +36,15 @@ export const useSidebarStore = create<SidebarState>((set) => ({
   openCreateModal: (category) => set({ createModalOpen: true, createModalCategory: category }),
   closeCreateModal: () => set({ createModalOpen: false, createModalCategory: null }),
   expandAllCategories: (categories) => set({ expandedCategories: new Set(categories) }),
+  toggleAllCategories: (categories) => set((state) => {
+    // If any categories are expanded, collapse all. Otherwise, expand all.
+    const anyExpanded = categories.some(cat => state.expandedCategories.has(cat));
+    if (anyExpanded) {
+      return { expandedCategories: new Set() };
+    } else {
+      return { expandedCategories: new Set(categories) };
+    }
+  }),
 }));
 
 interface EditorState {

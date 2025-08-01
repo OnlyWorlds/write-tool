@@ -5,11 +5,11 @@ import { useWorldContext } from '../contexts/WorldContext';
 import { ApiService } from '../services/ApiService';
 import { useSidebarStore } from '../stores/uiStore';
 import { CategoryIcon } from '../utils/categoryIcons';
-import { PlusIcon, SearchIcon, TrashIcon } from './icons';
+import { PlusIcon, SearchIcon, TrashIcon, ExpandAllIcon, CollapseAllIcon } from './icons';
 
 export function CategorySidebar() {
   const { categories, worldKey, pin, deleteElement } = useWorldContext();
-  const { expandedCategories, selectedElementId, filterText, toggleCategory, selectElement, openCreateModal, setFilterText, expandAllCategories } = useSidebarStore();
+  const { expandedCategories, selectedElementId, filterText, toggleCategory, selectElement, openCreateModal, setFilterText, expandAllCategories, toggleAllCategories } = useSidebarStore();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
@@ -68,27 +68,39 @@ export function CategorySidebar() {
   return (
     <aside className="w-64 bg-sidebar border-r border-sidebar-dark flex flex-col h-full">
       <div className="p-4 border-b border-sidebar-dark bg-sidebar-dark">
-        <div className="relative">
-          <div className="absolute left-3 top-2 text-slate-500">
-            <SearchIcon />
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <div className="absolute left-3 top-2 text-slate-500">
+              <SearchIcon />
+            </div>
+            <input
+              ref={searchInputRef}
+              type="text"
+              placeholder="filter.."
+              value={filterText}
+              onChange={(e) => setFilterText(e.target.value)}
+              className="w-full pl-10 pr-8 py-1.5 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent bg-white text-slate-700 placeholder-slate-400"
+            />
+            {filterText && (
+              <button
+                onClick={() => setFilterText('')}
+                className="absolute right-2 top-1.5 text-slate-500 hover:text-slate-700"
+                title="Clear search"
+              >
+                ×
+              </button>
+            )}
           </div>
-          <input
-            ref={searchInputRef}
-            type="text"
-            placeholder="filter.."
-            value={filterText}
-            onChange={(e) => setFilterText(e.target.value)}
-            className="w-full pl-10 pr-8 py-1.5 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent bg-white text-slate-700 placeholder-slate-400"
-          />
-          {filterText && (
-            <button
-              onClick={() => setFilterText('')}
-              className="absolute right-2 top-1.5 text-slate-500 hover:text-slate-700"
-              title="Clear search"
-            >
-              ×
-            </button>
-          )}
+          <button
+            onClick={() => {
+              const categoryNames = Array.from(categories.keys());
+              toggleAllCategories(categoryNames);
+            }}
+            className="p-2 border border-slate-300 rounded-md hover:bg-slate-100 text-slate-600 hover:text-slate-800 transition-colors"
+            title={expandedCategories.size > 0 ? "Collapse all categories" : "Expand all categories"}
+          >
+            {expandedCategories.size > 0 ? <CollapseAllIcon /> : <ExpandAllIcon />}
+          </button>
         </div>
       </div>
       

@@ -1,7 +1,9 @@
+import { ChevronDownIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { useWorldContext } from '../contexts/WorldContext';
+import { useElementSections } from '../hooks/useElementSections';
 import { ApiService, type ShowcasePublishRequest } from '../services/ApiService';
 import { detectFieldType } from '../services/FieldTypeDetector';
 import { useEditorStore, useSidebarStore } from '../stores/uiStore';
@@ -9,9 +11,7 @@ import { CategoryIcon } from '../utils/categoryIcons';
 import { exportElementToPdf, isPdfExportSupported } from '../utils/pdfExport';
 import { FieldRenderer } from './FieldRenderers';
 import { FieldTypeIcon } from './FieldTypeIcon';
-import { useElementSections } from '../hooks/useElementSections';
-import { ChevronDownIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
-import { ExpandAllIcon, CollapseAllIcon } from './icons';
+import { CollapseAllIcon, ExpandAllIcon } from './icons';
 
 export function ElementViewer() {
   const { elements, worldKey, pin, deleteElement, updateElement, saveElement } = useWorldContext();
@@ -284,7 +284,7 @@ export function ElementViewer() {
   
   
   return (
-    <div className={`flex-1 overflow-y-auto h-screen pb-32 pr-96 ${editMode === 'showcase' ? 'max-w-4xl mx-auto' : ''}`}>
+    <div className="flex-1 overflow-y-auto h-screen pb-32 pr-96">
       <div className="p-6 max-w-5xl">
         <div 
           id={editMode === 'showcase' ? `showcase-${selectedElementId}` : undefined}
@@ -365,6 +365,7 @@ export function ElementViewer() {
                       }}
                       className="p-2 text-slate-500 hover:text-slate-700 hover:bg-white/20 rounded-lg transition-all"
                       title={collapsedSections.size > 0 ? "Expand all sections" : "Collapse all sections"}
+                      data-exclude-from-export
                     >
                       {collapsedSections.size > 0 ? <ExpandAllIcon /> : <CollapseAllIcon />}
                     </button>
@@ -375,6 +376,7 @@ export function ElementViewer() {
                       onClick={() => setShowOptions(!showOptions)}
                       className="p-2 text-slate-500 hover:text-slate-700 hover:bg-white/20 rounded-lg transition-all"
                       title="Field Options"
+                      data-exclude-from-export
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -384,13 +386,14 @@ export function ElementViewer() {
                   )}
                   {unsavedFieldsForElement.length > 0 && editMode === 'edit' && (
                     <>
-                      <span className="text-sm text-accent bg-info-bg px-3 py-1 rounded-full">
+                      <span className="text-sm text-accent bg-info-bg px-3 py-1 rounded-full" data-exclude-from-export>
                         {unsavedFieldsForElement.length} unsaved {unsavedFieldsForElement.length === 1 ? 'change' : 'changes'}
                       </span>
                       <button
                         onClick={handleSaveAll}
                         disabled={isSavingAll}
                         className="text-sm text-white bg-green-600 hover:bg-green-700 px-3 py-1 rounded-full transition-colors disabled:opacity-50"
+                        data-exclude-from-export
                       >
                         {isSavingAll ? 'Saving...' : 'Save All'}
                       </button>
@@ -398,6 +401,7 @@ export function ElementViewer() {
                         onClick={handleDiscardAll}
                         disabled={isSavingAll}
                         className="text-sm text-slate-600 bg-slate-200 hover:bg-slate-300 px-3 py-1 rounded-full transition-colors disabled:opacity-50"
+                        data-exclude-from-export
                       >
                         Discard All
                       </button>
@@ -409,16 +413,18 @@ export function ElementViewer() {
                         onClick={handlePublishShowcase}
                         disabled={isPublishing}
                         className="text-sm text-white bg-accent hover:bg-accent-hover px-3 py-1 rounded-full transition-colors disabled:opacity-50"
+                        data-exclude-from-export
                       >
-                        {isPublishing ? 'publishing...' : 'publish'}
+                        {isPublishing ? 'Publishing...' : 'Publish'}
                       </button>
                       {isPdfExportSupported() && (
                         <button
                           onClick={handleExport}
                           disabled={isExporting}
                           className="text-sm text-accent hover:text-accent-hover bg-info-bg hover:bg-info-bg/80 px-3 py-1 rounded-full transition-colors disabled:opacity-50"
+                          data-exclude-from-export
                         >
-                          {isExporting ? 'exporting...' : 'export pdf'}
+                          {isExporting ? 'Creating PDF...' : 'Create PDF'}
                         </button>
                       )}
                     </>
@@ -431,6 +437,7 @@ export function ElementViewer() {
                         ? 'bg-blue-500 hover:bg-blue-600 text-white' 
                         : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
                     }`}
+                    data-exclude-from-export
                   >
                     {editMode === 'edit' ? (
                       <>
@@ -445,7 +452,7 @@ export function ElementViewer() {
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>
-                        <span>Edit Mode</span>
+                        <span>Edit</span>
                       </>
                     )}
                   </button>
@@ -453,7 +460,7 @@ export function ElementViewer() {
               </div>
             </div>
             {/* Options row at bottom - always takes up space */}
-            <div className="h-10 px-6 flex items-center">
+            <div className="h-10 px-6 flex items-center" data-exclude-from-export>
               <div className={`flex items-center gap-6 justify-end w-full transition-opacity duration-200 ${showOptions && editMode === 'edit' ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
                   <label className="flex items-center gap-2 cursor-pointer text-sm">
                     <input
@@ -634,6 +641,7 @@ export function ElementViewer() {
                       <button
                         onClick={() => toggleSection(section.name)}
                         className="flex items-center gap-2 w-full text-left mb-3 px-3 py-2 bg-sidebar-dark hover:bg-sidebar-dark/80 rounded-lg transition-all group"
+                        data-exclude-from-export
                       >
                         {isCollapsed ? (
                           <ChevronRightIcon className="w-4 h-4 text-slate-600 group-hover:text-slate-700" />

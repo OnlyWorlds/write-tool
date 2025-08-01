@@ -19,6 +19,10 @@ export function EditArea() {
   const currentValue = editedValue !== undefined ? editedValue : originalValue;
   const error = selectedElementId && selectedFieldId ? getFieldError(selectedElementId, selectedFieldId) : null;
   
+  // Get the edited supertype value if it exists
+  const editedSupertype = selectedElementId ? getEditedValue(selectedElementId, 'supertype') : undefined;
+  const currentSupertype = editedSupertype !== undefined ? editedSupertype : selectedElement?.supertype;
+  
   const handleChange = (value: any) => {
     if (selectedElementId && selectedFieldId) {
       setFieldValue(selectedElementId, selectedFieldId, value);
@@ -136,7 +140,10 @@ export function EditArea() {
             mode={editMode === 'edit' ? 'edit' : 'view'}
             onChange={handleChange}
             className="h-auto"
-            selectedElement={selectedElement}
+            selectedElement={{
+              ...selectedElement,
+              supertype: currentSupertype // Use the current (potentially edited) supertype
+            }}
           />
           {error && (
             <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">

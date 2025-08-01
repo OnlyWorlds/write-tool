@@ -187,6 +187,7 @@ const FieldEditor = memo(function FieldEditor({ fieldName, value, fieldTypeInfo,
   const [supertypes, setSupertypes] = useState<string[]>([]);
   const [subtypes, setSubtypes] = useState<string[]>([]);
   const [isLoadingTypes, setIsLoadingTypes] = useState(false);
+  const [lastLoadedSupertype, setLastLoadedSupertype] = useState<string | null>(null);
   
   useEffect(() => {
     setLocalValue(value);
@@ -210,21 +211,29 @@ const FieldEditor = memo(function FieldEditor({ fieldName, value, fieldTypeInfo,
   
   // Load subtypes when supertype changes
   useEffect(() => {
-    if (fieldName === 'subtype' && elementCategory && selectedElement?.supertype) {
-      setIsLoadingTypes(true);
-      TypeManagementService.getSubtypesAsync(elementCategory, selectedElement.supertype)
-        .then(types => {
-          setSubtypes(types);
-          setIsLoadingTypes(false);
-        })
-        .catch(error => {
-          console.error('Failed to load subtypes:', error);
-          setIsLoadingTypes(false);
-        });
-    } else if (fieldName === 'subtype') {
+    const currentSupertype = selectedElement?.supertype;
+    
+    if (fieldName === 'subtype' && elementCategory && currentSupertype) {
+      // Only load if supertype has changed
+      if (currentSupertype !== lastLoadedSupertype) {
+        setIsLoadingTypes(true);
+        setLastLoadedSupertype(currentSupertype);
+        
+        TypeManagementService.getSubtypesAsync(elementCategory, currentSupertype)
+          .then(types => {
+            setSubtypes(types);
+            setIsLoadingTypes(false);
+          })
+          .catch(error => {
+            console.error('Failed to load subtypes:', error);
+            setIsLoadingTypes(false);
+          });
+      }
+    } else if (fieldName === 'subtype' && !currentSupertype) {
       setSubtypes([]);
+      setLastLoadedSupertype(null);
     }
-  }, [fieldName, elementCategory, selectedElement?.supertype]);
+  }, [fieldName, elementCategory, selectedElement?.supertype, lastLoadedSupertype]);
   
   const handleChange = (newValue: any) => {
     setLocalValue(newValue);

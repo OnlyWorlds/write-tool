@@ -3,6 +3,7 @@ import ForceGraph2D from 'react-force-graph-2d';
 import { useNavigate } from 'react-router-dom';
 import { useWorldContext } from '../contexts/WorldContext';
 import type { Element } from '../types/world';
+import { getCategoryIconName } from '../utils/categoryIcons';
 
 interface NetworkViewProps {
   selectedElement: Element;
@@ -30,33 +31,66 @@ interface GraphLink {
   color?: string;
 }
 
-// Relationship types and their colors
+// Relationship types and their colors - enhanced for better contrast
 const RELATIONSHIP_COLORS: Record<string, string> = {
-  friends: '#10b981', // green
-  family: '#f59e0b', // amber
-  rivals: '#ef4444', // red
-  location: '#3b82f6', // blue
-  institutions: '#8b5cf6', // purple
-  species: '#ec4899', // pink
-  languages: '#06b6d4', // cyan
-  abilities: '#f97316', // orange
-  traits: '#84cc16', // lime
-  objects: '#6366f1', // indigo
-  default: '#6b7280', // gray
+  friends: '#059669', // emerald-600
+  family: '#dc2626', // red-600
+  rivals: '#7c2d12', // orange-900
+  location: '#2563eb', // blue-600
+  birthplace: '#1e3a8a', // blue-900
+  institutions: '#7c3aed', // violet-600
+  species: '#db2777', // pink-600
+  languages: '#0891b2', // cyan-600
+  abilities: '#ea580c', // orange-600
+  traits: '#65a30d', // lime-600
+  objects: '#4f46e5', // indigo-600
+  'has-location': '#059669', // emerald-600
+  'is-location': '#059669', // emerald-600
+  'co-located': '#16a34a', // green-600
+  contains: '#14b8a6', // teal-600
+  default: '#4b5563', // gray-600
 };
 
-// Node colors by category
+// Node colors by category - enhanced palette
 const NODE_COLORS: Record<string, string> = {
-  character: '#1e40af',
-  location: '#065f46',
-  family: '#7c2d12',
-  institution: '#4c1d95',
-  species: '#701a75',
-  object: '#713f12',
-  trait: '#14532d',
-  ability: '#7c2d12',
-  language: '#0c4a6e',
-  default: '#1f2937',
+  character: '#3b82f6', // blue-500
+  location: '#10b981', // emerald-500
+  family: '#f59e0b', // amber-500
+  institution: '#8b5cf6', // violet-500
+  species: '#ec4899', // pink-500
+  object: '#f97316', // orange-500
+  trait: '#84cc16', // lime-500
+  ability: '#06b6d4', // cyan-500
+  language: '#14b8a6', // teal-500
+  creature: '#ef4444', // red-500
+  default: '#6b7280', // gray-500
+};
+
+// Icon map for categories (Material Icons font names)
+const CATEGORY_ICONS: Record<string, string> = {
+  character: 'person',
+  location: 'castle',
+  family: 'supervisor_account',
+  creature: 'bug_report',
+  institution: 'business',
+  trait: 'ac_unit',
+  species: 'child_care',
+  ability: 'auto_fix_high',
+  language: 'translate',
+  object: 'hub',
+  map: 'map',
+  zone: 'architecture',
+  collective: 'groups',
+  title: 'military_tech',
+  phenomenon: 'thunderstorm',
+  law: 'gavel',
+  event: 'event',
+  construct: 'api',
+  marker: 'place',
+  pin: 'push_pin',
+  narrative: 'menu_book',
+  world: 'public',
+  default: 'category',
 };
 
 export function NetworkView({ selectedElement, className = '' }: NetworkViewProps) {
@@ -244,39 +278,111 @@ export function NetworkView({ selectedElement, className = '' }: NetworkViewProp
     setHoverNode(node?.id || null);
   }, [graphData.links]);
 
-  // Paint nodes
+  // Paint nodes with icons and improved design
   const paintNode = useCallback((node: GraphNode, ctx: CanvasRenderingContext2D) => {
     const isHighlighted = hoverNode === null || highlightNodes.has(node.id);
     const isCenter = node.level === 0;
-    const size = isCenter ? 16 : node.level === 1 ? 12 : 8;
+    const size = isCenter ? 20 : node.level === 1 ? 16 : 12;
     
-    // Draw node circle
+    // Draw node circle with gradient
     ctx.beginPath();
     ctx.arc(node.x || 0, node.y || 0, size, 0, 2 * Math.PI);
     
-    // Fill color based on category
+    // Create gradient for depth
+    const gradient = ctx.createRadialGradient(
+      (node.x || 0) - size/3, (node.y || 0) - size/3, 0,
+      node.x || 0, node.y || 0, size
+    );
+    
     const baseColor = NODE_COLORS[node.category] || NODE_COLORS.default;
-    ctx.fillStyle = isHighlighted ? baseColor : `${baseColor}33`;
+    if (isHighlighted) {
+      gradient.addColorStop(0, `${baseColor}ee`);
+      gradient.addColorStop(1, baseColor);
+    } else {
+      gradient.addColorStop(0, `${baseColor}66`);
+      gradient.addColorStop(1, `${baseColor}44`);
+    }
+    
+    ctx.fillStyle = gradient;
     ctx.fill();
     
-    // Border
+    // Border with glow effect for center node
+    if (isCenter) {
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = baseColor;
+    }
     ctx.strokeStyle = isCenter ? '#ffffff' : baseColor;
-    ctx.lineWidth = isCenter ? 3 : 1;
+    ctx.lineWidth = isCenter ? 3 : 2;
     ctx.stroke();
+    ctx.shadowBlur = 0;
     
-    // Draw label
+    // Draw icon using Material Icons font
+    const iconName = CATEGORY_ICONS[node.category] || CATEGORY_ICONS.default;
+    ctx.font = `${isCenter ? '16px' : '12px'} "Material Icons Outlined"`;
+    ctx.fillStyle = isHighlighted ? '#ffffff' : '#ffffffaa';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(iconName, node.x || 0, node.y || 0);
+    
+    // Draw label with background for better readability
     if (isHighlighted) {
-      ctx.font = `${isCenter ? '18px' : '14px'} Arial`;
+      const fontSize = isCenter ? 14 : 12;
+      ctx.font = `${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
       ctx.textAlign = 'center';
-      ctx.textBaseline = 'top';
-      ctx.fillStyle = isHighlighted ? '#000000' : '#666666';
-      ctx.fillText(node.name, node.x || 0, (node.y || 0) + size + 4);
       
-      // Show relationship type for non-center nodes
+      // Measure text for background
+      const nameMetrics = ctx.measureText(node.name);
+      const labelY = (node.y || 0) + size + 8;
+      
+      // Draw name background
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
+      ctx.lineWidth = 1;
+      const padding = 4;
+      const bgHeight = fontSize + padding * 2;
+      
+      ctx.beginPath();
+      ctx.roundRect(
+        (node.x || 0) - nameMetrics.width / 2 - padding,
+        labelY - bgHeight / 2,
+        nameMetrics.width + padding * 2,
+        bgHeight,
+        4
+      );
+      ctx.fill();
+      ctx.stroke();
+      
+      // Draw name text
+      ctx.fillStyle = '#1f2937';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(node.name, node.x || 0, labelY);
+      
+      // Show relationship type for non-center nodes with better styling
       if (node.relationshipType && !isCenter) {
-        ctx.font = '10px Arial';
-        ctx.fillStyle = '#666666';
-        ctx.fillText(`(${node.relationshipType})`, node.x || 0, (node.y || 0) + size + 14);
+        const relY = labelY + bgHeight / 2 + 8;
+        const relText = node.relationshipType.replace(/-/g, ' ');
+        const relMetrics = ctx.measureText(relText);
+        
+        // Relationship background
+        ctx.font = '10px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        ctx.fillStyle = RELATIONSHIP_COLORS[node.relationshipType] || RELATIONSHIP_COLORS.default;
+        ctx.globalAlpha = 0.15;
+        ctx.beginPath();
+        ctx.roundRect(
+          (node.x || 0) - relMetrics.width / 2 - 3,
+          relY - 6,
+          relMetrics.width + 6,
+          12,
+          3
+        );
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        
+        // Relationship text
+        ctx.fillStyle = RELATIONSHIP_COLORS[node.relationshipType] || RELATIONSHIP_COLORS.default;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(relText, node.x || 0, relY);
       }
     }
   }, [highlightNodes, hoverNode]);
@@ -366,7 +472,8 @@ export function NetworkView({ selectedElement, className = '' }: NetworkViewProp
           nodePointerAreaPaint={(node, color, ctx) => {
             ctx.fillStyle = color;
             ctx.beginPath();
-            ctx.arc(node.x || 0, node.y || 0, node.level === 0 ? 16 : node.level === 1 ? 12 : 8, 0, 2 * Math.PI);
+            const size = node.level === 0 ? 20 : node.level === 1 ? 16 : 12;
+            ctx.arc(node.x || 0, node.y || 0, size, 0, 2 * Math.PI);
             ctx.fill();
           }}
           linkColor={getLinkColor}
@@ -410,16 +517,19 @@ export function NetworkView({ selectedElement, className = '' }: NetworkViewProp
               activeRelationships.add(link.type);
             });
             
-            // Show only active relationships
-            return Array.from(activeRelationships).sort().map(type => (
-              <div key={type} className="flex items-center gap-2">
-                <div 
-                  className="w-3 h-3 rounded-full" 
-                  style={{ backgroundColor: RELATIONSHIP_COLORS[type] || RELATIONSHIP_COLORS.default }}
-                />
-                <span className="text-xs text-gray-600">{type}</span>
-              </div>
-            ));
+            // Show only active relationships with formatted names
+            return Array.from(activeRelationships).sort().map(type => {
+              const displayName = type.replace(/-/g, ' ');
+              return (
+                <div key={type} className="flex items-center gap-2">
+                  <div 
+                    className="w-3 h-3 rounded-full border border-gray-300" 
+                    style={{ backgroundColor: RELATIONSHIP_COLORS[type] || RELATIONSHIP_COLORS.default }}
+                  />
+                  <span className="text-xs text-gray-600 capitalize">{displayName}</span>
+                </div>
+              );
+            });
           })()}
         </div>
       </div>

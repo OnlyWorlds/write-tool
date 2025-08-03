@@ -102,6 +102,7 @@ export function NetworkView({ selectedElement, className = '' }: NetworkViewProp
   const [highlightLinks, setHighlightLinks] = useState(new Set<string>());
   const [hoverNode, setHoverNode] = useState<string | null>(null);
   const [maxDepth, setMaxDepth] = useState(1); // Control how many levels deep to show
+  const [selectedRelationships, setSelectedRelationships] = useState<Set<string>>(new Set()); // Filter relationships
 
   // Build graph data from element relationships
   const graphData = useMemo(() => {
@@ -150,12 +151,15 @@ export function NetworkView({ selectedElement, className = '' }: NetworkViewProp
     const addLink = (source: string, target: string, type: string) => {
       // Only add link if both nodes exist
       if (addedNodes.has(source) && addedNodes.has(target)) {
-        links.push({
-          source,
-          target,
-          type,
-          color: RELATIONSHIP_COLORS[type] || RELATIONSHIP_COLORS.default,
-        });
+        // If relationships are selected, only add if this type is selected
+        if (selectedRelationships.size === 0 || selectedRelationships.has(type)) {
+          links.push({
+            source,
+            target,
+            type,
+            color: RELATIONSHIP_COLORS[type] || RELATIONSHIP_COLORS.default,
+          });
+        }
       }
     };
 
@@ -168,7 +172,7 @@ export function NetworkView({ selectedElement, className = '' }: NetworkViewProp
       if (nextLevel > maxDepth) return;
 
       // Single link fields
-      const singleLinkFields = ['location', 'birthplace', 'supertype'];
+      const singleLinkFields = ['location', 'birthplace'];
       
       // Array link fields
       const arrayLinkFields = [
@@ -202,7 +206,7 @@ export function NetworkView({ selectedElement, className = '' }: NetworkViewProp
       elements.forEach((otherElement) => {
         if (otherElement.id !== elementId) {
           // Check single link fields
-          const reverseFields = ['location', 'birthplace', 'supertype'];
+          const reverseFields = ['location', 'birthplace'];
           for (const field of reverseFields) {
             const value = (otherElement as any)[field];
             if (value === elementId) {
@@ -282,7 +286,7 @@ export function NetworkView({ selectedElement, className = '' }: NetworkViewProp
     });
 
     return { nodes, links };
-  }, [selectedElement, elements, maxDepth]);
+  }, [selectedElement, elements, maxDepth, selectedRelationships]);
 
   // Handle node click - navigate to element
   const handleNodeClick = useCallback((node: any) => {
@@ -556,26 +560,119 @@ export function NetworkView({ selectedElement, className = '' }: NetworkViewProp
 
       {/* Legend - context aware based on relationships actually shown */}
       <div className="absolute bottom-16 left-4 bg-slate-100/95 backdrop-blur-sm rounded-lg p-3 shadow-lg max-h-48 overflow-y-auto">
-        <h4 className="text-xs font-semibold mb-2 text-gray-700">Relationships</h4>
+        <div className="flex items-center justify-between mb-2">
+          <h4 className="text-xs font-semibold text-gray-700">Relationships</h4>
+          {selectedRelationships.size > 0 && (
+            <button
+              onClick={() => setSelectedRelationships(new Set())}
+              className="text-xs text-blue-600 hover:text-blue-800"
+            >
+              Clear
+            </button>
+          )}
+        </div>
         <div className="space-y-1">
           {(() => {
-            // Collect unique relationship types from current graph
-            const activeRelationships = new Set<string>();
-            graphData.links.forEach(link => {
-              activeRelationships.add(link.type);
-            });
+            // Collect all possible relationship types from the full graph
+            const allRelationshipTypes = new Set<string>();
             
-            // Show only active relationships with formatted names
-            return Array.from(activeRelationships).sort().map(type => {
+            // Build full graph without filters to get all relationship types
+            const tempLinks: GraphLink[] = [];
+            const tempAddedNodes = new Set<string>();
+            const tempNodesToProcess: Array<{id: string, level: number}> = [];
+            
+            tempAddedNodes.add(selectedElement.id);
+            tempNodesToProcess.push({id: selectedElement.id, level: 0});
+            
+            // Same traversal logic but collect all relationship types
+            const collectRelationshipTypes = (elementId: string, currentLevel: number) => {
+              const element = elements.get(elementId);
+              if (!element) return;
+              
+              const nextLevel = currentLevel + 1;
+              if (nextLevel > maxDepth) return;
+
+              const singleLinkFields = ['location', 'birthplace'];
+              const arrayLinkFields = [
+                'friends', 'family', 'rivals', 'species', 'languages', 
+                'abilities', 'traits', 'objects', 'institutions', 'members'
+              ];
+
+              for (const field of singleLinkFields) {
+                const value = (element as any)[field];
+                if (value && typeof value === 'string') {
+                  allRelationshipTypes.add(field);
+                }
+              }
+
+              for (const field of arrayLinkFields) {
+                const values = (element as any)[field];
+                if (Array.isArray(values) && values.length > 0) {
+                  allRelationshipTypes.add(field);
+                }
+              }
+
+              // Check reverse relationships
+              elements.forEach((otherElement) => {
+                if (otherElement.id !== elementId) {
+                  for (const field of singleLinkFields) {
+                    const value = (otherElement as any)[field];
+                    if (value === elementId) {
+                      allRelationshipTypes.add(field);
+                    }
+                  }
+
+                  for (const field of arrayLinkFields) {
+                    const values = (otherElement as any)[field];
+                    if (Array.isArray(values) && values.includes(elementId)) {
+                      allRelationshipTypes.add(field);
+                    }
+                  }
+                }
+              });
+            };
+            
+            let tempIndex = 0;
+            while (tempIndex < tempNodesToProcess.length) {
+              const { id, level } = tempNodesToProcess[tempIndex];
+              collectRelationshipTypes(id, level);
+              tempIndex++;
+            }
+            
+            // Show all possible relationships with selection state
+            return Array.from(allRelationshipTypes).sort().map(type => {
               const displayName = type.replace(/-/g, ' ');
+              const isSelected = selectedRelationships.has(type);
+              const isActive = selectedRelationships.size === 0 || isSelected;
+              
               return (
-                <div key={type} className="flex items-center gap-2">
+                <button
+                  key={type}
+                  onClick={() => {
+                    const newSelected = new Set(selectedRelationships);
+                    if (isSelected) {
+                      newSelected.delete(type);
+                    } else {
+                      newSelected.add(type);
+                    }
+                    setSelectedRelationships(newSelected);
+                  }}
+                  className={`w-full flex items-center gap-2 px-1 py-0.5 rounded hover:bg-gray-200 transition-colors ${
+                    isActive ? '' : 'opacity-40'
+                  }`}
+                >
                   <div 
-                    className="w-3 h-3 rounded-full border border-gray-300" 
+                    className={`w-3 h-3 rounded-full border ${
+                      isSelected ? 'border-gray-600 ring-2 ring-blue-500' : 'border-gray-300'
+                    }`}
                     style={{ backgroundColor: RELATIONSHIP_COLORS[type] || RELATIONSHIP_COLORS.default }}
                   />
-                  <span className="text-xs text-gray-600 capitalize">{displayName}</span>
-                </div>
+                  <span className={`text-xs capitalize ${
+                    isActive ? 'text-gray-700 font-medium' : 'text-gray-500'
+                  }`}>
+                    {displayName}
+                  </span>
+                </button>
               );
             });
           })()}

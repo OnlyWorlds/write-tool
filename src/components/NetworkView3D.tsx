@@ -78,6 +78,7 @@ export function NetworkView3D({ selectedElement, className = '' }: NetworkView3D
   const [highlightLinks, setHighlightLinks] = useState(new Set<string>());
   const [hoverNode, setHoverNode] = useState<string | null>(null);
   const [maxDepth, setMaxDepth] = useState(1);
+  const [selectedRelationships, setSelectedRelationships] = useState<Set<string>>(new Set());
 
   // Build graph data - same logic as 2D
   const graphData = useMemo(() => {
@@ -123,12 +124,15 @@ export function NetworkView3D({ selectedElement, className = '' }: NetworkView3D
 
     const addLink = (source: string, target: string, type: string) => {
       if (addedNodes.has(source) && addedNodes.has(target)) {
-        links.push({
-          source,
-          target,
-          type,
-          color: RELATIONSHIP_COLORS[type] || RELATIONSHIP_COLORS.default,
-        });
+        // If relationships are selected, only add if this type is selected
+        if (selectedRelationships.size === 0 || selectedRelationships.has(type)) {
+          links.push({
+            source,
+            target,
+            type,
+            color: RELATIONSHIP_COLORS[type] || RELATIONSHIP_COLORS.default,
+          });
+        }
       }
     };
 
@@ -139,7 +143,7 @@ export function NetworkView3D({ selectedElement, className = '' }: NetworkView3D
       const nextLevel = currentLevel + 1;
       if (nextLevel > maxDepth) return;
 
-      const singleLinkFields = ['location', 'birthplace', 'supertype'];
+      const singleLinkFields = ['location', 'birthplace'];
       const arrayLinkFields = [
         'friends', 'family', 'rivals', 'species', 'languages', 
         'abilities', 'traits', 'objects', 'institutions', 'members'
@@ -168,7 +172,7 @@ export function NetworkView3D({ selectedElement, className = '' }: NetworkView3D
       // Reverse relationships
       elements.forEach((otherElement) => {
         if (otherElement.id !== elementId) {
-          const reverseFields = ['location', 'birthplace', 'supertype'];
+          const reverseFields = ['location', 'birthplace'];
           for (const field of reverseFields) {
             const value = (otherElement as any)[field];
             if (value === elementId) {
@@ -245,7 +249,7 @@ export function NetworkView3D({ selectedElement, className = '' }: NetworkView3D
     });
 
     return { nodes, links };
-  }, [selectedElement, elements, maxDepth]);
+  }, [selectedElement, elements, maxDepth, selectedRelationships]);
 
   // Handle node click
   const handleNodeClick = useCallback((node: any, event: MouseEvent) => {
@@ -297,22 +301,64 @@ export function NetworkView3D({ selectedElement, className = '' }: NetworkView3D
       opacity: isHighlighted ? 1 : 0.5,
       transparent: true,
       emissive: isCenter ? NODE_COLORS[node.category] : 0x000000,
-      emissiveIntensity: isCenter ? 0.3 : 0,
+      emissiveIntensity: isCenter ? 0.5 : 0,
     });
     
     const sphere = new THREE.Mesh(geometry, material);
     group.add(sphere);
+    
+    // Add outer ring for center node
+    if (isCenter) {
+      // Create a torus (ring) around the center node
+      const ringGeometry = new THREE.TorusGeometry(size + 5, 1.5, 8, 32);
+      const ringMaterial = new THREE.MeshPhongMaterial({
+        color: 0xffffff,
+        emissive: 0xffffff,
+        emissiveIntensity: 0.2,
+        opacity: 0.8,
+        transparent: true,
+      });
+      const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+      group.add(ring);
+      
+      // Add a second, larger animated ring
+      const outerRingGeometry = new THREE.TorusGeometry(size + 10, 0.8, 8, 32);
+      const outerRingMaterial = new THREE.MeshPhongMaterial({
+        color: NODE_COLORS[node.category] || NODE_COLORS.default,
+        emissive: NODE_COLORS[node.category] || NODE_COLORS.default,
+        emissiveIntensity: 0.3,
+        opacity: 0.4,
+        transparent: true,
+      });
+      const outerRing = new THREE.Mesh(outerRingGeometry, outerRingMaterial);
+      
+      // Animate the outer ring
+      const animate = () => {
+        if (outerRing.parent) {
+          outerRing.rotation.z += 0.01;
+          outerRing.rotation.y += 0.005;
+          requestAnimationFrame(animate);
+        }
+      };
+      animate();
+      
+      group.add(outerRing);
+    }
     
     // Add text label
     if (isHighlighted || isCenter) {
       const sprite = new SpriteText(node.name);
       sprite.material.depthWrite = false;
       sprite.color = '#ffffff';
-      sprite.textHeight = isCenter ? 8 : 6;
-      sprite.position.y = size + 10;
-      sprite.backgroundColor = 'rgba(0, 0, 0, 0.8)';
-      sprite.padding = 2;
+      sprite.textHeight = isCenter ? 10 : 6;
+      sprite.position.y = size + (isCenter ? 15 : 10);
+      sprite.backgroundColor = isCenter ? 'rgba(0, 0, 0, 0.9)' : 'rgba(0, 0, 0, 0.8)';
+      sprite.padding = isCenter ? 4 : 2;
       sprite.borderRadius = 4;
+      if (isCenter) {
+        sprite.borderColor = NODE_COLORS[node.category] || NODE_COLORS.default;
+        sprite.borderWidth = 1;
+      }
       group.add(sprite);
     }
     
@@ -341,12 +387,12 @@ export function NetworkView3D({ selectedElement, className = '' }: NetworkView3D
       // Set initial camera position
       fgRef.current.cameraPosition({ x: 0, y: 0, z: 300 });
       
-      // Swap mouse controls: left click = pan, right click = rotate
+      // Swap mouse controls: left click = pan, right click = rotate, middle = pan
       const controls = fgRef.current.controls();
       if (controls) {
         controls.mouseButtons = {
           LEFT: 2,   // Pan (normally right click)
-          MIDDLE: 1, // Zoom (unchanged)
+          MIDDLE: 2, // Pan (same as left click)
           RIGHT: 0   // Rotate (normally left click)
         };
         
@@ -417,24 +463,118 @@ export function NetworkView3D({ selectedElement, className = '' }: NetworkView3D
 
       {/* Legend */}
       <div className="absolute bottom-16 left-4 bg-gray-800/95 backdrop-blur-sm rounded-lg p-3 shadow-lg max-h-48 overflow-y-auto text-white">
-        <h4 className="text-xs font-semibold mb-2">Relationships</h4>
+        <div className="flex items-center justify-between mb-2">
+          <h4 className="text-xs font-semibold">Relationships</h4>
+          {selectedRelationships.size > 0 && (
+            <button
+              onClick={() => setSelectedRelationships(new Set())}
+              className="text-xs text-blue-400 hover:text-blue-300"
+            >
+              Clear
+            </button>
+          )}
+        </div>
         <div className="space-y-1">
           {(() => {
-            const activeRelationships = new Set<string>();
-            graphData.links.forEach(link => {
-              activeRelationships.add(link.type);
-            });
+            // Collect all possible relationship types from the full graph
+            const allRelationshipTypes = new Set<string>();
             
-            return Array.from(activeRelationships).sort().map(type => {
+            // Build full graph without filters to get all relationship types
+            const tempAddedNodes = new Set<string>();
+            const tempNodesToProcess: Array<{id: string, level: number}> = [];
+            
+            tempAddedNodes.add(selectedElement.id);
+            tempNodesToProcess.push({id: selectedElement.id, level: 0});
+            
+            // Same traversal logic but collect all relationship types
+            const collectRelationshipTypes = (elementId: string, currentLevel: number) => {
+              const element = elements.get(elementId);
+              if (!element) return;
+              
+              const nextLevel = currentLevel + 1;
+              if (nextLevel > maxDepth) return;
+
+              const singleLinkFields = ['location', 'birthplace'];
+              const arrayLinkFields = [
+                'friends', 'family', 'rivals', 'species', 'languages', 
+                'abilities', 'traits', 'objects', 'institutions', 'members'
+              ];
+
+              for (const field of singleLinkFields) {
+                const value = (element as any)[field];
+                if (value && typeof value === 'string') {
+                  allRelationshipTypes.add(field);
+                }
+              }
+
+              for (const field of arrayLinkFields) {
+                const values = (element as any)[field];
+                if (Array.isArray(values) && values.length > 0) {
+                  allRelationshipTypes.add(field);
+                }
+              }
+
+              // Check reverse relationships
+              elements.forEach((otherElement) => {
+                if (otherElement.id !== elementId) {
+                  for (const field of singleLinkFields) {
+                    const value = (otherElement as any)[field];
+                    if (value === elementId) {
+                      allRelationshipTypes.add(field);
+                    }
+                  }
+
+                  for (const field of arrayLinkFields) {
+                    const values = (otherElement as any)[field];
+                    if (Array.isArray(values) && values.includes(elementId)) {
+                      allRelationshipTypes.add(field);
+                    }
+                  }
+                }
+              });
+            };
+            
+            let tempIndex = 0;
+            while (tempIndex < tempNodesToProcess.length) {
+              const { id, level } = tempNodesToProcess[tempIndex];
+              collectRelationshipTypes(id, level);
+              tempIndex++;
+            }
+            
+            // Show all possible relationships with selection state
+            return Array.from(allRelationshipTypes).sort().map(type => {
               const displayName = type.replace(/-/g, ' ');
+              const isSelected = selectedRelationships.has(type);
+              const isActive = selectedRelationships.size === 0 || isSelected;
+              
               return (
-                <div key={type} className="flex items-center gap-2">
+                <button
+                  key={type}
+                  onClick={() => {
+                    const newSelected = new Set(selectedRelationships);
+                    if (isSelected) {
+                      newSelected.delete(type);
+                    } else {
+                      newSelected.add(type);
+                    }
+                    setSelectedRelationships(newSelected);
+                  }}
+                  className={`w-full flex items-center gap-2 px-1 py-0.5 rounded hover:bg-gray-700 transition-colors ${
+                    isActive ? '' : 'opacity-40'
+                  }`}
+                >
                   <div 
-                    className="w-3 h-3 rounded-full border border-gray-600" 
+                    className={`w-3 h-3 rounded-full border ${
+                      isSelected ? 'border-gray-400 ring-2 ring-blue-400' : 'border-gray-600'
+                    }`}
                     style={{ backgroundColor: RELATIONSHIP_COLORS[type] || RELATIONSHIP_COLORS.default }}
                   />
-                  <span className="text-xs text-gray-300 capitalize">{displayName}</span>
-                </div>
+                  <span className={`text-xs capitalize ${
+                    isActive ? 'text-gray-200 font-medium' : 'text-gray-500'
+                  }`}>
+                    {displayName}
+                  </span>
+                </button>
               );
             });
           })()}
@@ -488,6 +628,7 @@ export function NetworkView3D({ selectedElement, className = '' }: NetworkView3D
           <div className="font-semibold mb-1">3D Controls:</div>
           <div className="space-y-0.5 text-gray-300">
             <div>• Left click: Pan</div>
+            <div>• Middle click: Pan</div>
             <div>• Right click: Rotate</div>
             <div>• Scroll: Zoom</div>
           </div>

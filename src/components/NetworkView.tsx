@@ -347,7 +347,7 @@ export function NetworkView({ selectedElement, className = '' }: NetworkViewProp
       ctx.shadowBlur = 10;
       ctx.shadowColor = baseColor;
     }
-    ctx.strokeStyle = isCenter ? '#ffffff' : baseColor;
+    ctx.strokeStyle = isCenter ? '#000000' : baseColor;
     ctx.lineWidth = isCenter ? 3 : 2;
     ctx.stroke();
     ctx.shadowBlur = 0;
@@ -355,7 +355,7 @@ export function NetworkView({ selectedElement, className = '' }: NetworkViewProp
     // Draw icon using Material Icons font
     const iconName = CATEGORY_ICONS[node.category] || CATEGORY_ICONS.default;
     ctx.font = `${isCenter ? '16px' : '12px'} "Material Icons Outlined"`;
-    ctx.fillStyle = isHighlighted ? '#ffffff' : '#ffffffaa';
+    ctx.fillStyle = isHighlighted ? '#374151' : '#6b7280';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(iconName, node.x || 0, node.y || 0);
@@ -371,7 +371,7 @@ export function NetworkView({ selectedElement, className = '' }: NetworkViewProp
       const labelY = (node.y || 0) + size + 8;
       
       // Draw name background
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+      ctx.fillStyle = 'rgba(249, 250, 251, 0.95)';
       ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
       ctx.lineWidth = 1;
       const padding = 4;
@@ -389,7 +389,7 @@ export function NetworkView({ selectedElement, className = '' }: NetworkViewProp
       ctx.stroke();
       
       // Draw name text
-      ctx.fillStyle = '#1f2937';
+      ctx.fillStyle = '#4b5563';
       ctx.textBaseline = 'middle';
       ctx.fillText(node.name, node.x || 0, labelY);
       
@@ -624,15 +624,6 @@ export function NetworkView({ selectedElement, className = '' }: NetworkViewProp
           </svg>
           <span className="text-sm font-medium">Recenter</span>
         </button>
-        
-        {/* Instructions */}
-        <div className="bg-slate-100/95 backdrop-blur-sm rounded-lg p-3 shadow-lg">
-          <p className="text-xs text-gray-600">
-            • Click nodes to navigate<br/>
-            • Drag to pan, scroll to zoom<br/>
-            • Hover to highlight connections
-          </p>
-        </div>
       </div>
     </div>
   );

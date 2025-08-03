@@ -13,6 +13,7 @@ import { FieldRenderer } from './FieldRenderers';
 import { FieldTypeIcon } from './FieldTypeIcon';
 import { CollapseAllIcon, ExpandAllIcon } from './icons';
 import { NetworkView } from './NetworkView';
+import { NetworkView3D } from './NetworkView3D';
 
 export function ElementViewer() {
   const { elements, worldKey, pin, deleteElement, updateElement, saveElement } = useWorldContext();
@@ -31,6 +32,7 @@ export function ElementViewer() {
   const [isSavingAll, setIsSavingAll] = useState(false);
   const [hideSections, setHideSections] = useState(false);
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
+  const [is3DView, setIs3DView] = useState(false);
   
   const selectedElement = selectedElementId ? elements.get(selectedElementId) : null;
   const { sections } = useElementSections(selectedElement?.category);
@@ -533,10 +535,46 @@ export function ElementViewer() {
           
           {/* Conditional rendering based on mode */}
           {editMode === 'network' ? (
-            <NetworkView 
-              selectedElement={selectedElement} 
-              className="h-[600px]"
-            />
+            <div className="relative">
+              {/* 2D/3D Toggle */}
+              <div className="absolute top-4 left-4 z-10 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-1">
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => setIs3DView(false)}
+                    className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                      !is3DView 
+                        ? 'bg-blue-600 text-white' 
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    2D View
+                  </button>
+                  <button
+                    onClick={() => setIs3DView(true)}
+                    className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                      is3DView 
+                        ? 'bg-blue-600 text-white' 
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    3D View
+                  </button>
+                </div>
+              </div>
+              
+              {/* Network View */}
+              {is3DView ? (
+                <NetworkView3D 
+                  selectedElement={selectedElement} 
+                  className="h-[600px]"
+                />
+              ) : (
+                <NetworkView 
+                  selectedElement={selectedElement} 
+                  className="h-[600px]"
+                />
+              )}
+            </div>
           ) : (
           <div className={`px-4 pb-6 pt-0 ${editMode === 'showcase' ? 'bg-slate-100' : 'bg-gradient-to-b from-slate-100 to-slate-50'}`}>
             {/* Base fields section */}

@@ -1,17 +1,19 @@
+import { QuestionMarkCircleIcon } from '@heroicons/react/24/outline';
 import { FormEvent, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useWorldContext } from '../contexts/WorldContext';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { ValidationService } from '../services/ValidationService';
-import { useEditorStore } from '../stores/uiStore';
+import { useEditorStore, useSidebarStore } from '../stores/uiStore';
 
 export function AuthBar() {
   const { authenticate, isLoading, error, isAuthenticated, logout, metadata, worldKey: authenticatedWorldKey, saveElement, elements } = useWorldContext();
   const { hasUnsavedChanges, clearEdits, localEdits, setValidationErrors, clearValidationErrors } = useEditorStore();
- // const [worldKey, setWorldKey] = useState('3550908908');
- // const [pin, setPin] = useState('1111');
-   const [worldKey, setWorldKey] = useState('');
-   const [pin, setPin] = useState('');
+  const { openHelpModal } = useSidebarStore();
+  const [worldKey, setWorldKey] = useState('3550908908');
+  const [pin, setPin] = useState('1111');
+ //  const [worldKey, setWorldKey] = useState('');
+ //  const [pin, setPin] = useState('');
   
   // Set initial values when authenticated
   useEffect(() => {
@@ -185,6 +187,15 @@ export function AuthBar() {
           </button>
         </div>
       )}
+      
+      {/* Help button - always visible on the right */}
+      <button
+        onClick={openHelpModal}
+        className="ml-auto p-2 rounded hover:bg-primary-dark transition-colors"
+        title="Help & Guide"
+      >
+        <QuestionMarkCircleIcon className="h-5 w-5 text-text-dark/70 hover:text-text-dark" />
+      </button>
     </div>
   );
 }

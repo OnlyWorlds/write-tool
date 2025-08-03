@@ -19,6 +19,7 @@
   "dependencies": {
     "@astrojs/react": "^4.3.0",
     "@astrojs/tailwind": "^6.0.2",
+    "@headlessui/react": "^2.2.7",
     "@heroicons/react": "^2.2.0",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",

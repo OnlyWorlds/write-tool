@@ -285,7 +285,7 @@ export function ElementViewer() {
   
   
   return (
-    <div className="flex-1 overflow-y-auto h-screen pb-32 pr-96">
+    <div className="flex-1 overflow-y-auto h-screen pb-32">
       <div className="p-6 max-w-5xl">
         <div 
           id={editMode === 'showcase' ? `showcase-${selectedElementId}` : undefined}

@@ -132,6 +132,9 @@ export function calculateReverseLinks(
     // Skip self-references
     if (element.id === elementId) return;
     
+    // Skip pins and markers
+    if (element.category === 'pin' || element.category === 'marker') return;
+    
     // Check each field that could be a link or array of links
     Object.entries(element).forEach(([fieldName, value]) => {
       // Skip system fields

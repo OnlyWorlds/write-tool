@@ -7,11 +7,14 @@ interface SidebarState {
   filterText: string;
   createModalOpen: boolean;
   createModalCategory: string | null;
+  helpModalOpen: boolean;
   toggleCategory: (category: string) => void;
   selectElement: (id: string | null) => void;
   setFilterText: (text: string) => void;
   openCreateModal: (category: string) => void;
   closeCreateModal: () => void;
+  openHelpModal: () => void;
+  closeHelpModal: () => void;
   expandAllCategories: (categories: string[]) => void;
   toggleAllCategories: (categories: string[]) => void;
 }
@@ -22,6 +25,7 @@ export const useSidebarStore = create<SidebarState>((set) => ({
   filterText: '',
   createModalOpen: false,
   createModalCategory: null,
+  helpModalOpen: false,
   toggleCategory: (category) => set((state) => {
     const newExpanded = new Set(state.expandedCategories);
     if (newExpanded.has(category)) {
@@ -35,6 +39,8 @@ export const useSidebarStore = create<SidebarState>((set) => ({
   setFilterText: (text) => set({ filterText: text }),
   openCreateModal: (category) => set({ createModalOpen: true, createModalCategory: category }),
   closeCreateModal: () => set({ createModalOpen: false, createModalCategory: null }),
+  openHelpModal: () => set({ helpModalOpen: true }),
+  closeHelpModal: () => set({ helpModalOpen: false }),
   expandAllCategories: (categories) => set({ expandedCategories: new Set(categories) }),
   toggleAllCategories: (categories) => set((state) => {
     // If any categories are expanded, collapse all. Otherwise, expand all.

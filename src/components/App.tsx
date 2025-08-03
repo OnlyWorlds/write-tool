@@ -8,6 +8,7 @@ import { CreateElementModal } from './CreateElementModal';
 import { EditArea } from './EditArea';
 import { ElementViewer } from './ElementViewer';
 import { ShowcaseViewer } from './ShowcaseViewer';
+import { HelpModal } from './HelpModal';
 
 // Element route component that handles URL params
 function ElementRoute() {
@@ -60,6 +61,7 @@ function ShowcaseRoute() {
 export function App() {
   const { isAuthenticated, isLoading } = useWorldContext();
   const { editMode, selectedFieldId } = useEditorStore();
+  const { helpModalOpen, closeHelpModal } = useSidebarStore();
 
   return (
     <div className="min-h-screen bg-secondary flex flex-col">
@@ -119,6 +121,9 @@ export function App() {
             
             {/* Create Element Modal */}
             <CreateElementModal />
+            
+            {/* Help Modal */}
+            <HelpModal isOpen={helpModalOpen} onClose={closeHelpModal} />
           </>
         } />
       </Routes>

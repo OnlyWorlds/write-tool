@@ -6,10 +6,11 @@ import { ApiService } from '../services/ApiService';
 import { useSidebarStore } from '../stores/uiStore';
 import { CategoryIcon } from '../utils/categoryIcons';
 import { PlusIcon, SearchIcon, TrashIcon, ExpandAllIcon, CollapseAllIcon } from './icons';
+import { ONLYWORLDS_CATEGORIES } from '../constants/categories';
 
 export function CategorySidebar() {
   const { categories, worldKey, pin, deleteElement } = useWorldContext();
-  const { expandedCategories, selectedElementId, filterText, toggleCategory, selectElement, openCreateModal, setFilterText, expandAllCategories, toggleAllCategories } = useSidebarStore();
+  const { expandedCategories, selectedElementId, filterText, toggleCategory, selectElement, openCreateModal, setFilterText, expandAllCategories, toggleAllCategories, showEmptyCategories, toggleShowEmptyCategories } = useSidebarStore();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
@@ -39,58 +40,65 @@ export function CategorySidebar() {
     }
   }, [categories, expandAllCategories]);
 
-  // Filter elements based on search text (memoized for performance)
+  // Filter elements based on search text and empty category setting (memoized for performance)
   const filteredCategories = useMemo(() => {
     const filtered = new Map();
     
+    // Get all categories to show based on showEmptyCategories setting
+    const categoriesToShow = showEmptyCategories 
+      ? ONLYWORLDS_CATEGORIES 
+      : Array.from(categories.keys());
+    
     if (filterText.trim()) {
       const searchTerm = filterText.toLowerCase();
-      categories.forEach((elements, category) => {
+      categoriesToShow.forEach(category => {
+        const elements = categories.get(category) || [];
         const filteredElements = elements.filter(element => 
           element.name.toLowerCase().includes(searchTerm) ||
           element.description?.toLowerCase().includes(searchTerm) ||
           element.type?.toLowerCase().includes(searchTerm) ||
           element.subtype?.toLowerCase().includes(searchTerm)
         );
-        if (filteredElements.length > 0) {
+        if (filteredElements.length > 0 || (showEmptyCategories && elements.length === 0)) {
           filtered.set(category, filteredElements);
         }
       });
     } else {
-      categories.forEach((elements, category) => {
+      categoriesToShow.forEach(category => {
+        const elements = categories.get(category) || [];
         filtered.set(category, elements);
       });
     }
     
     return filtered;
-  }, [categories, filterText]);
+  }, [categories, filterText, showEmptyCategories]);
 
   return (
     <aside className="w-64 bg-sidebar border-r border-sidebar-dark flex flex-col h-full">
       <div className="p-4 border-b border-sidebar-dark bg-sidebar-dark">
-        <div className="flex gap-2">
-          <div className="relative flex-1">
-            <div className="absolute left-3 top-2 text-slate-500">
-              <SearchIcon />
-            </div>
-            <input
-              ref={searchInputRef}
-              type="text"
-              placeholder="filter.."
-              value={filterText}
-              onChange={(e) => setFilterText(e.target.value)}
-              className="w-full pl-10 pr-8 py-1.5 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent bg-white text-slate-700 placeholder-slate-400"
-            />
-            {filterText && (
-              <button
-                onClick={() => setFilterText('')}
-                className="absolute right-2 top-1.5 text-slate-500 hover:text-slate-700"
-                title="Clear search"
-              >
-                ×
-              </button>
-            )}
+        <div className="relative">
+          <div className="absolute left-3 top-2 text-slate-500">
+            <SearchIcon />
           </div>
+          <input
+            ref={searchInputRef}
+            type="text"
+            placeholder="filter.."
+            value={filterText}
+            onChange={(e) => setFilterText(e.target.value)}
+            className="w-full pl-10 pr-8 py-1.5 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent bg-white text-slate-700 placeholder-slate-400"
+          />
+          {filterText && (
+            <button
+              onClick={() => setFilterText('')}
+              className="absolute right-2 top-1.5 text-slate-500 hover:text-slate-700"
+              title="Clear search"
+            >
+              ×
+            </button>
+          )}
+        </div>
+        <div className="flex gap-2 mt-2">
           <button
             onClick={() => {
               const categoryNames = Array.from(categories.keys());
@@ -100,6 +108,22 @@ export function CategorySidebar() {
             title={expandedCategories.size > 0 ? "Collapse all categories" : "Expand all categories"}
           >
             {expandedCategories.size > 0 ? <CollapseAllIcon /> : <ExpandAllIcon />}
+          </button>
+          <button
+            onClick={toggleShowEmptyCategories}
+            className="p-2 border border-slate-300 rounded-md hover:bg-slate-100 text-slate-600 hover:text-slate-800 transition-colors"
+            title={showEmptyCategories ? "Hide empty categories" : "Show empty categories"}
+          >
+            {showEmptyCategories ? (
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L8.464 8.464m1.414 1.414l-1.414-1.414m4.242 4.242l1.414 1.414m-1.414-1.414l1.414-1.414m-1.414-1.414L8.464 8.464m4.243 4.243a3.001 3.001 0 01-4.243-4.243" />
+              </svg>
+            ) : (
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+            )}
           </button>
         </div>
       </div>

@@ -14,6 +14,7 @@ import { FieldTypeIcon } from './FieldTypeIcon';
 import { CollapseAllIcon, ExpandAllIcon } from './icons';
 import { NetworkView } from './NetworkView';
 import { NetworkView3D } from './NetworkView3D';
+import { NarrativeWriter } from './narrative/NarrativeWriter';
 
 export function ElementViewer() {
   const { elements, worldKey, pin, deleteElement, updateElement, saveElement } = useWorldContext();
@@ -507,6 +508,20 @@ export function ElementViewer() {
                         <span>Network</span>
                       </button>
                     )}
+                    {selectedElement.category === 'narrative' && editMode !== 'write' && (
+                      <button
+                        onClick={() => setMode('write')}
+                        className="px-4 py-2 text-sm font-medium rounded-lg transition-all shadow-sm flex items-center gap-2 bg-green-100 hover:bg-green-200 text-green-900"
+                        data-exclude-from-export
+                        title="Open dedicated writing interface"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                        </svg>
+                        <span>Write</span>
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -564,7 +579,9 @@ export function ElementViewer() {
           </div>
           
           {/* Conditional rendering based on mode */}
-          {editMode === 'network' ? (
+          {editMode === 'write' && selectedElement.category === 'narrative' ? (
+            <NarrativeWriter element={selectedElement} />
+          ) : editMode === 'network' ? (
             <div className="relative">
               {/* 2D/3D Toggle */}
               <div className="absolute top-4 left-4 z-10 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-1">

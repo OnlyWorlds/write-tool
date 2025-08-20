@@ -1,0 +1,90 @@
+/* Custom styles for MDXEditor in narrative writing mode */
+
+/* Vertical text for collapsed panels */
+.writing-mode-vertical-rl {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+.narrative-editor-wrapper [contenteditable] {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  font-size: 16px;
+  line-height: 1.7;
+  color: #1a1a1a;
+}
+
+.narrative-editor-wrapper h1 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  line-height: 1.2;
+  color: #111827;
+}
+
+.narrative-editor-wrapper h2 {
+  font-size: 1.875rem;
+  font-weight: 600;
+  margin-top: 1.75rem;
+  margin-bottom: 0.875rem;
+  line-height: 1.3;
+  color: #1f2937;
+}
+
+.narrative-editor-wrapper h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  line-height: 1.4;
+  color: #374151;
+}
+
+.narrative-editor-wrapper ul,
+.narrative-editor-wrapper ol {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+}
+
+.narrative-editor-wrapper li {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.narrative-editor-wrapper blockquote {
+  border-left: 4px solid #e5e7eb;
+  padding-left: 1rem;
+  margin: 1rem 0;
+  font-style: italic;
+  color: #6b7280;
+}
+
+.narrative-editor-wrapper p {
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.narrative-editor-wrapper a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.narrative-editor-wrapper a:hover {
+  color: #1d4ed8;
+}
+
+.narrative-editor-wrapper strong {
+  font-weight: 600;
+}
+
+.narrative-editor-wrapper em {
+  font-style: italic;
+}
+
+.narrative-editor-wrapper code {
+  background-color: #f3f4f6;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-size: 0.875em;
+}

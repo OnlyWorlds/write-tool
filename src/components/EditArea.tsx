@@ -25,7 +25,12 @@ export function EditArea() {
   
   const handleChange = (value: any) => {
     if (selectedElementId && selectedFieldId) {
-      setFieldValue(selectedElementId, selectedFieldId, value);
+      // If the value matches the original, clear the edit (sets to undefined)
+      if (value === originalValue) {
+        setFieldValue(selectedElementId, selectedFieldId, undefined);
+      } else {
+        setFieldValue(selectedElementId, selectedFieldId, value);
+      }
     }
   };
   
@@ -117,9 +122,28 @@ export function EditArea() {
             </div>
             <div className="flex items-center gap-2">
               {isEdited && (
-                <span className="text-xs text-amber-700 bg-amber-100 px-2 py-1 rounded-full">
-                  Modified
-                </span>
+                <>
+                  <button
+                    onClick={() => selectedElementId && selectedFieldId && setFieldValue(selectedElementId, selectedFieldId, undefined)}
+                    className="text-xs text-red-600 hover:text-red-800 px-1 py-0.5 rounded transition-colors"
+                    title={`Discard changes to ${selectedFieldId.replace(/_/g, ' ')}`}
+                  >
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={handleSaveField}
+                    disabled={isSaving}
+                    className="text-xs text-white bg-green-600 hover:bg-green-700 px-2 py-0.5 rounded transition-colors disabled:opacity-50"
+                    title={`Save ${selectedFieldId.replace(/_/g, ' ')}`}
+                  >
+                    Save
+                  </button>
+                  <span className="text-xs text-amber-700 bg-amber-100 px-2 py-1 rounded-full">
+                    Modified
+                  </span>
+                </>
               )}
               <button
                 onClick={() => selectField(null)}
@@ -168,7 +192,7 @@ export function EditArea() {
               {isSaving ? 'Saving...' : 'Save Changes'}
             </button>
             <button
-              onClick={() => selectedElementId && selectedFieldId && setFieldValue(selectedElementId, selectedFieldId, originalValue)}
+              onClick={() => selectedElementId && selectedFieldId && setFieldValue(selectedElementId, selectedFieldId, undefined)}
               disabled={isSaving}
               className="flex-1 px-4 py-2 text-sm bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition-colors disabled:opacity-50"
             >

@@ -10,10 +10,10 @@ export function AuthBar() {
   const { authenticate, isLoading, error, isAuthenticated, logout, metadata, worldKey: authenticatedWorldKey, saveElement, elements } = useWorldContext();
   const { hasUnsavedChanges, clearEdits, localEdits, setValidationErrors, clearValidationErrors } = useEditorStore();
   const { openHelpModal } = useSidebarStore();
-//  const [worldKey, setWorldKey] = useState('3550908908');
- // const [pin, setPin] = useState('1111');
-   const [worldKey, setWorldKey] = useState('');
-   const [pin, setPin] = useState('');
+  const [worldKey, setWorldKey] = useState('3550908908');
+   const [pin, setPin] = useState('1111');
+//   const [worldKey, setWorldKey] = useState('');
+//   const [pin, setPin] = useState('');
   
   // Set initial values when authenticated
   useEffect(() => {
@@ -143,14 +143,14 @@ export function AuthBar() {
           type="button"
           onClick={handleValidate}
           disabled={isLoading || worldKey.length !== 10 || pin.length !== 4}
-          className={`px-4 py-1 text-xs rounded transition-colors ${
+          className={`px-4 py-1 text-xs rounded transition-colors border ${
             isLoading
-              ? 'bg-primary-dark text-text-dark/60 cursor-not-allowed'
+              ? 'bg-primary-dark text-text-dark/60 cursor-not-allowed border-gray-400'
               : isAuthenticated
-              ? 'bg-accent hover:bg-accent-hover text-text-dark cursor-pointer'
+              ? 'bg-accent hover:bg-accent-hover text-text-dark cursor-pointer border-accent-hover'
               : worldKey.length === 10 && pin.length === 4
-              ? 'bg-primary-dark hover:bg-primary-dark/80 text-text-dark cursor-pointer'
-              : 'bg-primary-dark text-text-dark/60 cursor-not-allowed'
+              ? 'bg-primary-dark hover:bg-primary-dark/80 text-text-dark cursor-pointer border-gray-500'
+              : 'bg-primary-dark text-text-dark/60 cursor-not-allowed border-gray-400'
           }`}
         >
           {isLoading ? 'loading...' : isAuthenticated ? 'validated' : 'validate'}
@@ -165,28 +165,6 @@ export function AuthBar() {
         )}
       </form>
       
-      {hasUnsavedChanges && (
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-accent">unsaved changes</span>
-          <button
-            onClick={() => clearEdits()}
-            className="px-3 py-1 text-xs bg-primary-dark hover:bg-primary-dark/80 rounded transition-colors"
-          >
-            discard
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={isSaving}
-            className={`px-3 py-1 text-xs rounded transition-colors ${
-              isSaving 
-                ? 'bg-primary-dark/60 cursor-not-allowed' 
-                : 'bg-accent hover:bg-accent-hover'
-            }`}
-          >
-            {isSaving ? 'saving...' : 'save'}
-          </button>
-        </div>
-      )}
       
       {/* Help button - always visible on the right */}
       <button

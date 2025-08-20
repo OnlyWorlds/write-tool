@@ -277,6 +277,32 @@ export function ElementViewer() {
     toast.success('All changes discarded');
   };
   
+  const handleSaveField = async (fieldName: string) => {
+    if (!selectedElementId || !selectedElement) return;
+    
+    const editedValue = getEditedValue(selectedElementId, fieldName);
+    if (editedValue === undefined) return;
+    
+    try {
+      const success = await saveElement(selectedElementId, { [fieldName]: editedValue });
+      if (success) {
+        setFieldValue(selectedElementId, fieldName, undefined);
+        toast.success(`${fieldName.replace(/_/g, ' ')} saved`);
+      } else {
+        toast.error('Failed to save field');
+      }
+    } catch (error) {
+      console.error('Error saving field:', error);
+      toast.error('Error saving field');
+    }
+  };
+  
+  const handleDiscardField = (fieldName: string) => {
+    if (!selectedElementId) return;
+    setFieldValue(selectedElementId, fieldName, undefined);
+    toast.success(`${fieldName.replace(/_/g, ' ')} changes discarded`);
+  };
+  
   const handleNameKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleNameSave();
@@ -389,7 +415,11 @@ export function ElementViewer() {
                   )}
                   {unsavedFieldsForElement.length > 0 && editMode === 'edit' && (
                     <>
-                      <span className="text-sm text-accent bg-info-bg px-3 py-1 rounded-full" data-exclude-from-export>
+                      <span 
+                        className="text-sm text-accent bg-info-bg px-3 py-1 rounded-full cursor-help" 
+                        data-exclude-from-export
+                        title={`Unsaved changes in: ${unsavedFieldsForElement.map(f => f.fieldName.replace(/_/g, ' ')).join(', ')}`}
+                      >
                         {unsavedFieldsForElement.length} unsaved {unsavedFieldsForElement.length === 1 ? 'change' : 'changes'}
                       </span>
                       <button

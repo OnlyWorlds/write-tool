@@ -84,7 +84,7 @@ const FieldViewer = memo(function FieldViewer({ fieldName, value, fieldTypeInfo,
     case 'number':
       return (
         <span className={`font-mono ${className}`}>
-          {typeof value === 'number' ? value.toLocaleString() : value}
+          {typeof value === 'number' ? value.toString() : value}
         </span>
       );
       

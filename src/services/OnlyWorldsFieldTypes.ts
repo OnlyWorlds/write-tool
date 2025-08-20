@@ -1,6 +1,8 @@
 // OnlyWorlds field types according to specification
 // https://onlyworlds.github.io/docs/specification/fields.html
 
+import { FieldRegistry } from './FieldRegistry';
+
 export type OnlyWorldsFieldType = 'string' | 'integer' | 'single_link' | 'multi_link';
 
 export interface OnlyWorldsFieldInfo {
@@ -45,59 +47,40 @@ export function analyzeOnlyWorldsField(
     return baseFieldTypes[fieldName];
   }
   
-  // Known link fields without Id suffix (API returns these)
-  const knownSingleLinkFields = [
-    'location', 'birthplace', 'parentLocation', 'parent_location',
-    'zone', 'actor', 'leader', 'creator', 'owner', 'rival', 'partner',
-    'primaryPower', 'primary_power', 'governingTitle', 'governing_title',
-    'parentObject', 'parent_object', 'custodian', 'operator', 'narrator',
-    'conservator', 'antagonist', 'protagonist', 'author', 'founder', 'issuer',
-    'parent_institution', 'parent_law', 'parent_species', 'parent_narrative',
-    'superior_title', 'anti_trait', 'parent_map'
-  ];
+  // Use the dynamic field registry instead of hardcoded lists
   
-  const knownMultiLinkFields = [
-    'species', 'traits', 'abilities', 'languages', 'family', 'friends',
-    'rivals', 'inhabitants', 'populations', 'founders', 'buildings',
-    'characters', 'objects', 'locations', 'institutions', 'events',
-    'collectivities', 'zones', 'cults', 'phenomena', 'families', 'titles',
-    'constructs', 'narratives', 'secondaryPowers', 'secondary_powers',
-    'extractionMethods', 'extraction_methods', 'industryMethods', 'industry_methods',
-    'affinities', 'extractionMarkets', 'extraction_markets', 'industryMarkets', 'industry_markets'
-  ];
-  
-  // Check if it's a known link field without Id suffix
-  if (knownSingleLinkFields.includes(fieldName)) {
+  // Check if it's a known single link field
+  if (FieldRegistry.isSingleLinkField(fieldName)) {
     // If value is null, undefined, or empty string, it's still a link field
     if (value === null || value === undefined || value === '') {
       return {
         type: 'single_link',
-        linkedCategory: guessLinkedCategory(fieldName)
+        linkedCategory: FieldRegistry.getLinkedCategory(fieldName)
       };
     }
     // If value is a string that looks like UUID, it's a link
     if (typeof value === 'string' && isUuidLike(value)) {
       return {
         type: 'single_link',
-        linkedCategory: guessLinkedCategory(fieldName)
+        linkedCategory: FieldRegistry.getLinkedCategory(fieldName)
       };
     }
     // If value is an object with URL property (API format not yet transformed)
     if (value && typeof value === 'object' && 'url' in value && typeof value.url === 'string') {
       return {
         type: 'single_link',
-        linkedCategory: guessLinkedCategory(fieldName)
+        linkedCategory: FieldRegistry.getLinkedCategory(fieldName)
       };
     }
     // If value is a non-UUID string, it's not a link (e.g., "Some City")
   }
   
-  if (knownMultiLinkFields.includes(fieldName) && Array.isArray(value)) {
+  if (FieldRegistry.isMultiLinkField(fieldName) && Array.isArray(value)) {
     // Empty array or array of UUIDs
     if (value.length === 0 || value.every(v => typeof v === 'string' && isUuidLike(v))) {
       return {
         type: 'multi_link',
-        linkedCategory: guessLinkedCategory(fieldName)
+        linkedCategory: FieldRegistry.getLinkedCategory(fieldName)
       };
     }
   }
@@ -110,7 +93,7 @@ export function analyzeOnlyWorldsField(
     
     return {
       type: 'single_link',
-      linkedCategory: guessLinkedCategory(baseFieldName)
+      linkedCategory: FieldRegistry.getLinkedCategory(baseFieldName)
     };
   }
   
@@ -122,7 +105,7 @@ export function analyzeOnlyWorldsField(
     
     return {
       type: 'multi_link',
-      linkedCategory: guessLinkedCategory(baseFieldName)
+      linkedCategory: FieldRegistry.getLinkedCategory(baseFieldName)
     };
   }
   
@@ -182,88 +165,3 @@ export function analyzeOnlyWorldsField(
   return { type: 'string', format: 'text' };
 }
 
-// Guess the linked category from field name
-function guessLinkedCategory(baseFieldName: string): string {
-  const categoryMap: Record<string, string> = {
-    // Locations
-    'location': 'location',
-    'birthplace': 'location',
-    'parentLocation': 'location',
-    'parent_location': 'location',
-    'zone': 'zone',
-    'extractionMarkets': 'location',
-    'extraction_markets': 'location',
-    'industryMarkets': 'location',
-    'industry_markets': 'location',
-    
-    // Characters  
-    'owner': 'character',
-    'creator': 'character',
-    'leader': 'character',
-    'primaryPower': 'character',
-    'primary_power': 'character',
-    'fighters': 'character',
-    'founders': 'character',
-    'inhabitants': 'character',
-    
-    // Species
-    'species': 'species',
-    
-    // Traits
-    'traits': 'trait',
-    
-    // Abilities
-    'abilities': 'ability',
-    
-    // Languages
-    'languages': 'language',
-    
-    // Family
-    'family': 'family',
-    'friends': 'character',
-    'rivals': 'character',
-    
-    // Objects
-    'materials': 'object',
-    'technology': 'object',
-    'effects': 'object',
-    'consumes': 'object',
-    'defensiveObjects': 'object',
-    'defensive_objects': 'object',
-    'extractionGoods': 'object',
-    'extraction_goods': 'object',
-    'industryGoods': 'object',
-    'industry_goods': 'object',
-    'delicacies': 'object',
-    'currencies': 'object',
-    'objects': 'object',
-    
-    // Constructs
-    'buildings': 'construct',
-    'buildingMethods': 'object',
-    'building_methods': 'object',
-    
-    // Institutions
-    'institutions': 'institution',
-    'secondaryPowers': 'institution',
-    'secondary_powers': 'institution',
-    'cults': 'institution',
-    
-    // Other
-    'populations': 'collective',
-    'governingTitle': 'title',
-    'governing_title': 'title',
-    'extractionMethods': 'phenomenon',
-    'extraction_methods': 'phenomenon',
-    'industryMethods': 'phenomenon',
-    'industry_methods': 'phenomenon',
-    'affinities': 'phenomenon',
-    'rival': 'character',
-    'partner': 'character',
-    'parentObject': 'object',
-    'parent_object': 'object',
-    'language': 'language',
-  };
-  
-  return categoryMap[baseFieldName] || baseFieldName.toLowerCase();
-}

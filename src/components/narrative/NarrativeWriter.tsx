@@ -31,26 +31,26 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
   };
 
   const handleEventsReorder = (eventIds: string[]) => {
-    const updated = { ...currentElement, events: eventIds };
+    const updated = { ...currentElement, eventsIds: eventIds };
     setCurrentElement(updated);
     updateElement(updated);
-    saveElement(currentElement.id, { events: eventIds });
+    saveElement(currentElement.id, { eventsIds: eventIds });
   };
 
   const handleEventAdd = (eventId: string) => {
-    const events = [...(currentElement.events || []), eventId];
-    const updated = { ...currentElement, events };
+    const events = [...(currentElement.eventsIds || []), eventId];
+    const updated = { ...currentElement, eventsIds: events };
     setCurrentElement(updated);
     updateElement(updated);
-    saveElement(currentElement.id, { events });
+    saveElement(currentElement.id, { eventsIds: events });
   };
 
   const handleEventRemove = (eventId: string) => {
-    const events = (currentElement.events || []).filter((id: any) => id !== eventId);
-    const updated = { ...currentElement, events };
+    const events = (currentElement.eventsIds || []).filter((id: any) => id !== eventId);
+    const updated = { ...currentElement, eventsIds: events };
     setCurrentElement(updated);
     updateElement(updated);
-    saveElement(currentElement.id, { events });
+    saveElement(currentElement.id, { eventsIds: events });
   };
 
   const handleElementInsert = (elementId: string, elementName: string, elementType: string) => {
@@ -89,13 +89,8 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
 
   return (
     <div className={`narrative-editor-wrapper flex flex-col h-full bg-white dark:bg-dark-bg-primary ${isFullscreen ? 'fixed inset-0 z-50' : 'relative'}`}>
-      {/* Header - Fixed at top of container */}
-      <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-dark-bg-border bg-gradient-to-r from-green-50 to-blue-50 dark:from-dark-bg-secondary dark:to-dark-bg-tertiary shadow-sm">
-        <div className="flex items-center gap-4">
-          <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200">{currentElement.name}</h2>
-          <span className="text-sm text-gray-500 dark:text-gray-400 bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded">Writing Mode</span>
-        </div>
-        
+      {/* Header - Compact toolbar */}
+      <div className="flex-shrink-0 flex items-center justify-between px-6 py-2 border-b border-gray-200 dark:border-dark-bg-border bg-gradient-to-r from-green-50 to-blue-50 dark:from-dark-bg-secondary dark:to-dark-bg-tertiary shadow-sm">
         <div className="flex items-center gap-4">
           <WritingStats content={content} />
           
@@ -109,12 +104,13 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
-              <span className="font-medium">
-                {detectedCount} detected
+              <span className="font-medium flex items-center gap-2">
+                <span>{detectedCount - linkedCount} new</span>
                 {linkedCount > 0 && (
-                  <span className="text-green-700 ml-1">
-                    ({linkedCount} linked)
-                  </span>
+                  <>
+                    <span className="text-blue-600 dark:text-blue-400">•</span>
+                    <span className="text-green-700 dark:text-green-400">{linkedCount} linked</span>
+                  </>
                 )}
               </span>
             </button>
@@ -179,7 +175,7 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
             
             <button
               onClick={handleExitWriteMode}
-              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-dark-bg-tertiary hover:bg-gray-300 dark:hover:bg-dark-bg-hover rounded-lg transition-colors"
+              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg transition-colors border border-gray-300 dark:border-gray-600"
             >
               Exit Write Mode
             </button>

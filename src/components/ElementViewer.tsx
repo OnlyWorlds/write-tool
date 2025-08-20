@@ -317,7 +317,7 @@ export function ElementViewer() {
   
   
   return (
-    <div className="flex-1 overflow-y-auto h-screen pb-32">
+    <div className={`flex-1 h-screen pb-32 ${editMode === 'network' ? 'overflow-hidden' : 'overflow-y-auto'}`}>
       <div className="p-6 max-w-5xl">
         <div 
           id={editMode === 'showcase' ? `showcase-${selectedElementId}` : undefined}
@@ -585,9 +585,9 @@ export function ElementViewer() {
           {editMode === 'write' && selectedElement.category === 'narrative' ? (
             <NarrativeWriter element={selectedElement} />
           ) : editMode === 'network' ? (
-            <div className="relative">
+            <div className="relative network-view-no-scroll">
               {/* 2D/3D Toggle */}
-              <div className="absolute top-4 left-4 z-10 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-1">
+              <div className="absolute top-4 left-4 z-10 bg-white/95 dark:bg-dark-bg-tertiary/95 backdrop-blur-sm rounded-lg shadow-lg p-1">
                 <div className="flex gap-1">
                   <button
                     onClick={() => setIs3DView(false)}
@@ -662,7 +662,7 @@ export function ElementViewer() {
                         : error
                           ? 'bg-red-50 dark:bg-red-900/20 cursor-pointer'
                           : selectedFieldId === fieldName 
-                            ? 'bg-blue-100 dark:bg-blue-900/20 border-blue-300 dark:border-blue-600 shadow-md cursor-pointer' 
+                            ? 'bg-blue-100 dark:bg-blue-900/40 border-blue-300 dark:border-blue-500 shadow-md cursor-pointer' 
                             : 'bg-zinc-50 dark:bg-dark-bg-tertiary hover:bg-zinc-100 dark:hover:bg-dark-bg-hover shadow-sm hover:shadow-md cursor-pointer'
                     }`}
                   >
@@ -808,7 +808,7 @@ export function ElementViewer() {
                         : error
                           ? 'bg-red-50 dark:bg-red-900/20 cursor-pointer'
                           : selectedFieldId === fieldName 
-                            ? 'bg-blue-100 dark:bg-blue-900/20 border-blue-300 dark:border-blue-600 shadow-md cursor-pointer' 
+                            ? 'bg-blue-100 dark:bg-blue-900/40 border-blue-300 dark:border-blue-500 shadow-md cursor-pointer' 
                             : 'bg-zinc-50 dark:bg-dark-bg-tertiary hover:bg-zinc-100 dark:hover:bg-dark-bg-hover shadow-sm hover:shadow-md cursor-pointer'
                     }`}
                   >

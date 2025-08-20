@@ -126,9 +126,9 @@ export const StoryEditor = forwardRef<StoryEditorRef, StoryEditorProps>(
               toolbarContents: () => (
                 <div className="flex items-center gap-2">
                   <BoldItalicUnderlineToggles />
-                  <div className="w-px h-6 bg-gray-300" />
+                  <div className="w-px h-6 bg-gray-300 dark:bg-gray-600" />
                   <button
-                    className="px-2 py-1 text-sm hover:bg-gray-100 rounded"
+                    className="px-2 py-1 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-700 dark:text-gray-300"
                     onClick={() => {
                       const currentContent = editorRef.current?.getMarkdown() || '';
                       const newContent = currentContent ? `${currentContent}\n\n# ` : '# ';
@@ -140,7 +140,7 @@ export const StoryEditor = forwardRef<StoryEditorRef, StoryEditorProps>(
                     H1
                   </button>
                   <button
-                    className="px-2 py-1 text-sm hover:bg-gray-100 rounded"
+                    className="px-2 py-1 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-700 dark:text-gray-300"
                     onClick={() => {
                       const currentContent = editorRef.current?.getMarkdown() || '';
                       const newContent = currentContent ? `${currentContent}\n\n## ` : '## ';
@@ -152,7 +152,7 @@ export const StoryEditor = forwardRef<StoryEditorRef, StoryEditorProps>(
                     H2
                   </button>
                   <button
-                    className="px-2 py-1 text-sm hover:bg-gray-100 rounded"
+                    className="px-2 py-1 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-700 dark:text-gray-300"
                     onClick={() => {
                       const currentContent = editorRef.current?.getMarkdown() || '';
                       const newContent = currentContent ? `${currentContent}\n\n### ` : '### ';
@@ -163,9 +163,9 @@ export const StoryEditor = forwardRef<StoryEditorRef, StoryEditorProps>(
                   >
                     H3
                   </button>
-                  <div className="w-px h-6 bg-gray-300" />
+                  <div className="w-px h-6 bg-gray-300 dark:bg-gray-600" />
                   <button
-                    className="px-2 py-1 text-sm hover:bg-gray-100 rounded"
+                    className="px-2 py-1 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-700 dark:text-gray-300"
                     onClick={() => {
                       const currentContent = editorRef.current?.getMarkdown() || '';
                       const newContent = currentContent ? `${currentContent}\n\n> ` : '> ';

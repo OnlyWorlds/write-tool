@@ -10,6 +10,13 @@
   font-size: 16px;
   line-height: 1.7;
   color: #1a1a1a;
+  background-color: #ffffff;
+}
+
+/* Dark mode for content editable */
+.dark .narrative-editor-wrapper [contenteditable] {
+  background-color: #1e293b; /* dark-bg-secondary */
+  color: #e5e7eb;
 }
 
 .narrative-editor-wrapper h1 {
@@ -21,6 +28,10 @@
   color: #111827;
 }
 
+.dark .narrative-editor-wrapper h1 {
+  color: #f3f4f6;
+}
+
 .narrative-editor-wrapper h2 {
   font-size: 1.875rem;
   font-weight: 600;
@@ -30,6 +41,10 @@
   color: #1f2937;
 }
 
+.dark .narrative-editor-wrapper h2 {
+  color: #e5e7eb;
+}
+
 .narrative-editor-wrapper h3 {
   font-size: 1.5rem;
   font-weight: 600;
@@ -37,6 +52,10 @@
   margin-bottom: 0.75rem;
   line-height: 1.4;
   color: #374151;
+}
+
+.dark .narrative-editor-wrapper h3 {
+  color: #d1d5db;
 }
 
 .narrative-editor-wrapper ul,
@@ -59,6 +78,11 @@
   color: #6b7280;
 }
 
+.dark .narrative-editor-wrapper blockquote {
+  border-left-color: #475569;
+  color: #9ca3af;
+}
+
 .narrative-editor-wrapper p {
   margin-top: 0.75rem;
   margin-bottom: 0.75rem;
@@ -71,6 +95,14 @@
 
 .narrative-editor-wrapper a:hover {
   color: #1d4ed8;
+}
+
+.dark .narrative-editor-wrapper a {
+  color: #60a5fa;
+}
+
+.dark .narrative-editor-wrapper a:hover {
+  color: #93bbfc;
 }
 
 .narrative-editor-wrapper strong {
@@ -87,4 +119,48 @@
   border-radius: 0.25rem;
   font-family: 'Monaco', 'Courier New', monospace;
   font-size: 0.875em;
+}
+
+.dark .narrative-editor-wrapper code {
+  background-color: #334155;
+  color: #e5e7eb;
+}
+
+/* MDXEditor toolbar styles for dark mode */
+.dark .narrative-editor-wrapper [class*="_toolbar"] {
+  background-color: #334155 !important; /* dark-bg-tertiary */
+  border-bottom-color: #475569 !important; /* dark-bg-border */
+}
+
+.dark .narrative-editor-wrapper [class*="_toolbarButton"] {
+  color: #d1d5db !important;
+}
+
+.dark .narrative-editor-wrapper [class*="_toolbarButton"]:hover {
+  background-color: #475569 !important;
+}
+
+/* Toolbar toggle buttons - make bold/italic/underline white */
+.dark .narrative-editor-wrapper [class*="_toggleItem"] {
+  color: #f3f4f6 !important; /* Make text white */
+}
+
+.dark .narrative-editor-wrapper [class*="_toggleItem"][data-state="on"] {
+  background-color: #475569 !important;
+  color: #ffffff !important; /* Bright white when active */
+}
+
+.dark .narrative-editor-wrapper [class*="_toggleItem"]:hover {
+  background-color: #475569 !important;
+  color: #ffffff !important; /* White on hover */
+}
+
+/* Make the main editor area lighter in dark mode */
+.dark .narrative-editor-wrapper ._editorWrapper_o9l36_15 {
+  background-color: #1e293b; /* dark-bg-secondary */
+}
+
+/* Editor container background */
+.dark .narrative-editor-wrapper ._rootEditor_o9l36_1 {
+  background-color: #1e293b; /* dark-bg-secondary */
 }

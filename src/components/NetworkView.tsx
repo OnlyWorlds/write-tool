@@ -517,7 +517,7 @@ export function NetworkView({ selectedElement, className = '' }: NetworkViewProp
   return (
     <div className={`${className} bg-white dark:bg-dark-bg-secondary rounded-lg shadow-sm relative overflow-hidden`} ref={containerRef}>
       {/* Graph container */}
-      <div className="w-full h-full flex items-center justify-center">
+      <div className="w-full h-full flex items-center justify-center overflow-hidden force-graph-container">
         <ForceGraph2D
           ref={fgRef}
           graphData={graphData}
@@ -685,7 +685,7 @@ export function NetworkView({ selectedElement, className = '' }: NetworkViewProp
       </div>
 
       {/* Controls */}
-      <div className="absolute top-4 right-4 flex flex-col gap-2">
+      <div className="absolute top-4 right-4 flex flex-col gap-2 z-10">
         {/* Depth control */}
         <div className="bg-slate-100/95 dark:bg-dark-bg-tertiary/95 backdrop-blur-sm rounded-lg p-3 shadow-lg">
           <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 block mb-2">

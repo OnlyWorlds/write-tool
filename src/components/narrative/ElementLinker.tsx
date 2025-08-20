@@ -8,6 +8,7 @@ export interface ElementMatch {
   confidence: number;
   suggestedElement: Element;
   elementType: string;
+  isLinked: boolean;
 }
 
 export interface LinkSuggestion {
@@ -52,11 +53,20 @@ export class ElementLinker {
 
   detectElementMentions(text: string): ElementMatch[] {
     const matches: ElementMatch[] = [];
+    
+    // First, extract already-linked elements from the markdown
+    const linkedInText = this.extractLinkedElements(text);
+    
     const words = this.extractPotentialNames(text);
     
     words.forEach(({ word, startIndex }) => {
       // Skip very short words
       if (word.length < 3) return;
+      
+      // Skip if this text is already part of a markdown link
+      if (this.isInsideMarkdownLink(text, startIndex, startIndex + word.length)) {
+        return;
+      }
       
       // Search in each category
       this.fuseInstances.forEach((fuse, category) => {
@@ -75,6 +85,10 @@ export class ElementLinker {
               : confidence;
             
             if (boostedConfidence >= threshold) {
+              // Check if this element is linked in the narrative fields OR in the text itself
+              const isLinkedInFields = this.linkedElements.has(result.item.id);
+              const isLinkedInText = linkedInText.has(result.item.id);
+              
               matches.push({
                 text: word,
                 startIndex,
@@ -82,6 +96,7 @@ export class ElementLinker {
                 confidence: boostedConfidence,
                 suggestedElement: result.item,
                 elementType: category,
+                isLinked: isLinkedInFields || isLinkedInText,
               });
             }
           }
@@ -228,5 +243,40 @@ export class ElementLinker {
         seen.add(result.element.id);
         return true;
       });
+  }
+  
+  private extractLinkedElements(text: string): Set<string> {
+    const linkedIds = new Set<string>();
+    
+    // Match markdown links with element references like [Name](type:id)
+    const linkRegex = /\[([^\]]+)\]\(([^):]+):([^)]+)\)/g;
+    let match;
+    
+    while ((match = linkRegex.exec(text)) !== null) {
+      const elementId = match[3];
+      linkedIds.add(elementId);
+    }
+    
+    return linkedIds;
+  }
+  
+  private isInsideMarkdownLink(text: string, startIndex: number, endIndex: number): boolean {
+    // Check if the given range is inside a markdown link
+    const linkRegex = /\[([^\]]+)\]\([^)]+\)/g;
+    let match;
+    
+    while ((match = linkRegex.exec(text)) !== null) {
+      const linkStart = match.index;
+      const linkEnd = match.index + match[0].length;
+      
+      // Check if our range overlaps with this link
+      if ((startIndex >= linkStart && startIndex < linkEnd) ||
+          (endIndex > linkStart && endIndex <= linkEnd) ||
+          (startIndex <= linkStart && endIndex >= linkEnd)) {
+        return true;
+      }
+    }
+    
+    return false;
   }
 }

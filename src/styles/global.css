@@ -10,3 +10,17 @@
     overflow: hidden;
   }
 }
+
+/* Fix for NetworkView ForceGraph2D scrolling issue */
+.force-graph-container,
+.force-graph-container canvas {
+  overflow: hidden !important;
+  position: relative !important;
+}
+
+/* Disable scrolling on NetworkView completely */
+.network-view-no-scroll {
+  overflow: hidden !important;
+  height: 600px !important;
+  position: relative !important;
+}

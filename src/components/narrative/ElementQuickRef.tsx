@@ -26,13 +26,13 @@ function ElementItem({ element, type, onInsert }: ElementItemProps) {
     >
       <button
         onClick={onInsert}
-        className="w-full text-left px-3 py-2 hover:bg-blue-50 rounded transition-colors group"
+        className="w-full text-left px-3 py-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors group"
       >
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-gray-900 group-hover:text-blue-600">
+          <span className="text-sm font-medium text-gray-900 dark:text-gray-200 group-hover:text-blue-600 dark:group-hover:text-blue-400">
             {element.name}
           </span>
-          <svg className="w-4 h-4 text-gray-400 group-hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:text-blue-600 dark:group-hover:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
         </div>
@@ -40,11 +40,11 @@ function ElementItem({ element, type, onInsert }: ElementItemProps) {
 
       {/* Hover preview */}
       {showPreview && element.description && (
-        <div className="absolute left-full ml-2 top-0 z-20 w-64 p-3 bg-white border border-gray-200 rounded-lg shadow-lg">
-          <h4 className="font-medium text-gray-900 mb-1">{element.name}</h4>
-          <p className="text-xs text-gray-600 line-clamp-4">{element.description}</p>
+        <div className="absolute left-full ml-2 top-0 z-20 w-64 p-3 bg-white dark:bg-dark-bg-secondary border border-gray-200 dark:border-dark-bg-border rounded-lg shadow-lg">
+          <h4 className="font-medium text-gray-900 dark:text-gray-200 mb-1">{element.name}</h4>
+          <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-4">{element.description}</p>
           {element.supertype && (
-            <div className="mt-2 text-xs text-gray-500">
+            <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
               <span className="font-medium">Type:</span> {element.supertype}
               {element.subtype && <span> / {element.subtype}</span>}
             </div>
@@ -149,17 +149,17 @@ export function ElementQuickRef({ narrative, onElementInsert }: ElementQuickRefP
 
   if (isCollapsed) {
     return (
-      <div className="w-12 bg-gray-50 border-l border-gray-200 flex flex-col items-center py-4">
+      <div className="w-12 bg-gray-50 dark:bg-dark-bg-secondary border-l border-gray-200 dark:border-dark-bg-border flex flex-col items-center py-4">
         <button
           onClick={() => setIsCollapsed(false)}
-          className="text-gray-600 hover:text-gray-800"
+          className="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-300"
           title="Expand quick reference"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <div className="mt-4 text-xs text-gray-500 writing-mode-vertical-rl">
+        <div className="mt-4 text-xs text-gray-500 dark:text-gray-400 writing-mode-vertical-rl">
           Quick Ref
         </div>
       </div>
@@ -167,14 +167,14 @@ export function ElementQuickRef({ narrative, onElementInsert }: ElementQuickRefP
   }
 
   return (
-    <div className="w-80 bg-gray-50 border-l border-gray-200 flex flex-col">
+    <div className="w-80 bg-gray-50 dark:bg-dark-bg-secondary border-l border-gray-200 dark:border-dark-bg-border flex flex-col">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-gray-200 bg-white">
+      <div className="px-4 py-3 border-b border-gray-200 dark:border-dark-bg-border bg-white dark:bg-dark-bg-tertiary">
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-gray-800">Quick Reference</h3>
+          <h3 className="font-semibold text-gray-800 dark:text-gray-200">Quick Reference</h3>
           <button
             onClick={() => setIsCollapsed(true)}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400"
             title="Collapse panel"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -185,15 +185,15 @@ export function ElementQuickRef({ narrative, onElementInsert }: ElementQuickRefP
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-gray-200 bg-white">
+      <div className="flex border-b border-gray-200 dark:border-dark-bg-border bg-white dark:bg-dark-bg-tertiary">
         {tabs.map(tab => (
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
             className={`flex-1 px-3 py-2 text-xs font-medium transition-colors flex items-center justify-center gap-1 ${
               activeTab === tab.key
-                ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
-                : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+                ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20'
+                : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-bg-hover'
             }`}
           >
             {tab.icon}
@@ -206,13 +206,13 @@ export function ElementQuickRef({ narrative, onElementInsert }: ElementQuickRefP
       </div>
 
       {/* Search */}
-      <div className="p-3 bg-white border-b border-gray-200">
+      <div className="p-3 bg-white dark:bg-dark-bg-tertiary border-b border-gray-200 dark:border-dark-bg-border">
         <input
           type="text"
           placeholder={`Search ${activeTab}...`}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 text-sm bg-white dark:bg-dark-bg-secondary border border-gray-300 dark:border-dark-bg-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-200"
         />
       </div>
 
@@ -220,7 +220,7 @@ export function ElementQuickRef({ narrative, onElementInsert }: ElementQuickRefP
       <div className="flex-1 overflow-y-auto p-3">
         {linkedElements[activeTab].length > 0 && searchTerm === '' && (
           <div className="mb-3">
-            <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">
+            <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
               Linked {activeTab}
             </h4>
             <div className="space-y-1">
@@ -242,7 +242,7 @@ export function ElementQuickRef({ narrative, onElementInsert }: ElementQuickRefP
           </h4>
           <div className="space-y-1">
             {allElements[activeTab].length === 0 ? (
-              <p className="text-sm text-gray-500 text-center py-4">
+              <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
                 No {activeTab} found
               </p>
             ) : (
@@ -263,8 +263,8 @@ export function ElementQuickRef({ narrative, onElementInsert }: ElementQuickRefP
       </div>
 
       {/* Insert tip */}
-      <div className="p-3 border-t border-gray-200 bg-gray-100">
-        <p className="text-xs text-gray-600">
+      <div className="p-3 border-t border-gray-200 dark:border-dark-bg-border bg-gray-100 dark:bg-dark-bg-tertiary">
+        <p className="text-xs text-gray-600 dark:text-gray-400">
           <span className="font-medium">Tip:</span> Click any element to insert a reference at your cursor position
         </p>
       </div>

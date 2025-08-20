@@ -35,12 +35,33 @@ export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedSt
 
     // Initialize ElementLinker
     useEffect(() => {
+      // Collect all linked element IDs from narrative fields
+      // Note: Narrative fields use 'Ids' suffix (e.g., eventsIds, charactersIds)
       const linkedIds = [
-        ...(element.events || []),
-        ...(element.characters || []),
-        ...(element.locations || []),
-        ...(element.families || []),
-        ...(element.collectives || []),
+        ...(element.eventsIds || []),
+        ...(element.charactersIds || []),
+        ...(element.locationsIds || []),
+        ...(element.familiesIds || []),
+        ...(element.collectivesIds || []),
+        ...(element.objectsIds || []),
+        ...(element.speciesIds || []),
+        ...(element.creaturesIds || []),
+        ...(element.institutionsIds || []),
+        ...(element.traitsIds || []),
+        ...(element.zonesIds || []),
+        ...(element.abilitiesIds || []),
+        ...(element.phenomenaIds || []),
+        ...(element.languagesIds || []),
+        ...(element.relationsIds || []),
+        ...(element.titlesIds || []),
+        ...(element.constructsIds || []),
+        ...(element.lawsIds || []),
+        // Also include single reference fields if they exist
+        ...(element.protagonistId ? [element.protagonistId] : []),
+        ...(element.antagonistId ? [element.antagonistId] : []),
+        ...(element.narratorId ? [element.narratorId] : []),
+        ...(element.conservatorId ? [element.conservatorId] : []),
+        ...(element.parentNarrativeId ? [element.parentNarrativeId] : []),
       ];
       const linker = new ElementLinker(elements, linkedIds);
       setElementLinker(linker);
@@ -52,6 +73,9 @@ export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedSt
 
       const detectedMatches = elementLinker.detectElementMentions(debouncedContent);
       
+      // Count linked elements BEFORE filtering (from all detected matches)
+      const linkedCount = detectedMatches.filter(match => match.isLinked).length;
+      
       // Filter out already accepted or ignored matches
       const filteredMatches = detectedMatches.filter(match => {
         const matchKey = `${match.startIndex}-${match.suggestedElement.id}`;
@@ -60,20 +84,12 @@ export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedSt
 
       setSuggestions(filteredMatches);
       
-      // Count linked elements (those that are already linked to the narrative)
-      const linkedCount = filteredMatches.filter(match => {
-        const linkedIds = [
-          ...(element.events || []),
-          ...(element.characters || []),
-          ...(element.locations || []),
-          ...(element.families || []),
-          ...(element.collectives || []),
-        ];
-        return linkedIds.includes(match.suggestedElement.id);
-      }).length;
+      // Count new (unlinked) elements from filtered matches
+      const newCount = filteredMatches.filter(match => !match.isLinked).length;
       
-      // Notify parent of detection changes
-      onDetectionChange?.(filteredMatches.length, linkedCount);
+      // Notify parent with total detected count and linked count
+      // Total detected = new unlinked + already linked
+      onDetectionChange?.(newCount + linkedCount, linkedCount);
     }, [debouncedContent, elementLinker, acceptedMatches, ignoredMatches, element, onDetectionChange]);
 
     const handleContentChange = (newContent: string) => {
@@ -88,15 +104,18 @@ export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedSt
       const matchKey = `${match.startIndex}-${match.suggestedElement.id}`;
       setAcceptedMatches(prev => new Set(prev).add(matchKey));
 
-      // Replace the text with a markdown link
-      const currentContent = storyEditorRef.current?.getContent() || content;
-      const beforeMatch = currentContent.substring(0, match.startIndex);
-      const afterMatch = currentContent.substring(match.endIndex);
-      const link = elementLinker.createMarkdownLink(match.suggestedElement, match.elementType);
-      
-      const newContent = beforeMatch + link + afterMatch;
-      storyEditorRef.current?.setContent(newContent);
-      handleContentChange(newContent);
+      // Only insert a link if the element is not already linked
+      if (!match.isLinked) {
+        // Replace the text with a markdown link
+        const currentContent = storyEditorRef.current?.getContent() || content;
+        const beforeMatch = currentContent.substring(0, match.startIndex);
+        const afterMatch = currentContent.substring(match.endIndex);
+        const link = elementLinker.createMarkdownLink(match.suggestedElement, match.elementType);
+        
+        const newContent = beforeMatch + link + afterMatch;
+        storyEditorRef.current?.setContent(newContent);
+        handleContentChange(newContent);
+      }
 
       // Remove this suggestion
       setSuggestions(prev => prev.filter(s => s !== match));

@@ -89,11 +89,16 @@ export function SuggestionPopover({
       className="relative z-50 bg-white rounded-lg shadow-xl border border-gray-200 max-w-md overflow-hidden"
       style={position ? { top: position.top, left: position.left } : {}}
     >
-      <div className="p-2 border-b border-gray-200 bg-gray-50">
+      <div className="p-3 border-b border-gray-200 bg-gray-50">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-gray-600">
-            Element Suggestions ({matches.length})
-          </span>
+          <div>
+            <span className="text-sm font-medium text-gray-700">
+              Detected Elements
+            </span>
+            <div className="text-xs text-gray-500 mt-0.5">
+              {matches.filter(m => !m.isLinked).length} new • {matches.filter(m => m.isLinked).length} already linked
+            </div>
+          </div>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600"
@@ -110,18 +115,20 @@ export function SuggestionPopover({
         {matches.map((match, index) => (
           <div
             key={`${match.suggestedElement.id}-${match.startIndex}`}
-            className={`flex items-start gap-3 p-3 cursor-pointer transition-colors ${
-              index === selectedIndex 
-                ? 'bg-blue-50 border-l-4 border-blue-500' 
-                : 'hover:bg-gray-50 border-l-4 border-transparent'
+            className={`flex items-start gap-3 p-3 transition-colors ${
+              match.isLinked 
+                ? 'bg-green-50 border-l-4 border-green-400' 
+                : index === selectedIndex 
+                  ? 'bg-blue-50 border-l-4 border-blue-500 cursor-pointer' 
+                  : 'hover:bg-gray-50 border-l-4 border-transparent cursor-pointer'
             }`}
-            onClick={() => onAccept(match)}
+            onClick={() => !match.isLinked && onAccept(match)}
             onMouseEnter={() => setSelectedIndex(index)}
           >
             <div className="flex-shrink-0 mt-1">
               <CategoryIcon 
                 category={match.elementType} 
-                className="text-lg text-gray-600"
+                className={`text-lg ${match.isLinked ? 'text-green-600' : 'text-gray-600'}`}
               />
             </div>
             
@@ -130,6 +137,11 @@ export function SuggestionPopover({
                 <span className="font-medium text-gray-900">
                   {match.suggestedElement.name}
                 </span>
+                {match.isLinked && (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700 border border-green-200">
+                    ✓ linked
+                  </span>
+                )}
                 <span className={`text-xs px-2 py-0.5 rounded-full border ${getCategoryColor(match.elementType)}`}>
                   {match.elementType}
                 </span>
@@ -143,7 +155,7 @@ export function SuggestionPopover({
               
               <div className="flex items-center gap-3 mt-2">
                 <span className="text-xs text-gray-500">
-                  Confidence: {Math.round(match.confidence * 100)}%
+                  {match.isLinked ? 'Already in narrative' : `Confidence: ${Math.round(match.confidence * 100)}%`}
                 </span>
                 <span className="text-xs text-gray-400">
                   "{match.text}"
@@ -151,27 +163,29 @@ export function SuggestionPopover({
               </div>
             </div>
 
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onReject(match);
-              }}
-              className="flex-shrink-0 text-gray-400 hover:text-red-600"
-              title="Ignore this suggestion"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+            {!match.isLinked && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onReject(match);
+                }}
+                className="flex-shrink-0 text-gray-400 hover:text-red-600"
+                title="Ignore this suggestion"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
           </div>
         ))}
       </div>
 
       <div className="p-2 border-t border-gray-200 bg-gray-50 text-xs text-gray-600">
         <div className="flex items-center justify-between">
-          <span>↑↓ Navigate • Enter Accept • Esc Close</span>
+          <span>Click to add link • Esc to close</span>
           <span className="font-medium">
-            {selectedIndex + 1} of {matches.length}
+            {matches.filter(m => !m.isLinked).length} available to link
           </span>
         </div>
       </div>

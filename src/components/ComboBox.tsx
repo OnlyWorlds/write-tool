@@ -125,11 +125,11 @@ export function ComboBox({ value, onChange, options, placeholder, className, dis
               </button>
             ))
           ) : options.length > 0 ? (
-            <div className="px-3 py-2 text-gray-500 text-sm">
+            <div className="px-3 py-2 text-gray-500 dark:text-gray-400 text-sm">
               No matching options. Type to enter a custom value.
             </div>
           ) : (
-            <div className="px-3 py-2 text-gray-500 text-sm">
+            <div className="px-3 py-2 text-gray-500 dark:text-gray-400 text-sm">
               Type to enter a custom value
             </div>
           )}

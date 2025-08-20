@@ -755,7 +755,7 @@ export function ElementViewer() {
                     {(!hideSections && sections && section.name !== 'Fields') && (
                       <button
                         onClick={() => toggleSection(section.name)}
-                        className="flex items-center gap-2 w-full text-left mb-3 px-3 py-2 bg-sidebar-dark dark:bg-dark-bg-secondary hover:bg-sidebar-dark/80 dark:hover:bg-dark-bg-tertiary/80 rounded-lg transition-all group"
+                        className="flex items-center gap-2 w-full text-left mb-3 px-3 py-2 bg-sidebar-dark dark:bg-dark-bg-primary/60 hover:bg-sidebar-dark/80 dark:hover:bg-dark-bg-primary/80 rounded-lg transition-all group"
                         data-exclude-from-export
                       >
                         {isCollapsed ? (
@@ -763,7 +763,7 @@ export function ElementViewer() {
                         ) : (
                           <ChevronDownIcon className="w-4 h-4 text-slate-600 dark:text-gray-400 group-hover:text-slate-700 dark:group-hover:text-gray-300" />
                         )}
-                        <span className="text-base font-semibold text-slate-800 dark:text-gray-300 flex-1">
+                        <span className="text-base font-semibold text-slate-800 dark:text-gray-400 flex-1">
                           {section.name}
                         </span>
                         <span className="text-sm text-slate-600 dark:text-gray-400 font-medium">

@@ -274,7 +274,7 @@ const FieldEditor = memo(function FieldEditor({ fieldName, value, fieldTypeInfo,
     onChange?.(newValue);
   };
   
-  const baseInputClass = `w-full px-3 py-2 bg-white border border-blue-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors hover:border-blue-300 ${className}`;
+  const baseInputClass = `w-full px-3 py-2 bg-white dark:bg-dark-bg-tertiary border border-blue-200 dark:border-dark-bg-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-colors hover:border-blue-300 dark:hover:border-gray-500 text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 ${className}`;
   
   // Special handling for supertype and subtype fields
   if (fieldName === 'supertype' && elementCategory) {
@@ -312,9 +312,9 @@ const FieldEditor = memo(function FieldEditor({ fieldName, value, fieldTypeInfo,
             type="checkbox"
             checked={!!localValue}
             onChange={(e) => handleChange(e.target.checked)}
-            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            className="h-4 w-4 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 border-gray-300 dark:border-gray-600 rounded"
           />
-          <label className="text-sm text-gray-700">
+          <label className="text-sm text-gray-700 dark:text-gray-300">
             {localValue ? 'yes' : 'no'}
           </label>
         </div>

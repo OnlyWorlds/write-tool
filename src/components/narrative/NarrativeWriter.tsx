@@ -88,12 +88,12 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
   };
 
   return (
-    <div className={`narrative-editor-wrapper flex flex-col h-full bg-white ${isFullscreen ? 'fixed inset-0 z-50' : 'relative'}`}>
+    <div className={`narrative-editor-wrapper flex flex-col h-full bg-white dark:bg-dark-bg-primary ${isFullscreen ? 'fixed inset-0 z-50' : 'relative'}`}>
       {/* Header - Fixed at top of container */}
-      <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-green-50 to-blue-50 shadow-sm">
+      <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-dark-bg-border bg-gradient-to-r from-green-50 to-blue-50 dark:from-dark-bg-secondary dark:to-dark-bg-tertiary shadow-sm">
         <div className="flex items-center gap-4">
-          <h2 className="text-2xl font-bold text-gray-800">{currentElement.name}</h2>
-          <span className="text-sm text-gray-500 bg-green-100 px-2 py-1 rounded">Writing Mode</span>
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200">{currentElement.name}</h2>
+          <span className="text-sm text-gray-500 dark:text-gray-400 bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded">Writing Mode</span>
         </div>
         
         <div className="flex items-center gap-4">
@@ -103,7 +103,7 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
           {detectedCount > 0 && (
             <button
               onClick={handleShowSuggestions}
-              className="px-3 py-1.5 text-sm bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-lg transition-colors flex items-center gap-2"
+              className="px-3 py-1.5 text-sm bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/40 text-blue-800 dark:text-blue-300 rounded-lg transition-colors flex items-center gap-2"
               title="View detected elements"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -179,7 +179,7 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
             
             <button
               onClick={handleExitWriteMode}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors"
+              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-dark-bg-tertiary hover:bg-gray-300 dark:hover:bg-dark-bg-hover rounded-lg transition-colors"
             >
               Exit Write Mode
             </button>
@@ -221,7 +221,7 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
       </div>
 
       {/* Footer */}
-      <div className="flex-shrink-0 px-6 py-2 border-t border-gray-200 bg-gray-50 text-xs text-gray-500">
+      <div className="flex-shrink-0 px-6 py-2 border-t border-gray-200 dark:border-dark-bg-border bg-gray-50 dark:bg-dark-bg-secondary text-xs text-gray-500 dark:text-gray-400">
         <div className="flex items-center justify-between">
           <span>Auto-save every 30 seconds • Last saved content backed up to browser storage</span>
           <span>Press F11 for focus mode • Ctrl+S to save manually</span>

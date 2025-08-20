@@ -76,31 +76,31 @@ export function HelpModal({ isOpen, onClose }: HelpModalProps) {
                     <div className="space-y-3">
                       <div>
                         <h4 className="font-medium mb-1">📊 Network Visualization</h4>
-                        <p className="text-text-dark/80 text-xs ml-6">
+                        <p className="text-text-dark/80 dark:text-gray-400 text-xs ml-6">
                           See relationships between elements as an interactive graph. Adjust depth (1-5) to control how many connections to show.
                         </p>
                       </div>
                       <div>
                         <h4 className="font-medium mb-1">✏️ Edit Mode</h4>
-                        <p className="text-text-dark/80 text-xs ml-6">
+                        <p className="text-text-dark/80 dark:text-gray-400 text-xs ml-6">
                           Toggle edit mode with the button or press 'E'. Click any field to edit it. Changes are highlighted until saved.
                         </p>
                       </div>
                       <div>
                         <h4 className="font-medium mb-1">🔗 Smart Linking</h4>
-                        <p className="text-text-dark/80 text-xs ml-6">
+                        <p className="text-text-dark/80 dark:text-gray-400 text-xs ml-6">
                           Link fields show related elements. Click links to navigate. Multi-link fields support adding/removing multiple connections.
                         </p>
                       </div>
                       <div>
                         <h4 className="font-medium mb-1">🔄 Reverse Relationships</h4>
-                        <p className="text-text-dark/80 text-xs ml-6">
+                        <p className="text-text-dark/80 dark:text-gray-400 text-xs ml-6">
                           See which elements link TO the current element in the reverse relations panel.
                         </p>
                       </div>
                       <div>
                         <h4 className="font-medium mb-1">📤 Export & Share</h4>
-                        <p className="text-text-dark/80 text-xs ml-6">
+                        <p className="text-text-dark/80 dark:text-gray-400 text-xs ml-6">
                           Export elements to PDF or publish showcase URLs for public sharing.
                         </p>
                       </div>

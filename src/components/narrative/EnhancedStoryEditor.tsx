@@ -10,15 +10,19 @@ interface EnhancedStoryEditorProps {
   element: Element;
   onSave: (content: string) => Promise<boolean>;
   onContentChange?: (content: string) => void;
+  onDetectionChange?: (detected: number, linked: number) => void;
+  onShowSuggestions?: () => void;
   className?: string;
 }
 
 export interface EnhancedStoryEditorRef extends StoryEditorRef {
   insertLinkAtCursor: (elementId: string, elementName: string, elementType: string) => void;
+  showSuggestions: () => void;
+  getSuggestions: () => ElementMatch[];
 }
 
 export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedStoryEditorProps>(
-  ({ element, onSave, onContentChange, className = '' }, ref) => {
+  ({ element, onSave, onContentChange, onDetectionChange, onShowSuggestions, className = '' }, ref) => {
     const { elements } = useWorldContext();
     const storyEditorRef = useRef<StoryEditorRef>(null);
     const [content, setContent] = useState(element.story || '');
@@ -55,8 +59,22 @@ export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedSt
       });
 
       setSuggestions(filteredMatches);
-      setShowSuggestions(filteredMatches.length > 0);
-    }, [debouncedContent, elementLinker, acceptedMatches, ignoredMatches]);
+      
+      // Count linked elements (those that are already linked to the narrative)
+      const linkedCount = filteredMatches.filter(match => {
+        const linkedIds = [
+          ...(element.events || []),
+          ...(element.characters || []),
+          ...(element.locations || []),
+          ...(element.families || []),
+          ...(element.collectives || []),
+        ];
+        return linkedIds.includes(match.suggestedElement.id);
+      }).length;
+      
+      // Notify parent of detection changes
+      onDetectionChange?.(filteredMatches.length, linkedCount);
+    }, [debouncedContent, elementLinker, acceptedMatches, ignoredMatches, element, onDetectionChange]);
 
     const handleContentChange = (newContent: string) => {
       setContent(newContent);
@@ -121,6 +139,8 @@ export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedSt
       },
       focus: () => storyEditorRef.current?.focus(),
       insertLinkAtCursor,
+      showSuggestions: () => setShowSuggestions(true),
+      getSuggestions: () => suggestions,
     }));
 
     return (
@@ -143,19 +163,6 @@ export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedSt
               />
             </div>
           </div>
-        )}
-
-        {/* Floating indicator when suggestions are available */}
-        {suggestions.length > 0 && !showSuggestions && (
-          <button
-            onClick={() => setShowSuggestions(true)}
-            className="fixed bottom-20 right-4 z-40 bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            <span className="font-medium">{suggestions.length} element{suggestions.length > 1 ? 's' : ''} detected</span>
-          </button>
         )}
       </div>
     );

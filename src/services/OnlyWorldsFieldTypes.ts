@@ -21,6 +21,24 @@ function isUuidLike(value: string): boolean {
          /^[a-z]+-[0-9]+$/.test(value); // category-number pattern
 }
 
+// Guess linked category from field name
+function guessLinkedCategory(fieldName: string): string | undefined {
+  const normalized = fieldName.toLowerCase();
+  
+  // Try to guess based on common patterns
+  if (normalized.includes('character') || normalized.includes('person')) return 'character';
+  if (normalized.includes('location') || normalized.includes('place')) return 'location';
+  if (normalized.includes('ability') || normalized.includes('talent')) return 'ability';
+  if (normalized.includes('trait')) return 'trait';
+  if (normalized.includes('object') || normalized.includes('item')) return 'object';
+  if (normalized.includes('construct')) return 'construct';
+  if (normalized.includes('creature')) return 'creature';
+  if (normalized.includes('event')) return 'event';
+  if (normalized.includes('narrative') || normalized.includes('story')) return 'narrative';
+  
+  return undefined;
+}
+
 // Analyze field based on OnlyWorlds specification
 export function analyzeOnlyWorldsField(
   fieldName: string,

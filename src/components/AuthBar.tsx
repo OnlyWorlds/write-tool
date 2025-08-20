@@ -5,6 +5,7 @@ import { useWorldContext } from '../contexts/WorldContext';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { ValidationService } from '../services/ValidationService';
 import { useEditorStore, useSidebarStore } from '../stores/uiStore';
+import { ThemeToggle } from './ThemeToggle';
 
 export function AuthBar() {
   const { authenticate, isLoading, error, isAuthenticated, logout, metadata, worldKey: authenticatedWorldKey, saveElement, elements } = useWorldContext();
@@ -119,14 +120,14 @@ export function AuthBar() {
   };
 
   return (
-    <div className="flex items-center justify-between p-4 bg-primary text-text-dark shadow-lg">
+    <div className="flex items-center justify-between p-4 bg-primary dark:bg-dark-bg-primary text-text-dark shadow-lg">
       <form onSubmit={handleSubmit} className="flex items-center gap-2">
         <input
           type="text"
           value={worldKey}
           onChange={handleWorldKeyChange}
           placeholder="api key"
-          className="w-24 px-2 py-1 text-xs bg-primary-dark border border-primary-dark text-text-dark placeholder-text-dark/60 rounded"
+          className="w-24 px-2 py-1 text-xs bg-primary-dark dark:bg-dark-bg-secondary border border-primary-dark dark:border-dark-bg-border text-text-dark placeholder-text-dark/60 rounded"
           disabled={isLoading}
           maxLength={10}
         />
@@ -135,7 +136,7 @@ export function AuthBar() {
           value={pin}
           onChange={handlePinChange}
           placeholder="pin"
-          className="w-12 px-2 py-1 text-xs bg-primary-dark border border-primary-dark text-text-dark placeholder-text-dark/60 rounded"
+          className="w-12 px-2 py-1 text-xs bg-primary-dark dark:bg-dark-bg-secondary border border-primary-dark dark:border-dark-bg-border text-text-dark placeholder-text-dark/60 rounded"
           disabled={isLoading}
           maxLength={4}
         />
@@ -145,12 +146,12 @@ export function AuthBar() {
           disabled={isLoading || worldKey.length !== 10 || pin.length !== 4}
           className={`px-4 py-1 text-xs rounded transition-colors border ${
             isLoading
-              ? 'bg-primary-dark text-text-dark/60 cursor-not-allowed border-gray-400'
+              ? 'bg-primary-dark dark:bg-dark-bg-secondary text-text-dark/60 cursor-not-allowed border-gray-400 dark:border-gray-600'
               : isAuthenticated
               ? 'bg-accent hover:bg-accent-hover text-text-dark cursor-pointer border-accent-hover'
               : worldKey.length === 10 && pin.length === 4
-              ? 'bg-primary-dark hover:bg-primary-dark/80 text-text-dark cursor-pointer border-gray-500'
-              : 'bg-primary-dark text-text-dark/60 cursor-not-allowed border-gray-400'
+              ? 'bg-primary-dark dark:bg-dark-bg-secondary hover:bg-primary-dark/80 dark:hover:bg-dark-bg-tertiary text-text-dark cursor-pointer border-gray-500 dark:border-gray-600'
+              : 'bg-primary-dark dark:bg-dark-bg-secondary text-text-dark/60 cursor-not-allowed border-gray-400 dark:border-gray-600'
           }`}
         >
           {isLoading ? 'loading...' : isAuthenticated ? 'validated' : 'validate'}
@@ -165,15 +166,19 @@ export function AuthBar() {
         )}
       </form>
       
-      
-      {/* Help button - always visible on the right */}
-      <button
-        onClick={openHelpModal}
-        className="ml-auto p-2 rounded hover:bg-primary-dark transition-colors"
-        title="Help & Guide"
-      >
-        <QuestionMarkCircleIcon className="h-5 w-5 text-text-dark/70 hover:text-text-dark" />
-      </button>
+      <div className="flex items-center gap-2">
+        {/* Theme toggle */}
+        <ThemeToggle />
+        
+        {/* Help button */}
+        <button
+          onClick={openHelpModal}
+          className="p-2 rounded hover:bg-primary-dark dark:hover:bg-dark-bg-secondary transition-colors"
+          title="Help & Guide"
+        >
+          <QuestionMarkCircleIcon className="h-5 w-5 text-text-dark/70 hover:text-text-dark" />
+        </button>
+      </div>
     </div>
   );
 }

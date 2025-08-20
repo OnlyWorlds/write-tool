@@ -88,10 +88,10 @@ export function CategorySidebar() {
   }, [filteredCategories, sortAlphabetically]);
 
   return (
-    <aside className="w-64 bg-sidebar border-r border-sidebar-dark flex flex-col h-full">
-      <div className="p-4 border-b border-sidebar-dark bg-sidebar-dark">
+    <aside className="w-64 bg-sidebar dark:bg-dark-bg-secondary border-r border-sidebar-dark dark:border-dark-bg-border flex flex-col h-full">
+      <div className="p-4 border-b border-sidebar-dark dark:border-dark-bg-border bg-sidebar-dark dark:bg-dark-bg-tertiary">
         <div className="relative">
-          <div className="absolute left-3 top-2 text-slate-500">
+          <div className="absolute left-3 top-2 text-slate-500 dark:text-gray-400">
             <SearchIcon />
           </div>
           <input
@@ -100,12 +100,12 @@ export function CategorySidebar() {
             placeholder="filter.."
             value={filterText}
             onChange={(e) => setFilterText(e.target.value)}
-            className="w-full pl-10 pr-8 py-1.5 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent bg-white text-slate-700 placeholder-slate-400"
+            className="w-full pl-10 pr-8 py-1.5 text-sm border border-slate-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-accent dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-dark-bg-secondary text-slate-700 dark:text-gray-200 placeholder-slate-400 dark:placeholder-gray-500"
           />
           {filterText && (
             <button
               onClick={() => setFilterText('')}
-              className="absolute right-2 top-1.5 text-slate-500 hover:text-slate-700"
+              className="absolute right-2 top-1.5 text-slate-500 dark:text-gray-400 hover:text-slate-700 dark:hover:text-gray-200"
               title="Clear search"
             >
               ×
@@ -118,14 +118,14 @@ export function CategorySidebar() {
               const categoryNames = Array.from(categories.keys());
               toggleAllCategories(categoryNames);
             }}
-            className="p-2 border border-slate-300 rounded-md hover:bg-slate-100 text-slate-600 hover:text-slate-800 transition-colors"
+            className="p-2 border border-slate-300 dark:border-gray-500 rounded-md hover:bg-slate-100 dark:hover:bg-dark-bg-hover text-slate-600 dark:text-gray-300 hover:text-slate-800 dark:hover:text-gray-100 transition-colors"
             title={expandedCategories.size > 0 ? "Collapse all categories" : "Expand all categories"}
           >
             {expandedCategories.size > 0 ? <CollapseAllIcon /> : <ExpandAllIcon />}
           </button>
           <button
             onClick={toggleShowEmptyCategories}
-            className="p-2 border border-slate-300 rounded-md hover:bg-slate-100 text-slate-600 hover:text-slate-800 transition-colors"
+            className="p-2 border border-slate-300 dark:border-gray-500 rounded-md hover:bg-slate-100 dark:hover:bg-dark-bg-hover text-slate-600 dark:text-gray-300 hover:text-slate-800 dark:hover:text-gray-100 transition-colors"
             title={showEmptyCategories ? "Hide empty categories" : "Show empty categories"}
           >
             {showEmptyCategories ? (
@@ -141,7 +141,7 @@ export function CategorySidebar() {
           </button>
           <button
             onClick={toggleSortMode}
-            className="p-2 border border-slate-300 rounded-md hover:bg-slate-100 text-slate-600 hover:text-slate-800 transition-colors"
+            className="p-2 border border-slate-300 dark:border-gray-500 rounded-md hover:bg-slate-100 dark:hover:bg-dark-bg-hover text-slate-600 dark:text-gray-300 hover:text-slate-800 dark:hover:text-gray-100 transition-colors"
             title={sortAlphabetically ? "Sort by default order (narrative first)" : "Sort alphabetically"}
           >
             {sortAlphabetically ? (
@@ -159,9 +159,9 @@ export function CategorySidebar() {
       
       <div className="flex-1 overflow-y-auto">
         {categories.size === 0 ? (
-          <p className="text-sm text-slate-500 p-4">no elements loaded</p>
+          <p className="text-sm text-slate-500 dark:text-gray-400 p-4">no elements loaded</p>
         ) : filteredCategories.size === 0 ? (
-          <p className="text-sm text-slate-500 p-4">no elements found matching "{filterText}"</p>
+          <p className="text-sm text-slate-500 dark:text-gray-400 p-4">no elements found matching "{filterText}"</p>
         ) : (
           <div className="py-2">
             {sortedCategories.map(([category, elements]) => {
@@ -173,13 +173,13 @@ export function CategorySidebar() {
                   <div className="flex items-center">
                     <button
                       onClick={() => toggleCategory(category)}
-                      className="flex-1 flex items-center justify-between px-4 py-2 hover:bg-sidebar-light/20 transition-colors rounded-l-md"
+                      className="flex-1 flex items-center justify-between px-4 py-2 hover:bg-sidebar-light/20 dark:hover:bg-dark-bg-hover/20 transition-colors rounded-l-md"
                     >
                       <div className="flex items-center gap-2">
-                        <CategoryIcon category={category} className={`text-base ${isExpanded ? 'text-accent' : 'text-slate-500'}`} />
-                        <span className="text-sm font-bold text-slate-700 capitalize" style={{ fontSize: '0.95rem' }}>{category.toLowerCase()}</span>
+                        <CategoryIcon category={category} className={`text-base ${isExpanded ? 'text-accent dark:text-blue-400' : 'text-slate-500 dark:text-gray-400'}`} />
+                        <span className="text-sm font-bold text-slate-700 dark:text-gray-200 capitalize" style={{ fontSize: '0.95rem' }}>{category.toLowerCase()}</span>
                       </div>
-                      <span className="text-xs text-slate-500">
+                      <span className="text-xs text-slate-500 dark:text-gray-400">
                         {elements.length}
                         {isSearching && (
                           <span className="ml-1 text-field-highlight">
@@ -190,7 +190,7 @@ export function CategorySidebar() {
                     </button>
                     <button
                       onClick={() => openCreateModal(category)}
-                      className="p-2 hover:bg-sidebar-dark/20 text-slate-500 hover:text-accent transition-colors rounded-r-md"
+                      className="p-2 hover:bg-sidebar-dark/20 dark:hover:bg-dark-bg-hover/20 text-slate-500 dark:text-gray-400 hover:text-accent dark:hover:text-blue-400 transition-colors rounded-r-md"
                       title={`create new ${category}`}
                     >
                       <PlusIcon />
@@ -203,14 +203,14 @@ export function CategorySidebar() {
                         <div key={element.id} className="group flex items-center">
                           <button
                             onClick={() => navigate(`/element/${element.id}`)}
-                            className={`flex-1 text-left px-4 py-1.5 text-sm hover:bg-sidebar-light/20 transition-colors rounded-md ${
-                              selectedElementId === element.id ? 'bg-accent/10 text-accent font-medium' : 'text-slate-600'
+                            className={`flex-1 text-left px-4 py-1.5 text-sm hover:bg-sidebar-light/20 dark:hover:bg-dark-bg-hover/20 transition-colors rounded-md ${
+                              selectedElementId === element.id ? 'bg-accent/10 dark:bg-blue-400/10 text-accent dark:text-blue-400 font-medium' : 'text-slate-600 dark:text-gray-300'
                             }`}
                           >
                             <div className="flex items-center justify-between">
                               <span>{element.name}</span>
                               {isSearching && element.type && (
-                                <span className="text-xs text-slate-400 ml-1">
+                                <span className="text-xs text-slate-400 dark:text-gray-500 ml-1">
                                   {element.type}
                                 </span>
                               )}
@@ -238,7 +238,7 @@ export function CategorySidebar() {
                                 }
                               }
                             }}
-                            className="opacity-0 group-hover:opacity-100 p-1.5 mr-2 hover:bg-red-500/10 text-red-500 hover:text-red-600 transition-all rounded"
+                            className="opacity-0 group-hover:opacity-100 p-1.5 mr-2 hover:bg-red-500/10 dark:hover:bg-red-500/20 text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-all rounded"
                             title={`Delete ${element.name}`}
                           >
                             <TrashIcon />

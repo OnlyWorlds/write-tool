@@ -86,12 +86,12 @@ export function ReverseRelationsPanel({ elementId }: ReverseRelationsPanelProps)
   if (groupedLinks.size === 0) {
     return (
       <div className="h-full flex flex-col">
-        <div className="bg-sidebar-dark border-b border-border p-4">
-          <h3 className="font-bold text-slate-800">Reverse Relations</h3>
-          <p className="text-xs text-accent mt-1">Elements that reference this one</p>
+        <div className="bg-sidebar-dark dark:bg-dark-bg-tertiary border-b border-border dark:border-dark-bg-border p-4">
+          <h3 className="font-bold text-slate-800 dark:text-gray-200">Reverse Relations</h3>
+          <p className="text-xs text-accent dark:text-blue-400 mt-1">Elements that reference this one</p>
         </div>
         <div className="flex-1 flex items-center justify-center p-6">
-          <p className="text-sm text-slate-500 text-center">
+          <p className="text-sm text-slate-500 dark:text-gray-400 text-center">
             No elements currently reference this one
           </p>
         </div>
@@ -104,9 +104,9 @@ export function ReverseRelationsPanel({ elementId }: ReverseRelationsPanelProps)
   
   return (
     <div className="h-screen flex flex-col">
-      <div className="bg-sidebar-dark border-b border-border p-4">
-        <h3 className="font-bold text-slate-800">Reverse Relations</h3>
-        <p className="text-xs text-accent mt-1">
+      <div className="bg-sidebar-dark dark:bg-dark-bg-tertiary border-b border-border dark:border-dark-bg-border p-4">
+        <h3 className="font-bold text-slate-800 dark:text-gray-200">Reverse Relations</h3>
+        <p className="text-xs text-accent dark:text-blue-400 mt-1">
           {totalReferences} {totalReferences === 1 ? 'reference' : 'references'} from {reverseLinks.size} {reverseLinks.size === 1 ? 'type' : 'types'}
         </p>
         
@@ -118,13 +118,13 @@ export function ReverseRelationsPanel({ elementId }: ReverseRelationsPanelProps)
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search references..."
-              className="w-full px-3 py-1.5 text-sm bg-white border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-1.5 text-sm bg-white dark:bg-dark-bg-secondary border border-slate-200 dark:border-dark-bg-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-slate-700 dark:text-gray-200 placeholder-slate-400 dark:placeholder-gray-500"
             />
           </div>
         )}
       </div>
       
-      <div className="flex-1 overflow-y-auto p-4 bg-gradient-to-b from-gray-50 to-blue-50/30">
+      <div className="flex-1 overflow-y-auto p-4 bg-gradient-to-b from-gray-50 to-blue-50/30 dark:from-dark-bg-primary dark:to-dark-bg-secondary">
         <div className="space-y-3">
           {Array.from(filteredGroups.entries()).map(([label, group]) => {
             const isExpanded = expandedGroups.has(label) || filteredGroups.size === 1;
@@ -132,11 +132,11 @@ export function ReverseRelationsPanel({ elementId }: ReverseRelationsPanelProps)
             return (
               <div 
                 key={label} 
-                className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden"
+                className="bg-white dark:bg-dark-bg-tertiary rounded-lg shadow-sm border border-slate-200 dark:border-dark-bg-border overflow-hidden"
               >
                 <button
                   onClick={() => toggleGroup(label)}
-                  className="w-full px-4 py-3 flex items-center justify-between hover:bg-slate-50 transition-colors"
+                  className="w-full px-4 py-3 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-dark-bg-hover transition-colors"
                 >
                   <div className="flex items-center gap-2">
                     <svg 
@@ -147,8 +147,8 @@ export function ReverseRelationsPanel({ elementId }: ReverseRelationsPanelProps)
                     >
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
-                    <span className="font-medium text-slate-700">{label}</span>
-                    <span className="text-sm text-slate-500">({group.elements.length})</span>
+                    <span className="font-medium text-slate-700 dark:text-gray-200">{label}</span>
+                    <span className="text-sm text-slate-500 dark:text-gray-400">({group.elements.length})</span>
                   </div>
                 </button>
                 
@@ -158,16 +158,16 @@ export function ReverseRelationsPanel({ elementId }: ReverseRelationsPanelProps)
                       <button
                         key={element.id}
                         onClick={() => handleElementClick(element)}
-                        className="w-full flex items-center gap-2 px-3 py-2 rounded-md hover:bg-blue-50 transition-colors group"
+                        className="w-full flex items-center gap-2 px-3 py-2 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group"
                       >
                         <CategoryIcon 
                           category={element.category || ''} 
-                          className="text-lg text-slate-400 group-hover:text-blue-500 flex-shrink-0" 
+                          className="text-lg text-slate-400 dark:text-gray-500 group-hover:text-blue-500 dark:group-hover:text-blue-400 flex-shrink-0" 
                         />
-                        <span className="text-sm text-slate-700 group-hover:text-blue-700 text-left">
+                        <span className="text-sm text-slate-700 dark:text-gray-300 group-hover:text-blue-700 dark:group-hover:text-blue-300 text-left">
                           {element.name}
                         </span>
-                        <span className="text-xs text-slate-400 group-hover:text-blue-400 ml-auto">
+                        <span className="text-xs text-slate-400 dark:text-gray-500 group-hover:text-blue-400 dark:group-hover:text-blue-300 ml-auto">
                           {element.category}
                         </span>
                       </button>

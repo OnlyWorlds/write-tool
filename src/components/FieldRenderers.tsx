@@ -59,7 +59,7 @@ const FieldViewer = memo(function FieldViewer({ fieldName, value, fieldTypeInfo,
           href={value} 
           target="_blank" 
           rel="noopener noreferrer"
-          className={`text-blue-600 hover:text-blue-800 hover:underline ${className}`}
+          className={`text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline ${className}`}
         >
           {value}
         </a>
@@ -75,7 +75,7 @@ const FieldViewer = memo(function FieldViewer({ fieldName, value, fieldTypeInfo,
               <div className="w-full h-full rounded-full bg-white scale-50"></div>
             )}
           </div>
-          <span className={value ? 'text-green-700' : 'text-gray-600'}>
+          <span className={value ? 'text-green-700 dark:text-green-400' : 'text-gray-600 dark:text-gray-400'}>
             {value ? 'yes' : 'no'}
           </span>
         </div>
@@ -95,7 +95,7 @@ const FieldViewer = memo(function FieldViewer({ fieldName, value, fieldTypeInfo,
             {value.map((tag, index) => (
               <span 
                 key={index}
-                className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full"
+                className="inline-block bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-xs px-2 py-1 rounded-full"
               >
                 {tag}
               </span>

@@ -22,6 +22,8 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
   const [currentElement, setCurrentElement] = useState(element);
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [detectedCount, setDetectedCount] = useState(0);
+  const [linkedCount, setLinkedCount] = useState(0);
   const editorRef = useRef<EnhancedStoryEditorRef>(null);
 
   const handleSave = async (newContent: string) => {
@@ -75,6 +77,15 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
   const toggleFullscreen = () => {
     setIsFullscreen(!isFullscreen);
   };
+  
+  const handleDetectionChange = (detected: number, linked: number) => {
+    setDetectedCount(detected);
+    setLinkedCount(linked);
+  };
+  
+  const handleShowSuggestions = () => {
+    editorRef.current?.showSuggestions();
+  };
 
   return (
     <div className={`narrative-editor-wrapper flex flex-col h-full bg-white ${isFullscreen ? 'fixed inset-0 z-50' : 'relative'}`}>
@@ -87,6 +98,27 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
         
         <div className="flex items-center gap-4">
           <WritingStats content={content} />
+          
+          {/* Element detection widget */}
+          {detectedCount > 0 && (
+            <button
+              onClick={handleShowSuggestions}
+              className="px-3 py-1.5 text-sm bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-lg transition-colors flex items-center gap-2"
+              title="View detected elements"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              <span className="font-medium">
+                {detectedCount} detected
+                {linkedCount > 0 && (
+                  <span className="text-green-700 ml-1">
+                    ({linkedCount} linked)
+                  </span>
+                )}
+              </span>
+            </button>
+          )}
           
           <div className="flex items-center gap-2">
             <button
@@ -164,6 +196,8 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
             element={currentElement}
             onSave={handleSave}
             onContentChange={setContent}
+            onDetectionChange={handleDetectionChange}
+            onShowSuggestions={handleShowSuggestions}
             className="h-full"
           />
         </div>

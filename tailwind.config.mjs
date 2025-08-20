@@ -1,10 +1,11 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class', // Enable class-based dark mode
   content: ['./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}'],
   theme: {
     extend: {
       colors: {
-        // OnlyWorlds Browse Tool - Vibrant color palette
+        // OnlyWorlds Browse Tool - Vibrant color palette with dark mode support
         primary: {
           DEFAULT: '#2c3e50', // Dark blue-grey
           dark: '#1a2531',    // Darker border
@@ -12,6 +13,16 @@ export default {
         secondary: {
           DEFAULT: '#f8f9fa', // Very light grey (almost white)
           dark: '#e2e6ea',    // Darker grey for hover
+        },
+        // Dark mode background colors
+        dark: {
+          bg: {
+            primary: '#0f172a',   // Slate-900 - main dark background
+            secondary: '#1e293b', // Slate-800 - secondary dark background
+            tertiary: '#334155',  // Slate-700 - tertiary dark background
+            hover: '#475569',     // Slate-600 - hover states
+            border: '#475569',    // Slate-600 - borders
+          }
         },
         sidebar: {
           DEFAULT: '#e2e8f0', // Light slate-200

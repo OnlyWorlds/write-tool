@@ -77,14 +77,14 @@ export function EditArea() {
   // Case 1: No element selected - show empty state
   if (!selectedElement || !selectedElementId) {
     return (
-      <div className="w-96 border-l border-blue-200 flex flex-col bg-white h-full">
+      <div className="w-96 border-l border-blue-200 dark:border-dark-bg-border flex flex-col bg-white dark:bg-dark-bg-secondary h-full">
         <div className="h-full flex flex-col">
-          <div className="bg-sidebar-dark border-b border-border p-4">
-            <h3 className="font-bold text-slate-800">Element Details</h3>
-            <p className="text-xs text-accent mt-1">Select an element to view details</p>
+          <div className="bg-sidebar-dark dark:bg-dark-bg-tertiary border-b border-border dark:border-dark-bg-border p-4">
+            <h3 className="font-bold text-slate-800 dark:text-gray-200">Element Details</h3>
+            <p className="text-xs text-accent dark:text-blue-400 mt-1">Select an element to view details</p>
           </div>
           <div className="flex-1 flex items-center justify-center p-6">
-            <p className="text-sm text-slate-500 text-center">
+            <p className="text-sm text-slate-500 dark:text-gray-400 text-center">
               Select an element from the sidebar to view its details and relationships
             </p>
           </div>
@@ -96,7 +96,7 @@ export function EditArea() {
   // Case 2: Element selected but no field - show reverse relations
   if (!selectedFieldId) {
     return (
-      <div className="w-96 border-l border-blue-200 flex flex-col bg-white h-full">
+      <div className="w-96 border-l border-blue-200 dark:border-dark-bg-border flex flex-col bg-white dark:bg-dark-bg-secondary h-full">
         <ReverseRelationsPanel elementId={selectedElementId} />
       </div>
     );
@@ -108,15 +108,15 @@ export function EditArea() {
   const fieldTypeInfo = detectFieldType(selectedFieldId, currentValue, selectedElement.category);
   
   return (
-    <div className="w-96 border-l border-blue-200 flex flex-col bg-white h-full">
-      <div className="bg-sidebar-dark border-b border-border">
+    <div className="w-96 border-l border-blue-200 dark:border-dark-bg-border flex flex-col bg-white dark:bg-dark-bg-secondary h-full">
+      <div className="bg-sidebar-dark dark:bg-dark-bg-tertiary border-b border-border dark:border-dark-bg-border">
         <div className="p-4">
           <div className="flex items-center justify-between">
             <div className="flex flex-col gap-1">
-              <h3 className="font-bold text-slate-800 capitalize">
+              <h3 className="font-bold text-slate-800 dark:text-gray-200 capitalize">
                 {selectedFieldId.replace(/_/g, ' ')}
               </h3>
-              <span className="text-xs text-accent">
+              <span className="text-xs text-accent dark:text-blue-400">
                 ({fieldTypeInfo.type === 'textarea' ? 'text' : fieldTypeInfo.type} field)
               </span>
             </div>
@@ -125,7 +125,7 @@ export function EditArea() {
                 <>
                   <button
                     onClick={() => selectedElementId && selectedFieldId && setFieldValue(selectedElementId, selectedFieldId, undefined)}
-                    className="text-xs text-red-600 hover:text-red-800 px-1 py-0.5 rounded transition-colors"
+                    className="text-xs text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 px-1 py-0.5 rounded transition-colors"
                     title={`Discard changes to ${selectedFieldId.replace(/_/g, ' ')}`}
                   >
                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -135,19 +135,19 @@ export function EditArea() {
                   <button
                     onClick={handleSaveField}
                     disabled={isSaving}
-                    className="text-xs text-white bg-green-600 hover:bg-green-700 px-2 py-0.5 rounded transition-colors disabled:opacity-50"
+                    className="text-xs text-white bg-green-600 dark:bg-green-700 hover:bg-green-700 dark:hover:bg-green-600 px-2 py-0.5 rounded transition-colors disabled:opacity-50"
                     title={`Save ${selectedFieldId.replace(/_/g, ' ')}`}
                   >
                     Save
                   </button>
-                  <span className="text-xs text-amber-700 bg-amber-100 px-2 py-1 rounded-full">
+                  <span className="text-xs text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/30 px-2 py-1 rounded-full">
                     Modified
                   </span>
                 </>
               )}
               <button
                 onClick={() => selectField(null)}
-                className="text-slate-400 hover:text-slate-600 p-1 rounded hover:bg-slate-100 transition-colors"
+                className="text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-300 p-1 rounded hover:bg-slate-100 dark:hover:bg-dark-bg-hover transition-colors"
                 title="Close editor"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -159,7 +159,7 @@ export function EditArea() {
         </div>
       </div>
       
-      <div className="flex-1 p-4 bg-gradient-to-b from-gray-50 to-blue-50/30 overflow-y-auto">
+      <div className="flex-1 p-4 bg-gradient-to-b from-gray-50 to-blue-50/30 dark:from-dark-bg-secondary dark:to-dark-bg-tertiary overflow-y-auto">
         <div>
           <FieldRenderer
             fieldName={selectedFieldId}
@@ -174,7 +174,7 @@ export function EditArea() {
             }}
           />
           {error && (
-            <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">
+            <div className="mt-2 p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded text-sm text-red-700 dark:text-red-300">
               {error}
             </div>
           )}
@@ -182,19 +182,19 @@ export function EditArea() {
       </div>
       
       {isEdited && editMode === 'edit' && (
-        <div className="p-4 border-t border-blue-200 bg-gradient-to-r from-slate-50 to-blue-50">
+        <div className="p-4 border-t border-blue-200 dark:border-dark-bg-border bg-gradient-to-r from-slate-50 to-blue-50 dark:from-dark-bg-tertiary dark:to-dark-bg-secondary">
           <div className="flex items-center gap-2">
             <button
               onClick={handleSaveField}
               disabled={isSaving}
-              className="flex-1 px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+              className="flex-1 px-4 py-2 text-sm bg-blue-600 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors disabled:opacity-50"
             >
               {isSaving ? 'Saving...' : 'Save Changes'}
             </button>
             <button
               onClick={() => selectedElementId && selectedFieldId && setFieldValue(selectedElementId, selectedFieldId, undefined)}
               disabled={isSaving}
-              className="flex-1 px-4 py-2 text-sm bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition-colors disabled:opacity-50"
+              className="flex-1 px-4 py-2 text-sm bg-slate-200 dark:bg-dark-bg-tertiary text-slate-700 dark:text-gray-300 rounded-lg hover:bg-slate-300 dark:hover:bg-dark-bg-hover transition-colors disabled:opacity-50"
             >
               Cancel
             </button>

@@ -49,11 +49,14 @@ export function ElementViewer() {
     });
   }
   
-  // Reset hidden fields when element changes
+  // Reset hidden fields and mode when element changes
   useEffect(() => {
     resetHiddenFields();
     setCollapsedSections(new Set());
-  }, [selectedElementId, resetHiddenFields]);
+    // Reset to edit mode when navigating away from a narrative in write mode
+    // But only if the element actually changed (not on first mount or mode change)
+    setMode('edit');
+  }, [selectedElementId]); // Only depend on selectedElementId changing
   
   const toggleSection = (sectionName: string) => {
     setCollapsedSections(prev => {
@@ -69,7 +72,7 @@ export function ElementViewer() {
   
   if (!selectedElement) {
     return (
-      <div className="flex-1 flex items-center justify-center text-text-light/60">
+      <div className="flex-1 flex items-center justify-center text-text-light/60 dark:text-gray-400">
         <p>select an element from the sidebar to view its details</p>
       </div>
     );
@@ -318,9 +321,9 @@ export function ElementViewer() {
       <div className="p-6 max-w-5xl">
         <div 
           id={editMode === 'showcase' ? `showcase-${selectedElementId}` : undefined}
-          className={`bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg shadow-md border border-slate-200 ${editMode === 'showcase' ? 'shadow-lg' : ''}`}
+          className={`bg-gradient-to-br from-slate-50 to-slate-100 dark:from-dark-bg-secondary dark:to-dark-bg-tertiary rounded-lg shadow-md border border-slate-200 dark:border-dark-bg-border ${editMode === 'showcase' ? 'shadow-lg' : ''}`}
         >
-          <div className="sticky top-6 z-10 border-b border-border bg-sidebar-dark shadow-md rounded-t-lg">
+          <div className="sticky top-6 z-10 border-b border-border dark:border-dark-bg-border bg-sidebar-dark dark:bg-dark-bg-tertiary shadow-md rounded-t-lg">
             <div className="p-6 pb-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-6">
@@ -349,32 +352,32 @@ export function ElementViewer() {
                           value={editedName}
                           onChange={(e) => setEditedName(e.target.value)}
                           onKeyDown={handleNameKeyDown}
-                          className="text-2xl font-semibold text-text-light bg-input-bg border border-input-border rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-accent"
+                          className="text-2xl font-semibold text-text-light dark:text-gray-200 bg-input-bg dark:bg-dark-bg-secondary border border-input-border dark:border-dark-bg-border rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-accent dark:focus:ring-blue-400"
                           autoFocus
                         />
                         <button
                           onClick={handleNameSave}
-                          className="text-sm text-accent hover:text-accent-hover px-2 py-1 rounded transition-colors"
+                          className="text-sm text-accent dark:text-blue-400 hover:text-accent-hover dark:hover:text-blue-300 px-2 py-1 rounded transition-colors"
                         >
                           ✓
                         </button>
                         <button
                           onClick={handleNameCancel}
-                          className="text-sm text-text-light/60 hover:text-text-light px-2 py-1 rounded transition-colors"
+                          className="text-sm text-text-light/60 dark:text-gray-400 hover:text-text-light dark:hover:text-gray-200 px-2 py-1 rounded transition-colors"
                         >
                           ×
                         </button>
                       </div>
                     ) : (
                       <h2 
-                        className={`text-2xl font-semibold text-text-light ${editMode === 'edit' ? 'cursor-pointer hover:text-text-light/80' : ''}`}
+                        className={`text-2xl font-semibold text-text-light dark:text-gray-200 ${editMode === 'edit' ? 'cursor-pointer hover:text-text-light/80 dark:hover:text-gray-300' : ''}`}
                         onClick={editMode === 'edit' ? handleNameEdit : undefined}
                         title={editMode === 'edit' ? 'click to edit name' : undefined}
                       >
                         {selectedElement.name}
                       </h2>
                     )}
-                    <div className="text-sm text-text-light/60 mt-1 capitalize">{selectedElement.category}</div>
+                    <div className="text-sm text-text-light/60 dark:text-gray-400 mt-1 capitalize">{selectedElement.category}</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -393,7 +396,7 @@ export function ElementViewer() {
                           setCollapsedSections(new Set(allSectionNames));
                         }
                       }}
-                      className="p-2 text-slate-500 hover:text-slate-700 hover:bg-white/20 rounded-lg transition-all"
+                      className="p-2 text-slate-500 dark:text-gray-400 hover:text-slate-700 dark:hover:text-gray-200 hover:bg-white/20 dark:hover:bg-dark-bg-hover/20 rounded-lg transition-all"
                       title={collapsedSections.size > 0 ? "Expand all sections" : "Collapse all sections"}
                       data-exclude-from-export
                     >
@@ -404,7 +407,7 @@ export function ElementViewer() {
                   {editMode === 'edit' && (
                     <button
                       onClick={() => setShowOptions(!showOptions)}
-                      className="p-2 text-slate-500 hover:text-slate-700 hover:bg-white/20 rounded-lg transition-all"
+                      className="p-2 text-slate-500 dark:text-gray-400 hover:text-slate-700 dark:hover:text-gray-200 hover:bg-white/20 dark:hover:bg-dark-bg-hover/20 rounded-lg transition-all"
                       title="Field Options"
                       data-exclude-from-export
                     >
@@ -417,7 +420,7 @@ export function ElementViewer() {
                   {unsavedFieldsForElement.length > 0 && editMode === 'edit' && (
                     <>
                       <span 
-                        className="text-sm text-accent bg-info-bg px-3 py-1 rounded-full cursor-help" 
+                        className="text-sm text-accent dark:text-blue-400 bg-info-bg dark:bg-blue-900/20 px-3 py-1 rounded-full cursor-help" 
                         data-exclude-from-export
                         title={`Unsaved changes in: ${unsavedFieldsForElement.map(f => f.fieldName.replace(/_/g, ' ')).join(', ')}`}
                       >
@@ -426,7 +429,7 @@ export function ElementViewer() {
                       <button
                         onClick={handleSaveAll}
                         disabled={isSavingAll}
-                        className="text-sm text-white bg-green-600 hover:bg-green-700 px-3 py-1 rounded-full transition-colors disabled:opacity-50"
+                        className="text-sm text-white bg-green-600 dark:bg-green-700 hover:bg-green-700 dark:hover:bg-green-600 px-3 py-1 rounded-full transition-colors disabled:opacity-50"
                         data-exclude-from-export
                       >
                         {isSavingAll ? 'Saving...' : 'Save All'}
@@ -434,7 +437,7 @@ export function ElementViewer() {
                       <button
                         onClick={handleDiscardAll}
                         disabled={isSavingAll}
-                        className="text-sm text-slate-600 bg-slate-200 hover:bg-slate-300 px-3 py-1 rounded-full transition-colors disabled:opacity-50"
+                        className="text-sm text-slate-600 dark:text-gray-300 bg-slate-200 dark:bg-dark-bg-tertiary hover:bg-slate-300 dark:hover:bg-dark-bg-hover px-3 py-1 rounded-full transition-colors disabled:opacity-50"
                         data-exclude-from-export
                       >
                         Discard All
@@ -468,7 +471,7 @@ export function ElementViewer() {
                     {editMode !== 'edit' && (
                       <button
                         onClick={() => setMode('edit')}
-                        className="px-4 py-2 text-sm font-medium rounded-lg transition-all shadow-sm flex items-center gap-2 bg-blue-100 hover:bg-blue-200 text-blue-900"
+                        className="px-4 py-2 text-sm font-medium rounded-lg transition-all shadow-sm flex items-center gap-2 bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-900/60 text-blue-900 dark:text-blue-200 border border-blue-200 dark:border-blue-700/50"
                         data-exclude-from-export
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -480,7 +483,7 @@ export function ElementViewer() {
                     {editMode !== 'showcase' && (
                       <button
                         onClick={() => setMode('showcase')}
-                        className="px-4 py-2 text-sm font-medium rounded-lg transition-all shadow-sm flex items-center gap-2 bg-blue-100 hover:bg-blue-200 text-blue-900"
+                        className="px-4 py-2 text-sm font-medium rounded-lg transition-all shadow-sm flex items-center gap-2 bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-900/60 text-blue-900 dark:text-blue-200 border border-blue-200 dark:border-blue-700/50"
                         data-exclude-from-export
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -493,7 +496,7 @@ export function ElementViewer() {
                     {editMode !== 'network' && (
                       <button
                         onClick={() => setMode('network')}
-                        className="px-4 py-2 text-sm font-medium rounded-lg transition-all shadow-sm flex items-center gap-2 bg-blue-100 hover:bg-blue-200 text-blue-900"
+                        className="px-4 py-2 text-sm font-medium rounded-lg transition-all shadow-sm flex items-center gap-2 bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-900/60 text-blue-900 dark:text-blue-200 border border-blue-200 dark:border-blue-700/50"
                         data-exclude-from-export
                         title="View element relationships as a network graph"
                       >
@@ -511,7 +514,7 @@ export function ElementViewer() {
                     {selectedElement.category === 'narrative' && editMode !== 'write' && (
                       <button
                         onClick={() => setMode('write')}
-                        className="px-4 py-2 text-sm font-medium rounded-lg transition-all shadow-sm flex items-center gap-2 bg-green-100 hover:bg-green-200 text-green-900"
+                        className="px-4 py-2 text-sm font-medium rounded-lg transition-all shadow-sm flex items-center gap-2 bg-green-100 dark:bg-green-900/50 hover:bg-green-200 dark:hover:bg-green-900/60 text-green-900 dark:text-green-200 border border-green-200 dark:border-green-700/50"
                         data-exclude-from-export
                         title="Open dedicated writing interface"
                       >
@@ -536,7 +539,7 @@ export function ElementViewer() {
                       onChange={(e) => setHideEmptyFields(e.target.checked)}
                       className="w-4 h-4 text-accent rounded border-gray-300 focus:ring-accent"
                     />
-                    <span className="text-text-light/60">Hide empty</span>
+                    <span className="text-text-light/60 dark:text-gray-400">Hide empty</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer text-sm">
                     <input
@@ -545,7 +548,7 @@ export function ElementViewer() {
                       onChange={(e) => setExpandAllFields(e.target.checked)}
                       className="w-4 h-4 text-accent rounded border-gray-300 focus:ring-accent"
                     />
-                    <span className="text-text-light/60">Always expand</span>
+                    <span className="text-text-light/60 dark:text-gray-400">Always expand</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer text-sm">
                     <input
@@ -554,7 +557,7 @@ export function ElementViewer() {
                       onChange={(e) => setHideFieldIcons(e.target.checked)}
                       className="w-4 h-4 text-accent rounded border-gray-300 focus:ring-accent"
                     />
-                    <span className="text-text-light/60">Hide icons</span>
+                    <span className="text-text-light/60 dark:text-gray-400">Hide icons</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer text-sm">
                     <input
@@ -563,7 +566,7 @@ export function ElementViewer() {
                       onChange={(e) => setSortAlphabetically(e.target.checked)}
                       className="w-4 h-4 text-accent rounded border-gray-300 focus:ring-accent"
                     />
-                    <span className="text-text-light/60">Sort A-Z</span>
+                    <span className="text-text-light/60 dark:text-gray-400">Sort A-Z</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer text-sm">
                     <input
@@ -572,7 +575,7 @@ export function ElementViewer() {
                       onChange={(e) => setHideSections(e.target.checked)}
                       className="w-4 h-4 text-accent rounded border-gray-300 focus:ring-accent"
                     />
-                    <span className="text-text-light/60">Hide sections</span>
+                    <span className="text-text-light/60 dark:text-gray-400">Hide sections</span>
                   </label>
               </div>
             </div>
@@ -591,7 +594,7 @@ export function ElementViewer() {
                     className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
                       !is3DView 
                         ? 'bg-blue-600 text-white' 
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        : 'bg-gray-100 dark:bg-dark-bg-tertiary text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-dark-bg-hover'
                     }`}
                   >
                     2D View
@@ -601,7 +604,7 @@ export function ElementViewer() {
                     className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
                       is3DView 
                         ? 'bg-blue-600 text-white' 
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        : 'bg-gray-100 dark:bg-dark-bg-tertiary text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-dark-bg-hover'
                     }`}
                   >
                     3D View
@@ -623,9 +626,9 @@ export function ElementViewer() {
               )}
             </div>
           ) : (
-          <div className={`px-4 pb-6 pt-0 ${editMode === 'showcase' ? 'bg-slate-100' : 'bg-gradient-to-b from-slate-100 to-slate-50'}`}>
+          <div className={`px-4 pb-6 pt-0 ${editMode === 'showcase' ? 'bg-slate-100 dark:bg-dark-bg-secondary' : 'bg-gradient-to-b from-slate-100 to-slate-50 dark:from-dark-bg-secondary dark:to-dark-bg-tertiary'}`}>
             {/* Base fields section */}
-            <div className="pt-6 pb-4 border-b border-border/50">
+            <div className="pt-6 pb-4 border-b border-border/50 dark:border-dark-bg-border/50">
               {fields.filter(([fieldName]) => baseFields.includes(fieldName)).map(([fieldName, originalValue]) => {
                 const editedValue = selectedElementId ? getEditedValue(selectedElementId, fieldName) : undefined;
                 const value = editedValue !== undefined ? editedValue : originalValue;
@@ -655,12 +658,12 @@ export function ElementViewer() {
                     onClick={() => editMode === 'edit' && selectField(selectedFieldId === fieldName ? null : fieldName)}
                     className={`mb-3 rounded-lg transition-all relative flex items-start ${
                       editMode === 'showcase' 
-                        ? 'bg-zinc-50 border border-slate-200 shadow-sm' 
+                        ? 'bg-zinc-50 dark:bg-dark-bg-tertiary border border-slate-200 dark:border-dark-bg-border shadow-sm' 
                         : error
-                          ? 'bg-red-50 cursor-pointer'
+                          ? 'bg-red-50 dark:bg-red-900/20 cursor-pointer'
                           : selectedFieldId === fieldName 
-                            ? 'bg-blue-100 border-blue-300 shadow-md cursor-pointer' 
-                            : 'bg-zinc-50 hover:bg-zinc-100 shadow-sm hover:shadow-md cursor-pointer'
+                            ? 'bg-blue-100 dark:bg-blue-900/20 border-blue-300 dark:border-blue-600 shadow-md cursor-pointer' 
+                            : 'bg-zinc-50 dark:bg-dark-bg-tertiary hover:bg-zinc-100 dark:hover:bg-dark-bg-hover shadow-sm hover:shadow-md cursor-pointer'
                     }`}
                   >
                     {/* Field type icon */}
@@ -676,12 +679,12 @@ export function ElementViewer() {
                       <div className="flex items-start">
                         <label className={`block w-32 flex-shrink-0 cursor-pointer font-bold ${
                           editMode === 'showcase' 
-                            ? 'text-base text-gray-700 font-medium' 
-                            : 'text-sm text-blue-600'
+                            ? 'text-base text-gray-700 dark:text-gray-300 font-medium' 
+                            : 'text-sm text-blue-600 dark:text-blue-300'
                         }`}>
                           {fieldName.replace(/_/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
                         </label>
-                        <div className={`flex-1 ${editMode === 'showcase' ? 'text-slate-800 font-medium' : 'text-slate-700'}`}>
+                        <div className={`flex-1 ${editMode === 'showcase' ? 'text-slate-800 dark:text-gray-200 font-medium' : 'text-slate-700 dark:text-gray-300'}`}>
                           <FieldRenderer
                             fieldName={fieldName}
                             value={value}
@@ -752,18 +755,18 @@ export function ElementViewer() {
                     {(!hideSections && sections && section.name !== 'Fields') && (
                       <button
                         onClick={() => toggleSection(section.name)}
-                        className="flex items-center gap-2 w-full text-left mb-3 px-3 py-2 bg-sidebar-dark hover:bg-sidebar-dark/80 rounded-lg transition-all group"
+                        className="flex items-center gap-2 w-full text-left mb-3 px-3 py-2 bg-sidebar-dark dark:bg-dark-bg-secondary hover:bg-sidebar-dark/80 dark:hover:bg-dark-bg-tertiary/80 rounded-lg transition-all group"
                         data-exclude-from-export
                       >
                         {isCollapsed ? (
-                          <ChevronRightIcon className="w-4 h-4 text-slate-600 group-hover:text-slate-700" />
+                          <ChevronRightIcon className="w-4 h-4 text-slate-600 dark:text-gray-400 group-hover:text-slate-700 dark:group-hover:text-gray-300" />
                         ) : (
-                          <ChevronDownIcon className="w-4 h-4 text-slate-600 group-hover:text-slate-700" />
+                          <ChevronDownIcon className="w-4 h-4 text-slate-600 dark:text-gray-400 group-hover:text-slate-700 dark:group-hover:text-gray-300" />
                         )}
-                        <span className="text-base font-semibold text-slate-800 flex-1">
+                        <span className="text-base font-semibold text-slate-800 dark:text-gray-300 flex-1">
                           {section.name}
                         </span>
-                        <span className="text-sm text-slate-600 font-medium">
+                        <span className="text-sm text-slate-600 dark:text-gray-400 font-medium">
                           {section.fields.length}
                         </span>
                       </button>
@@ -801,12 +804,12 @@ export function ElementViewer() {
                     onClick={() => editMode === 'edit' && selectField(selectedFieldId === fieldName ? null : fieldName)}
                     className={`rounded-lg transition-all relative flex items-start ${
                       editMode === 'showcase' 
-                        ? 'bg-zinc-50 border border-slate-200 shadow-sm' 
+                        ? 'bg-zinc-50 dark:bg-dark-bg-tertiary border border-slate-200 dark:border-dark-bg-border shadow-sm' 
                         : error
-                          ? 'bg-red-50 cursor-pointer'
+                          ? 'bg-red-50 dark:bg-red-900/20 cursor-pointer'
                           : selectedFieldId === fieldName 
-                            ? 'bg-blue-100 border-blue-300 shadow-md cursor-pointer' 
-                            : 'bg-zinc-50 hover:bg-zinc-100 shadow-sm hover:shadow-md cursor-pointer'
+                            ? 'bg-blue-100 dark:bg-blue-900/20 border-blue-300 dark:border-blue-600 shadow-md cursor-pointer' 
+                            : 'bg-zinc-50 dark:bg-dark-bg-tertiary hover:bg-zinc-100 dark:hover:bg-dark-bg-hover shadow-sm hover:shadow-md cursor-pointer'
                     }`}
                   >
                     {/* Field type icon */}
@@ -827,7 +830,7 @@ export function ElementViewer() {
                         }`}>
                           {fieldName.replace(/_/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
                         </label>
-                        <div className={`flex-1 ${editMode === 'showcase' ? 'text-slate-800 font-medium' : 'text-slate-700'}`}>
+                        <div className={`flex-1 ${editMode === 'showcase' ? 'text-slate-800 dark:text-gray-200 font-medium' : 'text-slate-700 dark:text-gray-300'}`}>
                           <FieldRenderer
                             fieldName={fieldName}
                             value={value}

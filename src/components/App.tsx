@@ -64,7 +64,7 @@ export function App() {
   const { helpModalOpen, closeHelpModal } = useSidebarStore();
 
   return (
-    <div className="min-h-screen bg-secondary flex flex-col">
+    <div className="min-h-screen bg-secondary dark:bg-dark-bg-primary flex flex-col">
       {/* Routes that handle showcase viewing */}
       <Routes>
         <Route path="/showcase/:showcaseId" element={<ShowcaseRoute />} />
@@ -101,14 +101,14 @@ export function App() {
                   <div className="text-center max-w-md">
                     {isLoading ? (
                       <>
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto mb-4"></div>
-                        <h2 className="text-xl font-semibold text-text-light mb-2">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent dark:border-blue-400 mx-auto mb-4"></div>
+                        <h2 className="text-xl font-semibold text-text-light dark:text-gray-200 mb-2">
                           loading world..
                         </h2> 
                       </>
                     ) : (
                       <> 
-                        <p className="text-text-light mb-2">
+                        <p className="text-text-light dark:text-gray-300 mb-2">
                           load a world using the API key and PIN field above
                         </p>
         

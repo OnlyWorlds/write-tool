@@ -97,10 +97,7 @@ function transformElementFromApi(element: any): any {
 function transformElementForApi(element: any, allElements?: Map<string, Element>): any {
   const transformed = { ...element };
   
-  // The API expects field names with _id suffix for single links and _ids suffix for arrays
-  // We need to rename fields that don't have the proper suffix
-  const keysToDelete: string[] = [];
-  
+  // Process fields to ensure proper format for API
   for (const [key, value] of Object.entries(element)) {
     // Skip null/undefined values
     if (value == null) continue;
@@ -110,34 +107,17 @@ function transformElementForApi(element: any, allElements?: Map<string, Element>
     
     // Handle single link fields
     if (fieldInfo.type === 'single_link' && typeof value === 'string' && value) {
-      // Check if field name needs _id suffix
-      if (!key.endsWith('_id') && !key.endsWith('Id')) {
-        // Rename field to have _id suffix
-        transformed[`${key}_id`] = value;
-        keysToDelete.push(key);
-      }
-      // Field already has proper suffix, keep the ID value
-      else {
-        transformed[key] = value;
-      }
+      // For single link fields, keep the field name as-is
+      // The API will handle the field naming convention
+      transformed[key] = value;
     }
     // Handle multi-link fields
     else if (fieldInfo.type === 'multi_link' && Array.isArray(value)) {
-      // Check if field name needs _ids suffix
-      if (!key.endsWith('_ids') && !key.endsWith('Ids')) {
-        // Rename field to have _ids suffix
-        transformed[`${key}_ids`] = value.filter(id => typeof id === 'string' && id);
-        keysToDelete.push(key);
-      }
-      // Field already has proper suffix, keep the array of IDs
-      else {
-        transformed[key] = value.filter(id => typeof id === 'string' && id);
-      }
+      // For multi-link fields, the API expects the field name WITHOUT _ids suffix
+      // Only filter to ensure we have valid string IDs
+      transformed[key] = value.filter(id => typeof id === 'string' && id);
     }
   }
-  
-  // Remove fields that were renamed
-  keysToDelete.forEach(key => delete transformed[key]);
   
   return transformed;
 }
@@ -255,7 +235,9 @@ export class ApiService {
         });
         
         if (response.ok) {
-          const elements = await response.json();
+          const data = await response.json();
+          // Handle both paginated and non-paginated responses
+          const elements = Array.isArray(data) ? data : (data.results || []);
           // Add category to each element based on the endpoint
           return elements.map((el: any) => {
             const transformed = transformElementFromApi(el);

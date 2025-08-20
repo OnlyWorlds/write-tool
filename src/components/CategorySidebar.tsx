@@ -10,7 +10,7 @@ import { ONLYWORLDS_CATEGORIES } from '../constants/categories';
 
 export function CategorySidebar() {
   const { categories, worldKey, pin, deleteElement } = useWorldContext();
-  const { expandedCategories, selectedElementId, filterText, toggleCategory, selectElement, openCreateModal, setFilterText, expandAllCategories, toggleAllCategories, showEmptyCategories, toggleShowEmptyCategories } = useSidebarStore();
+  const { expandedCategories, selectedElementId, filterText, toggleCategory, selectElement, openCreateModal, setFilterText, expandAllCategories, toggleAllCategories, showEmptyCategories, toggleShowEmptyCategories, sortAlphabetically, toggleSortMode } = useSidebarStore();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
@@ -32,15 +32,8 @@ export function CategorySidebar() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [filterText, setFilterText]);
 
-  // Expand all categories when categories are loaded
-  useEffect(() => {
-    if (categories.size > 0) {
-      const categoryNames = Array.from(categories.keys());
-      expandAllCategories(categoryNames);
-    }
-  }, [categories, expandAllCategories]);
 
-  // Filter elements based on search text and empty category setting (memoized for performance)
+  // Filter and sort elements based on search text and empty category setting (memoized for performance)
   const filteredCategories = useMemo(() => {
     const filtered = new Map();
     
@@ -72,6 +65,27 @@ export function CategorySidebar() {
     
     return filtered;
   }, [categories, filterText, showEmptyCategories]);
+  
+  // Sort categories based on sort mode
+  const sortedCategories = useMemo(() => {
+    const entries = Array.from(filteredCategories.entries());
+    
+    if (sortAlphabetically) {
+      // Sort alphabetically
+      return entries.sort((a, b) => a[0].localeCompare(b[0]));
+    } else {
+      // Default sort with narrative first
+      return entries.sort((a, b) => {
+        // Narrative always comes first
+        if (a[0] === 'narrative') return -1;
+        if (b[0] === 'narrative') return 1;
+        // Then use the default ONLYWORLDS_CATEGORIES order
+        const aIndex = ONLYWORLDS_CATEGORIES.indexOf(a[0]);
+        const bIndex = ONLYWORLDS_CATEGORIES.indexOf(b[0]);
+        return aIndex - bIndex;
+      });
+    }
+  }, [filteredCategories, sortAlphabetically]);
 
   return (
     <aside className="w-64 bg-sidebar border-r border-sidebar-dark flex flex-col h-full">
@@ -125,6 +139,21 @@ export function CategorySidebar() {
               </svg>
             )}
           </button>
+          <button
+            onClick={toggleSortMode}
+            className="p-2 border border-slate-300 rounded-md hover:bg-slate-100 text-slate-600 hover:text-slate-800 transition-colors"
+            title={sortAlphabetically ? "Sort by default order (narrative first)" : "Sort alphabetically"}
+          >
+            {sortAlphabetically ? (
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+              </svg>
+            ) : (
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0h4m-4 4h4m-4 4h4" />
+              </svg>
+            )}
+          </button>
         </div>
       </div>
       
@@ -135,7 +164,7 @@ export function CategorySidebar() {
           <p className="text-sm text-slate-500 p-4">no elements found matching "{filterText}"</p>
         ) : (
           <div className="py-2">
-            {Array.from(filteredCategories.entries()).map(([category, elements]) => {
+            {sortedCategories.map(([category, elements]) => {
               const isExpanded = expandedCategories.has(category);
               const isSearching = filterText.trim().length > 0;
               

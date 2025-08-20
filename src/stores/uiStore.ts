@@ -9,6 +9,7 @@ interface SidebarState {
   createModalCategory: string | null;
   helpModalOpen: boolean;
   showEmptyCategories: boolean;
+  sortAlphabetically: boolean;
   toggleCategory: (category: string) => void;
   selectElement: (id: string | null) => void;
   setFilterText: (text: string) => void;
@@ -19,6 +20,7 @@ interface SidebarState {
   expandAllCategories: (categories: string[]) => void;
   toggleAllCategories: (categories: string[]) => void;
   toggleShowEmptyCategories: () => void;
+  toggleSortMode: () => void;
 }
 
 export const useSidebarStore = create<SidebarState>((set) => ({
@@ -29,6 +31,7 @@ export const useSidebarStore = create<SidebarState>((set) => ({
   createModalCategory: null,
   helpModalOpen: false,
   showEmptyCategories: true,
+  sortAlphabetically: false,
   toggleCategory: (category) => set((state) => {
     const newExpanded = new Set(state.expandedCategories);
     if (newExpanded.has(category)) {
@@ -55,6 +58,7 @@ export const useSidebarStore = create<SidebarState>((set) => ({
     }
   }),
   toggleShowEmptyCategories: () => set((state) => ({ showEmptyCategories: !state.showEmptyCategories })),
+  toggleSortMode: () => set((state) => ({ sortAlphabetically: !state.sortAlphabetically })),
 }));
 
 interface EditorState {

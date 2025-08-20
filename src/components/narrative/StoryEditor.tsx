@@ -129,46 +129,52 @@ export const StoryEditor = forwardRef<StoryEditorRef, StoryEditorProps>(
                   <div className="w-px h-6 bg-gray-300" />
                   <button
                     className="px-2 py-1 text-sm hover:bg-gray-100 rounded"
-                    onClick={() => editorRef.current?.insertMarkdown('# ')}
-                    title="Heading 1"
+                    onClick={() => {
+                      const currentContent = editorRef.current?.getMarkdown() || '';
+                      const newContent = currentContent ? `${currentContent}\n\n# ` : '# ';
+                      editorRef.current?.setMarkdown(newContent);
+                      editorRef.current?.focus();
+                    }}
+                    title="Add Heading 1"
                   >
                     H1
                   </button>
                   <button
                     className="px-2 py-1 text-sm hover:bg-gray-100 rounded"
-                    onClick={() => editorRef.current?.insertMarkdown('## ')}
-                    title="Heading 2"
+                    onClick={() => {
+                      const currentContent = editorRef.current?.getMarkdown() || '';
+                      const newContent = currentContent ? `${currentContent}\n\n## ` : '## ';
+                      editorRef.current?.setMarkdown(newContent);
+                      editorRef.current?.focus();
+                    }}
+                    title="Add Heading 2"
                   >
                     H2
                   </button>
                   <button
                     className="px-2 py-1 text-sm hover:bg-gray-100 rounded"
-                    onClick={() => editorRef.current?.insertMarkdown('### ')}
-                    title="Heading 3"
+                    onClick={() => {
+                      const currentContent = editorRef.current?.getMarkdown() || '';
+                      const newContent = currentContent ? `${currentContent}\n\n### ` : '### ';
+                      editorRef.current?.setMarkdown(newContent);
+                      editorRef.current?.focus();
+                    }}
+                    title="Add Heading 3"
                   >
                     H3
                   </button>
                   <div className="w-px h-6 bg-gray-300" />
                   <button
                     className="px-2 py-1 text-sm hover:bg-gray-100 rounded"
-                    onClick={() => editorRef.current?.insertMarkdown('- ')}
-                    title="Bullet List"
+                    onClick={() => {
+                      const currentContent = editorRef.current?.getMarkdown() || '';
+                      const newContent = currentContent ? `${currentContent}\n\n> ` : '> ';
+                      editorRef.current?.setMarkdown(newContent);
+                      editorRef.current?.focus();
+                    }}
+                    title="Add Quote"
                   >
-                    • List
-                  </button>
-                  <button
-                    className="px-2 py-1 text-sm hover:bg-gray-100 rounded"
-                    onClick={() => editorRef.current?.insertMarkdown('1. ')}
-                    title="Numbered List"
-                  >
-                    1. List
-                  </button>
-                  <button
-                    className="px-2 py-1 text-sm hover:bg-gray-100 rounded"
-                    onClick={() => editorRef.current?.insertMarkdown('> ')}
-                    title="Quote"
-                  >
-                    " Quote
+                    Quote
                   </button>
                 </div>
               )

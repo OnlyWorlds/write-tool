@@ -12,6 +12,7 @@ interface EnhancedStoryEditorProps {
   onContentChange?: (content: string) => void;
   onDetectionChange?: (detected: number, linked: number) => void;
   onShowSuggestions?: () => void;
+  onFieldUpdate?: (fieldName: string, value: any) => void;
   className?: string;
 }
 
@@ -22,7 +23,7 @@ export interface EnhancedStoryEditorRef extends StoryEditorRef {
 }
 
 export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedStoryEditorProps>(
-  ({ element, onSave, onContentChange, onDetectionChange, onShowSuggestions, className = '' }, ref) => {
+  ({ element, onSave, onContentChange, onDetectionChange, onShowSuggestions, onFieldUpdate, className = '' }, ref) => {
     const { elements } = useWorldContext();
     const storyEditorRef = useRef<StoryEditorRef>(null);
     const [content, setContent] = useState(element.story || '');
@@ -36,33 +37,43 @@ export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedSt
     // Initialize ElementLinker
     useEffect(() => {
       // Collect all linked element IDs from narrative fields
-      // Note: Narrative fields use 'Ids' suffix (e.g., eventsIds, charactersIds)
+      // Note: API returns fields WITHOUT 'Ids' suffix (e.g., events, characters)
       const linkedIds = [
-        ...(element.eventsIds || []),
-        ...(element.charactersIds || []),
-        ...(element.locationsIds || []),
-        ...(element.familiesIds || []),
-        ...(element.collectivesIds || []),
-        ...(element.objectsIds || []),
-        ...(element.speciesIds || []),
-        ...(element.creaturesIds || []),
-        ...(element.institutionsIds || []),
-        ...(element.traitsIds || []),
-        ...(element.zonesIds || []),
-        ...(element.abilitiesIds || []),
-        ...(element.phenomenaIds || []),
-        ...(element.languagesIds || []),
-        ...(element.relationsIds || []),
-        ...(element.titlesIds || []),
-        ...(element.constructsIds || []),
-        ...(element.lawsIds || []),
-        // Also include single reference fields if they exist
-        ...(element.protagonistId ? [element.protagonistId] : []),
-        ...(element.antagonistId ? [element.antagonistId] : []),
-        ...(element.narratorId ? [element.narratorId] : []),
-        ...(element.conservatorId ? [element.conservatorId] : []),
-        ...(element.parentNarrativeId ? [element.parentNarrativeId] : []),
+        ...(element.events || element.eventsIds || []),
+        ...(element.characters || element.charactersIds || []),
+        ...(element.locations || element.locationsIds || []),
+        ...(element.families || element.familiesIds || []),
+        ...(element.collectives || element.collectivesIds || []),
+        ...(element.objects || element.objectsIds || []),
+        ...(element.species || element.speciesIds || []),
+        ...(element.creatures || element.creaturesIds || []),
+        ...(element.institutions || element.institutionsIds || []),
+        ...(element.traits || element.traitsIds || []),
+        ...(element.zones || element.zonesIds || []),
+        ...(element.abilities || element.abilitiesIds || []),
+        ...(element.phenomena || element.phenomenaIds || []),
+        ...(element.languages || element.languagesIds || []),
+        ...(element.relations || element.relationsIds || []),
+        ...(element.titles || element.titlesIds || []),
+        ...(element.constructs || element.constructsIds || []),
+        ...(element.laws || element.lawsIds || []),
+        // Also include single reference fields (these don't have 'Id' suffix in API)
+        ...(element.protagonist || element.protagonistId ? [element.protagonist || element.protagonistId] : []),
+        ...(element.antagonist || element.antagonistId ? [element.antagonist || element.antagonistId] : []),
+        ...(element.narrator || element.narratorId ? [element.narrator || element.narratorId] : []),
+        ...(element.conservator || element.conservatorId ? [element.conservator || element.conservatorId] : []),
+        ...(element.parent_narrative || element.parentNarrativeId ? [element.parent_narrative || element.parentNarrativeId] : []),
       ];
+      
+      console.log('[DEBUG] Narrative element fields:', {
+        events: element.events,
+        characters: element.characters,
+        locations: element.locations,
+        allFields: Object.keys(element),
+      });
+      console.log('[DEBUG] Collected linkedIds:', linkedIds);
+      console.log('[DEBUG] LinkedIds count:', linkedIds.length);
+      
       const linker = new ElementLinker(elements, linkedIds);
       setElementLinker(linker);
     }, [elements, element]);
@@ -73,8 +84,16 @@ export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedSt
 
       const detectedMatches = elementLinker.detectElementMentions(debouncedContent);
       
+      console.log('[DEBUG] Detected matches:', detectedMatches.map(m => ({
+        text: m.text,
+        id: m.suggestedElement.id,
+        name: m.suggestedElement.name,
+        isLinked: m.isLinked,
+      })));
+      
       // Count linked elements BEFORE filtering (from all detected matches)
       const linkedCount = detectedMatches.filter(match => match.isLinked).length;
+      console.log('[DEBUG] Linked count from detected matches:', linkedCount);
       
       // Filter out already accepted or ignored matches
       const filteredMatches = detectedMatches.filter(match => {
@@ -87,6 +106,8 @@ export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedSt
       // Count new (unlinked) elements from filtered matches
       const newCount = filteredMatches.filter(match => !match.isLinked).length;
       
+      console.log('[DEBUG] Detection results:', { newCount, linkedCount, totalDetected: newCount + linkedCount });
+      
       // Notify parent with total detected count and linked count
       // Total detected = new unlinked + already linked
       onDetectionChange?.(newCount + linkedCount, linkedCount);
@@ -97,7 +118,7 @@ export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedSt
       onContentChange?.(newContent);
     };
 
-    const handleAcceptSuggestion = (match: ElementMatch) => {
+    const handleAcceptSuggestion = async (match: ElementMatch) => {
       if (!elementLinker) return;
 
       // Mark as accepted
@@ -115,6 +136,17 @@ export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedSt
         const newContent = beforeMatch + link + afterMatch;
         storyEditorRef.current?.setContent(newContent);
         handleContentChange(newContent);
+        
+        // Also add to the appropriate multilink field
+        const fieldName = getCategoryFieldName(match.elementType);
+        if (fieldName && onFieldUpdate) {
+          const currentIds = element[fieldName] || [];
+          if (!currentIds.includes(match.suggestedElement.id)) {
+            const updatedIds = [...currentIds, match.suggestedElement.id];
+            // Update the parent with the new field value
+            onFieldUpdate(fieldName, updatedIds);
+          }
+        }
       }
 
       // Remove this suggestion
@@ -122,6 +154,32 @@ export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedSt
       if (suggestions.length <= 1) {
         setShowSuggestions(false);
       }
+    };
+    
+    // Helper to get the field name for a category
+    const getCategoryFieldName = (category: string): string | null => {
+      // Map categories to their multilink field names
+      const categoryToField: Record<string, string> = {
+        'event': 'events',
+        'character': 'characters',
+        'location': 'locations',
+        'family': 'families',
+        'collective': 'collectives',
+        'object': 'objects',
+        'species': 'species',
+        'creature': 'creatures',
+        'institution': 'institutions',
+        'trait': 'traits',
+        'zone': 'zones',
+        'ability': 'abilities',
+        'phenomenon': 'phenomena',
+        'language': 'languages',
+        'relation': 'relations',
+        'title': 'titles',
+        'construct': 'constructs',
+        'law': 'laws',
+      };
+      return categoryToField[category] || null;
     };
 
     const handleRejectSuggestion = (match: ElementMatch) => {

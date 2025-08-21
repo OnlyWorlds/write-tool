@@ -7,15 +7,13 @@ interface ElementQuickRefProps {
   onElementInsert: (elementId: string, elementName: string, elementType: string) => void;
 }
 
-type TabType = 'characters' | 'locations' | 'families' | 'collectives';
-
-interface ElementItemProps {
+interface LinkedElementItemProps {
   element: Element;
-  type: string;
+  isInText: boolean;
   onInsert: () => void;
 }
 
-function ElementItem({ element, type, onInsert }: ElementItemProps) {
+function LinkedElementItem({ element, isInText, onInsert }: LinkedElementItemProps) {
   const [showPreview, setShowPreview] = useState(false);
 
   return (
@@ -28,13 +26,23 @@ function ElementItem({ element, type, onInsert }: ElementItemProps) {
         onClick={onInsert}
         className="w-full text-left px-3 py-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors group"
       >
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-gray-900 dark:text-gray-200 group-hover:text-blue-600 dark:group-hover:text-blue-400">
-            {element.name}
-          </span>
-          <svg className="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:text-blue-600 dark:group-hover:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <span className="text-sm font-medium text-gray-900 dark:text-gray-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 truncate">
+              {element.name}
+            </span>
+            {isInText && (
+              <span className="flex-shrink-0 px-1.5 py-0.5 text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded" title="Already mentioned in text">
+                in text
+              </span>
+            )}
+          </div>
+          <svg className="w-4 h-4 flex-shrink-0 text-gray-400 dark:text-gray-500 group-hover:text-blue-600 dark:group-hover:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
+        </div>
+        <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+          {element.category}
         </div>
       </button>
 
@@ -43,109 +51,137 @@ function ElementItem({ element, type, onInsert }: ElementItemProps) {
         <div className="absolute left-full ml-2 top-0 z-20 w-64 p-3 bg-white dark:bg-dark-bg-secondary border border-gray-200 dark:border-dark-bg-border rounded-lg shadow-lg">
           <h4 className="font-medium text-gray-900 dark:text-gray-200 mb-1">{element.name}</h4>
           <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-4">{element.description}</p>
-          {element.supertype && (
-            <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-              <span className="font-medium">Type:</span> {element.supertype}
-              {element.subtype && <span> / {element.subtype}</span>}
-            </div>
-          )}
+          <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+            <span className="font-medium">Category:</span> {element.category}
+            {element.supertype && (
+              <>
+                <br />
+                <span className="font-medium">Type:</span> {element.supertype}
+                {element.subtype && <span> / {element.subtype}</span>}
+              </>
+            )}
+          </div>
         </div>
       )}
     </div>
   );
 }
 
+// Category field mapping - only category-based multilink fields
+const CATEGORY_FIELDS: Record<string, string> = {
+  'events': 'event',
+  'characters': 'character',
+  'locations': 'location',
+  'families': 'family',
+  'collectives': 'collective',
+  'objects': 'object',
+  'species': 'species',
+  'creatures': 'creature',
+  'institutions': 'institution',
+  'traits': 'trait',
+  'zones': 'zone',
+  'abilities': 'ability',
+  'phenomena': 'phenomenon',
+  'languages': 'language',
+  'relations': 'relation',
+  'titles': 'title',
+  'constructs': 'construct',
+  'laws': 'law',
+};
+
 export function ElementQuickRef({ narrative, onElementInsert }: ElementQuickRefProps) {
   const { elements } = useWorldContext();
-  const [activeTab, setActiveTab] = useState<TabType>('characters');
   const [searchTerm, setSearchTerm] = useState('');
-  const [isCollapsed, setIsCollapsed] = useState(true); // Start collapsed by default
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [showOnlyInText, setShowOnlyInText] = useState(false);
 
-  // Get linked elements by type
+  // Get all linked elements from category-based fields
   const linkedElements = useMemo(() => {
-    const getLinkedElements = (fieldName: string, category: string): Element[] => {
-      const ids = narrative[fieldName];
-      if (!ids || !Array.isArray(ids)) return [];
-      return ids
-        .map(id => elements.get(id))
-        .filter((el): el is Element => el !== undefined && el.category === category);
-    };
-
-    return {
-      characters: getLinkedElements('characters', 'character'),
-      locations: getLinkedElements('locations', 'location'),
-      families: getLinkedElements('families', 'family'),
-      collectives: getLinkedElements('collectives', 'collective'),
-    };
+    const linked: Array<{ element: Element; fieldName: string; category: string }> = [];
+    
+    // Check each category field
+    for (const [fieldName, categoryName] of Object.entries(CATEGORY_FIELDS)) {
+      const ids = narrative[fieldName] || [];
+      if (Array.isArray(ids)) {
+        ids.forEach(id => {
+          const element = elements.get(id);
+          if (element) {
+            linked.push({ element, fieldName, category: categoryName });
+          }
+        });
+      }
+    }
+    
+    return linked;
   }, [narrative, elements]);
 
-  // Get all elements by category for searching
-  const allElements = useMemo(() => {
-    const filterByCategory = (category: string): Element[] => {
-      return Array.from(elements.values())
-        .filter(el => el.category === category)
-        .filter(el => 
-          searchTerm === '' || 
-          el.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          el.description?.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-        .sort((a, b) => {
-          // Prioritize already linked elements
-          const aLinked = linkedElements[activeTab].some(e => e.id === a.id);
-          const bLinked = linkedElements[activeTab].some(e => e.id === b.id);
-          if (aLinked && !bLinked) return -1;
-          if (!aLinked && bLinked) return 1;
-          return a.name.localeCompare(b.name);
-        });
-    };
+  // Check which elements are mentioned in the text
+  const elementsInText = useMemo(() => {
+    const textIds = new Set<string>();
+    const storyText = narrative.story || '';
+    
+    // Match markdown links with element references like [Name](type:id)
+    const linkRegex = /\[([^\]]+)\]\(([^):]+):([^)]+)\)/g;
+    let match;
+    
+    while ((match = linkRegex.exec(storyText)) !== null) {
+      const elementId = match[3];
+      textIds.add(elementId);
+    }
+    
+    return textIds;
+  }, [narrative.story]);
 
-    return {
-      characters: filterByCategory('character'),
-      locations: filterByCategory('location'),
-      families: filterByCategory('family'),
-      collectives: filterByCategory('collective'),
-    };
-  }, [elements, searchTerm, activeTab, linkedElements]);
+  // Filter linked elements based on search
+  const filteredElements = useMemo(() => {
+    let filtered = linkedElements;
+    
+    if (searchTerm) {
+      filtered = filtered.filter(({ element }) =>
+        element.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        element.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        element.category.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    if (showOnlyInText) {
+      filtered = filtered.filter(({ element }) => elementsInText.has(element.id));
+    }
+    
+    // Group by category for display
+    const grouped = new Map<string, Array<{ element: Element; isInText: boolean }>>();
+    
+    filtered.forEach(({ element, category }) => {
+      if (!grouped.has(category)) {
+        grouped.set(category, []);
+      }
+      grouped.get(category)!.push({
+        element,
+        isInText: elementsInText.has(element.id)
+      });
+    });
+    
+    // Sort categories and elements within each category
+    const sortedCategories = Array.from(grouped.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+    sortedCategories.forEach(([_, elements]) => {
+      elements.sort((a, b) => {
+        // Sort by: in-text first, then by name
+        if (a.isInText && !b.isInText) return -1;
+        if (!a.isInText && b.isInText) return 1;
+        return a.element.name.localeCompare(b.element.name);
+      });
+    });
+    
+    return sortedCategories;
+  }, [linkedElements, searchTerm, showOnlyInText, elementsInText]);
 
-  const tabs: { key: TabType; label: string; icon: React.ReactElement }[] = [
-    {
-      key: 'characters',
-      label: 'Characters',
-      icon: (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-        </svg>
-      ),
-    },
-    {
-      key: 'locations',
-      label: 'Locations',
-      icon: (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-        </svg>
-      ),
-    },
-    {
-      key: 'families',
-      label: 'Families',
-      icon: (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-        </svg>
-      ),
-    },
-    {
-      key: 'collectives',
-      label: 'Groups',
-      icon: (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-        </svg>
-      ),
-    },
-  ];
+  // Count statistics
+  const stats = useMemo(() => {
+    const total = linkedElements.length;
+    const inText = linkedElements.filter(({ element }) => elementsInText.has(element.id)).length;
+    const notInText = total - inText;
+    return { total, inText, notInText };
+  }, [linkedElements, elementsInText]);
 
   if (isCollapsed) {
     return (
@@ -153,14 +189,14 @@ export function ElementQuickRef({ narrative, onElementInsert }: ElementQuickRefP
         <button
           onClick={() => setIsCollapsed(false)}
           className="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-300"
-          title="Expand quick reference"
+          title="Expand linked elements"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
         <div className="mt-4 text-xs text-gray-500 dark:text-gray-400 writing-mode-vertical-rl">
-          Quick Ref
+          Linked ({stats.total})
         </div>
       </div>
     );
@@ -171,101 +207,93 @@ export function ElementQuickRef({ narrative, onElementInsert }: ElementQuickRefP
       {/* Header */}
       <div className="px-4 py-3 border-b border-gray-200 dark:border-dark-bg-border bg-white dark:bg-dark-bg-tertiary">
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-gray-800 dark:text-gray-200">Quick Reference</h3>
+          <h3 className="font-semibold text-gray-800 dark:text-gray-200">Linked Elements</h3>
           <button
             onClick={() => setIsCollapsed(true)}
             className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400"
             title="Collapse panel"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </button>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex border-b border-gray-200 dark:border-dark-bg-border bg-white dark:bg-dark-bg-tertiary">
-        {tabs.map(tab => (
-          <button
-            key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
-            className={`flex-1 px-3 py-2 text-xs font-medium transition-colors flex items-center justify-center gap-1 ${
-              activeTab === tab.key
-                ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20'
-                : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-bg-hover'
-            }`}
-          >
-            {tab.icon}
-            <span>{tab.label}</span>
-            {linkedElements[tab.key].length > 0 && (
-              <span className="ml-1 text-xs">({linkedElements[tab.key].length})</span>
-            )}
-          </button>
-        ))}
+      {/* Stats bar */}
+      <div className="px-4 py-2 bg-white dark:bg-dark-bg-tertiary border-b border-gray-200 dark:border-dark-bg-border">
+        <div className="flex items-center justify-between text-xs">
+          <div className="flex items-center gap-3">
+            <span className="text-gray-600 dark:text-gray-400">
+              Total: <span className="font-medium text-gray-900 dark:text-gray-200">{stats.total}</span>
+            </span>
+            <span className="text-green-600 dark:text-green-400">
+              In text: <span className="font-medium">{stats.inText}</span>
+            </span>
+            <span className="text-gray-500 dark:text-gray-400">
+              Not in text: <span className="font-medium">{stats.notInText}</span>
+            </span>
+          </div>
+        </div>
       </div>
 
-      {/* Search */}
-      <div className="p-3 bg-white dark:bg-dark-bg-tertiary border-b border-gray-200 dark:border-dark-bg-border">
+      {/* Search and filter */}
+      <div className="p-3 bg-white dark:bg-dark-bg-tertiary border-b border-gray-200 dark:border-dark-bg-border space-y-2">
         <input
           type="text"
-          placeholder={`Search ${activeTab}...`}
+          placeholder="Search linked elements..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full px-3 py-2 text-sm bg-white dark:bg-dark-bg-secondary border border-gray-300 dark:border-dark-bg-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-200"
         />
+        <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={showOnlyInText}
+            onChange={(e) => setShowOnlyInText(e.target.checked)}
+            className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
+          />
+          <span>Show only elements in text</span>
+        </label>
       </div>
 
       {/* Element list */}
       <div className="flex-1 overflow-y-auto p-3">
-        {linkedElements[activeTab].length > 0 && searchTerm === '' && (
-          <div className="mb-3">
-            <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-              Linked {activeTab}
-            </h4>
-            <div className="space-y-1">
-              {linkedElements[activeTab].map(element => (
-                <ElementItem
-                  key={element.id}
-                  element={element}
-                  type={activeTab.slice(0, -1)} // Remove 's' from plural
-                  onInsert={() => onElementInsert(element.id, element.name, activeTab.slice(0, -1))}
-                />
-              ))}
-            </div>
+        {filteredElements.length === 0 ? (
+          <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-8">
+            {searchTerm 
+              ? 'No matching linked elements found'
+              : showOnlyInText 
+                ? 'No linked elements found in text'
+                : 'No elements linked to this narrative yet'}
+          </p>
+        ) : (
+          <div className="space-y-4">
+            {filteredElements.map(([category, elements]) => (
+              <div key={category}>
+                <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+                  {category}s ({elements.length})
+                </h4>
+                <div className="space-y-1">
+                  {elements.map(({ element, isInText }) => (
+                    <LinkedElementItem
+                      key={element.id}
+                      element={element}
+                      isInText={isInText}
+                      onInsert={() => onElementInsert(element.id, element.name, element.category)}
+                    />
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         )}
-
-        <div>
-          <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">
-            {searchTerm ? 'Search Results' : 'All ' + activeTab}
-          </h4>
-          <div className="space-y-1">
-            {allElements[activeTab].length === 0 ? (
-              <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
-                No {activeTab} found
-              </p>
-            ) : (
-              allElements[activeTab]
-                .filter(el => !linkedElements[activeTab].some(linked => linked.id === el.id))
-                .slice(0, 20)
-                .map(element => (
-                  <ElementItem
-                    key={element.id}
-                    element={element}
-                    type={activeTab.slice(0, -1)}
-                    onInsert={() => onElementInsert(element.id, element.name, activeTab.slice(0, -1))}
-                  />
-                ))
-            )}
-          </div>
-        </div>
       </div>
 
       {/* Insert tip */}
       <div className="p-3 border-t border-gray-200 dark:border-dark-bg-border bg-gray-100 dark:bg-dark-bg-tertiary">
         <p className="text-xs text-gray-600 dark:text-gray-400">
-          <span className="font-medium">Tip:</span> Click any element to insert a reference at your cursor position
+          <span className="font-medium">Tip:</span> Click any element to insert a link at cursor. Green badge = already in text.
         </p>
       </div>
     </div>

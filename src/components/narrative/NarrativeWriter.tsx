@@ -31,26 +31,37 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
   };
 
   const handleEventsReorder = (eventIds: string[]) => {
-    const updated = { ...currentElement, eventsIds: eventIds };
+    const updated = { ...currentElement, events: eventIds, eventsIds: eventIds };
     setCurrentElement(updated);
     updateElement(updated);
-    saveElement(currentElement.id, { eventsIds: eventIds });
+    saveElement(currentElement.id, { events: eventIds });
   };
 
-  const handleEventAdd = (eventId: string) => {
-    const events = [...(currentElement.eventsIds || []), eventId];
-    const updated = { ...currentElement, eventsIds: events };
+  const handleEventAdd = async (eventId: string) => {
+    console.log('[NarrativeWriter] handleEventAdd called with:', eventId);
+    console.log('[NarrativeWriter] Current element before update:', currentElement);
+    
+    const existingEvents = currentElement.events || currentElement.eventsIds || [];
+    const events = [...existingEvents, eventId];
+    const updated = { ...currentElement, events: events, eventsIds: events };
+    
+    console.log('[NarrativeWriter] Updated element:', updated);
+    console.log('[NarrativeWriter] Events to save:', events);
+    
     setCurrentElement(updated);
     updateElement(updated);
-    saveElement(currentElement.id, { eventsIds: events });
+    
+    const result = await saveElement(currentElement.id, { events: events });
+    console.log('[NarrativeWriter] Save result:', result);
   };
 
   const handleEventRemove = (eventId: string) => {
-    const events = (currentElement.eventsIds || []).filter((id: any) => id !== eventId);
-    const updated = { ...currentElement, eventsIds: events };
+    const existingEvents = currentElement.events || currentElement.eventsIds || [];
+    const events = existingEvents.filter((id: any) => id !== eventId);
+    const updated = { ...currentElement, events: events, eventsIds: events };
     setCurrentElement(updated);
     updateElement(updated);
-    saveElement(currentElement.id, { eventsIds: events });
+    saveElement(currentElement.id, { events: events });
   };
 
   const handleElementInsert = (elementId: string, elementName: string, elementType: string) => {
@@ -85,6 +96,14 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
   
   const handleShowSuggestions = () => {
     editorRef.current?.showSuggestions();
+  };
+  
+  const handleFieldUpdate = async (fieldName: string, value: any) => {
+    console.log('[NarrativeWriter] Field update:', fieldName, value);
+    const updated = { ...currentElement, [fieldName]: value };
+    setCurrentElement(updated);
+    updateElement(updated);
+    await saveElement(currentElement.id, { [fieldName]: value });
   };
 
   return (
@@ -194,6 +213,7 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
             onContentChange={setContent}
             onDetectionChange={handleDetectionChange}
             onShowSuggestions={handleShowSuggestions}
+            onFieldUpdate={handleFieldUpdate}
             className="h-full"
           />
         </div>

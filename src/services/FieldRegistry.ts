@@ -190,6 +190,14 @@ class FieldRegistryClass {
       'rivals': 'character',
       'rival': 'character',
       'partner': 'character',
+      'protagonist': 'character',
+      'antagonist': 'character',
+      'narrator': 'character',
+      'conservator': 'character',
+      'custodian': 'character',
+      'operator': 'character',
+      'author': 'character',
+      'issuer': 'character',
       
       // Species
       'species': 'species',

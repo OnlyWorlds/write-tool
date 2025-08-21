@@ -231,9 +231,47 @@ export function WorldProvider({ children }: { children: ReactNode }) {
     try {
       const returnedElement = await ApiService.updateElement(state.worldKey, state.pin, updatedElement, state.elements);
       if (returnedElement) {
-        // Update local state with the server-returned element
-        // This ensures any server-side transformations or additions are reflected
-        updateElement({ ...returnedElement, category: element.category });
+        // Merge the server response intelligently
+        // Keep our link field values if server returns empty arrays/nulls
+        const mergedElement = { ...returnedElement };
+        
+        // Check ALL fields in the original element, not just updates
+        Object.keys(element).forEach(key => {
+          const serverValue = returnedElement[key];
+          const ourValue = element[key];
+          const updatedValue = updatedElement[key];
+          
+          // For arrays: if we had data and server returns empty, keep ours
+          if (Array.isArray(ourValue) && ourValue.length > 0 && 
+              Array.isArray(serverValue) && serverValue.length === 0) {
+            console.log(`[WorldContext] Preserving existing array field ${key} with ${ourValue.length} items`);
+            mergedElement[key] = ourValue;
+          }
+          // For single links: if we had a value and server returns null, keep ours
+          else if (typeof ourValue === 'string' && ourValue && 
+                   (serverValue === null || serverValue === undefined || serverValue === '')) {
+            // Only preserve if this wasn't the field we were updating
+            if (!(key in updates)) {
+              console.log(`[WorldContext] Preserving existing link field ${key}: ${ourValue}`);
+              mergedElement[key] = ourValue;
+            }
+          }
+          // If this field was in our updates, use the updated value if server cleared it
+          else if (key in updates) {
+            if (Array.isArray(updatedValue) && updatedValue.length > 0 && 
+                Array.isArray(serverValue) && serverValue.length === 0) {
+              console.log(`[WorldContext] Keeping updated array value for ${key}`);
+              mergedElement[key] = updatedValue;
+            }
+            else if (typeof updatedValue === 'string' && updatedValue && 
+                     (serverValue === null || serverValue === undefined || serverValue === '')) {
+              console.log(`[WorldContext] Keeping updated link value for ${key}: ${updatedValue}`);
+              mergedElement[key] = updatedValue;
+            }
+          }
+        });
+        
+        updateElement({ ...mergedElement, category: element.category });
         return true;
       }
       return false;

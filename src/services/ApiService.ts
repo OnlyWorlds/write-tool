@@ -93,6 +93,37 @@ function transformElementFromApi(element: any): any {
   return transformed;
 }
 
+// Helper to guess linked category from field name
+function guessLinkedCategoryFromFieldName(fieldName: string): string {
+  // Remove common suffixes
+  const baseName = fieldName
+    .replace(/_ids?$/i, '')
+    .replace(/Ids?$/i, '')
+    .replace(/s$/, ''); // Remove plural 's'
+  
+  // Map common field names to categories
+  const fieldToCategoryMap: Record<string, string> = {
+    'cult': 'collective',
+    'founder': 'character',
+    'fighter': 'character',
+    'building': 'construct',
+    'population': 'species',
+    'secondary_power': 'character',
+    'defensive_object': 'object',
+    'delicacy': 'object',
+    'extraction_good': 'object',
+    'industry_good': 'object',
+    'extraction_market': 'location',
+    'industry_market': 'location',
+    'currency': 'object',
+    'building_method': 'ability',
+    'extraction_method': 'ability',
+    'industry_method': 'ability',
+  };
+  
+  return fieldToCategoryMap[baseName] || baseName;
+}
+
 // Transform link fields to API format with proper field naming
 function transformElementForApi(element: any, allElements?: Map<string, Element>): any {
   const transformed = { ...element };
@@ -107,15 +138,19 @@ function transformElementForApi(element: any, allElements?: Map<string, Element>
     
     // Handle single link fields
     if (fieldInfo.type === 'single_link' && typeof value === 'string' && value) {
-      // For single link fields, keep the field name as-is
-      // The API will handle the field naming convention
-      transformed[key] = value;
+      // For single link fields, convert ID to URL
+      const linkedCategory = fieldInfo.linkedCategory || guessLinkedCategoryFromFieldName(key);
+      const url = `${API_BASE_URL}/${linkedCategory}/${value}/`;
+      console.log(`[API] Converting single link field ${key}: ${value} -> ${url}`);
+      transformed[key] = url;
     }
     // Handle multi-link fields
     else if (fieldInfo.type === 'multi_link' && Array.isArray(value)) {
-      // For multi-link fields, the API expects the field name WITHOUT _ids suffix
-      // Only filter to ensure we have valid string IDs
-      transformed[key] = value.filter(id => typeof id === 'string' && id);
+      // For multi-link fields, just send the IDs directly
+      // The API seems to handle them differently than single links
+      const ids = value.filter(id => typeof id === 'string' && id);
+      console.log(`[API] Keeping multi-link field ${key} as IDs: [${ids.join(', ')}]`);
+      transformed[key] = ids;
     }
   }
   

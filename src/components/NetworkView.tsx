@@ -699,7 +699,9 @@ export function NetworkView({ selectedElement, className = '' }: NetworkViewProp
             onChange={(e) => setMaxDepth(parseInt(e.target.value))}
             className="w-32 h-2 bg-gray-200 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer"
             style={{
-              background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${((maxDepth - 1) / 4) * 100}%, #e5e7eb ${((maxDepth - 1) / 4) * 100}%, #e5e7eb 100%)`
+              background: theme === 'dark' 
+                ? `linear-gradient(to right, #60a5fa 0%, #60a5fa ${((maxDepth - 1) / 4) * 100}%, #475569 ${((maxDepth - 1) / 4) * 100}%, #475569 100%)`
+                : `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${((maxDepth - 1) / 4) * 100}%, #e5e7eb ${((maxDepth - 1) / 4) * 100}%, #e5e7eb 100%)`
             }}
           />
           <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">

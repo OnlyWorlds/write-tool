@@ -274,7 +274,9 @@ const FieldEditor = memo(function FieldEditor({ fieldName, value, fieldTypeInfo,
     onChange?.(newValue);
   };
   
-  const baseInputClass = `w-full px-3 py-2 bg-white dark:bg-dark-bg-tertiary border border-blue-200 dark:border-dark-bg-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-colors hover:border-blue-300 dark:hover:border-gray-500 text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 ${className}`;
+  const baseInputClass = `w-full px-3 py-3 h-[48px] box-border leading-normal bg-white dark:bg-dark-bg-tertiary border border-blue-200 dark:border-dark-bg-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-colors hover:border-blue-300 dark:hover:border-gray-500 text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 ${className}`;
+  
+  const baseTextareaClass = `w-full px-3 py-3 box-border leading-normal bg-white dark:bg-dark-bg-tertiary border border-blue-200 dark:border-dark-bg-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-colors hover:border-blue-300 dark:hover:border-gray-500 text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 ${className}`;
   
   // Special handling for supertype and subtype fields
   if (fieldName === 'supertype' && elementCategory) {
@@ -513,7 +515,7 @@ const FieldEditor = memo(function FieldEditor({ fieldName, value, fieldTypeInfo,
         <textarea
           value={localValue || ''}
           onChange={(e) => handleChange(e.target.value)}
-          className={`${baseInputClass} min-h-[100px] resize-y overflow-y-auto`}
+          className={`${baseTextareaClass} min-h-[100px] resize-y overflow-y-auto`}
           placeholder="enter text..."
           rows={5}
           style={{ maxHeight: '400px' }}
@@ -533,7 +535,7 @@ const FieldEditor = memo(function FieldEditor({ fieldName, value, fieldTypeInfo,
                 handleChange(e.target.value);
               }
             }}
-            className={`${baseInputClass} min-h-[120px] font-mono text-sm`}
+            className={`${baseTextareaClass} min-h-[120px] font-mono text-sm`}
             placeholder="enter json..."
             rows={6}
           />
@@ -550,7 +552,7 @@ const FieldEditor = memo(function FieldEditor({ fieldName, value, fieldTypeInfo,
           <textarea
             value={localValue || ''}
             onChange={(e) => handleChange(e.target.value)}
-            className={`${baseInputClass} min-h-[100px] resize-y overflow-y-auto`}
+            className={`${baseTextareaClass} min-h-[100px] resize-y overflow-y-auto`}
             placeholder="enter text..."
             rows={5}
             style={{ maxHeight: '400px' }}

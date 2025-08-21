@@ -26,6 +26,9 @@ export class ElementLinker {
     this.linkedElements = new Set(linkedElementIds);
     this.fuseInstances = new Map();
     
+    console.log('[ElementLinker] Initialized with linkedElementIds:', linkedElementIds);
+    console.log('[ElementLinker] LinkedElements Set size:', this.linkedElements.size);
+    
     this.initializeFuseInstances();
   }
 
@@ -88,6 +91,16 @@ export class ElementLinker {
               // Check if this element is linked in the narrative fields OR in the text itself
               const isLinkedInFields = this.linkedElements.has(result.item.id);
               const isLinkedInText = linkedInText.has(result.item.id);
+              
+              if (isLinkedInFields || isLinkedInText) {
+                console.log('[ElementLinker] Found linked element:', {
+                  name: result.item.name,
+                  id: result.item.id,
+                  isLinkedInFields,
+                  isLinkedInText,
+                  linkedElementsSet: Array.from(this.linkedElements),
+                });
+              }
               
               matches.push({
                 text: word,

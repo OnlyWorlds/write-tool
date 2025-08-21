@@ -122,15 +122,16 @@ export function EventPanel({ narrative, onEventsReorder, onEventAdd, onEventRemo
 
   // Get linked events
   const linkedEvents = useMemo(() => {
-    if (!narrative.eventsIds || !Array.isArray(narrative.eventsIds)) return [];
-    return narrative.eventsIds
+    const events = narrative.events || narrative.eventsIds;
+    if (!events || !Array.isArray(events)) return [];
+    return events
       .map(eventId => elements.get(eventId))
       .filter((event): event is Element => event !== undefined && event.category === 'event');
-  }, [narrative.eventsIds, elements]);
+  }, [narrative.events, narrative.eventsIds, elements]);
 
   // Get available events for adding (not already linked)
   const availableEvents = useMemo(() => {
-    const linkedIds = new Set(narrative.eventsIds || []);
+    const linkedIds = new Set(narrative.events || narrative.eventsIds || []);
     return Array.from(elements.values())
       .filter(el => el.category === 'event' && !linkedIds.has(el.id))
       .filter(el => 
@@ -139,13 +140,13 @@ export function EventPanel({ narrative, onEventsReorder, onEventAdd, onEventRemo
         el.description?.toLowerCase().includes(searchTerm.toLowerCase())
       )
       .sort((a, b) => a.name.localeCompare(b.name));
-  }, [elements, narrative.eventsIds, searchTerm]);
+  }, [elements, narrative.events, narrative.eventsIds, searchTerm]);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
-    if (active.id !== over?.id && narrative.eventsIds) {
-      const events = narrative.eventsIds as string[];
+    if (active.id !== over?.id && (narrative.events || narrative.eventsIds)) {
+      const events = (narrative.events || narrative.eventsIds) as string[];
       const oldIndex = events.indexOf(active.id as string);
       const newIndex = events.indexOf(over?.id as string);
       
@@ -254,6 +255,8 @@ export function EventPanel({ narrative, onEventsReorder, onEventAdd, onEventRemo
                   <button
                     key={event.id}
                     onClick={() => {
+                      console.log('[EventPanel] Adding event:', event.id, event.name);
+                      console.log('[EventPanel] Current narrative before add:', narrative);
                       onEventAdd(event.id);
                       setIsAddingEvent(false);
                       setSearchTerm('');

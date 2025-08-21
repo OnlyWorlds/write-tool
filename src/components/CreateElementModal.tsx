@@ -109,7 +109,7 @@ export function CreateElementModal() {
     const baseClassName = `w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
       hasError 
         ? 'border-warning focus:ring-warning bg-warning-bg' 
-        : 'border-slate-300 focus:ring-accent bg-white text-slate-700 placeholder-slate-400'
+        : 'border-slate-300 dark:border-dark-bg-border focus:ring-accent bg-white dark:bg-dark-bg-tertiary text-slate-700 dark:text-gray-200 placeholder-slate-400 dark:placeholder-gray-500'
     }`;
     
     // For link/links/select fields, use FieldRenderer which has proper filtering and ComboBox for types
@@ -200,14 +200,14 @@ export function CreateElementModal() {
               id={field.name}
               checked={!!value}
               onChange={(e) => handleFieldChange(field.name, e.target.checked)}
-              className="h-4 w-4 text-accent focus:ring-accent border-input-border rounded"
+              className="h-4 w-4 text-accent focus:ring-accent border-input-border dark:border-dark-bg-border rounded"
               disabled={isSubmitting}
             />
             {field.description && (
-              <span className="ml-2 text-sm text-text-light/60">{field.description.toLowerCase()}</span>
+              <span className="ml-2 text-sm text-text-light/60 dark:text-gray-400">{field.description.toLowerCase()}</span>
             )}
             {field.name === 'is_public' && (
-              <div className="ml-2 text-xs text-gray-500">
+              <div className="ml-2 text-xs text-gray-500 dark:text-gray-400">
                 public elements are visible to all users in the world
               </div>
             )}
@@ -263,17 +263,17 @@ export function CreateElementModal() {
       onClick={handleClose}
     >
       <div 
-        className="bg-sidebar rounded-lg p-6 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto border border-sidebar-dark shadow-xl"
+        className="bg-sidebar dark:bg-dark-bg-secondary rounded-lg p-6 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto border border-sidebar-dark dark:border-dark-bg-border shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-lg font-semibold mb-4 text-slate-800">
+        <h2 className="text-lg font-semibold mb-4 text-slate-800 dark:text-gray-200">
           Create new {schema.name.toLowerCase()}
         </h2>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           {schema.fields.map((field) => (
             <div key={field.name}>
-              <label htmlFor={field.name} className="block text-sm font-medium text-slate-700 mb-1">
+              <label htmlFor={field.name} className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1">
                 {field.label.toLowerCase()} {field.required && '*'}
               </label>
               {renderField(field)}
@@ -298,7 +298,7 @@ export function CreateElementModal() {
               type="button"
               onClick={handleClose}
               disabled={isSubmitting}
-              className="px-4 py-2 text-slate-500 hover:text-slate-700 transition-colors disabled:opacity-50"
+              className="px-4 py-2 text-slate-500 dark:text-gray-400 hover:text-slate-700 dark:hover:text-gray-300 transition-colors disabled:opacity-50"
             >
               cancel
             </button>

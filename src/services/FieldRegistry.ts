@@ -1,294 +1,355 @@
-// Auto-generated field registry from TypeScript models
-// This dynamically determines field types based on the model definitions
+// Field registry for OnlyWorlds element types
+// Dynamically determines field types based on field naming patterns
 
-import type { Character } from '../types/onlyworlds/Character';
-import type { Location } from '../types/onlyworlds/Location';
-import type { Construct } from '../types/onlyworlds/Construct';
-import type { Event } from '../types/onlyworlds/Event';
-import type { Zone } from '../types/onlyworlds/Zone';
-import type { Phenomenon } from '../types/onlyworlds/Phenomenon';
-import type { Ability } from '../types/onlyworlds/Ability';
-import type { Collective } from '../types/onlyworlds/Collective';
-import type { Creature } from '../types/onlyworlds/Creature';
-import type { Family } from '../types/onlyworlds/Family';
-import type { Institution } from '../types/onlyworlds/Institution';
-import type { Language } from '../types/onlyworlds/Language';
-import type { Law } from '../types/onlyworlds/Law';
-import type { Map } from '../types/onlyworlds/Map';
-import type { Marker } from '../types/onlyworlds/Marker';
-import type { Narrative } from '../types/onlyworlds/Narrative';
-import type { Object as ObjectType } from '../types/onlyworlds/Object';
-import type { Pin } from '../types/onlyworlds/Pin';
-import type { Relation } from '../types/onlyworlds/Relation';
-import type { Species } from '../types/onlyworlds/Species';
-import type { Title } from '../types/onlyworlds/Title';
-import type { Trait } from '../types/onlyworlds/Trait';
-import type { World } from '../types/onlyworlds/World';
-
-// Type to extract field names from interfaces
-type ExtractFields<T> = {
-  [K in keyof T]: K extends string ? K : never;
-}[keyof T];
-
-// Registry of all link fields derived from TypeScript models
 class FieldRegistryClass {
-  private singleLinkFields = new Set<string>();
-  private multiLinkFields = new Set<string>();
   private fieldCategoryMap = new Map<string, string>();
   
   constructor() {
-    this.initializeFromModels();
+    this.initializeFieldMappings();
   }
   
-  private initializeFromModels() {
-    // Process all model types to extract fields
-    const models = [
-      'Character', 'Location', 'Construct', 'Event', 'Zone', 'Phenomenon',
-      'Ability', 'Collective', 'Creature', 'Family', 'Institution', 'Language',
-      'Law', 'Map', 'Marker', 'Narrative', 'Object', 'Pin', 'Relation',
-      'Species', 'Title', 'Trait', 'World'
-    ];
-    
-    // Manually extract fields from each model type
-    // This is done at build time, so we know exactly what fields exist
-    
-    // Character fields
-    this.registerFields([
-      'birthplaceId', 'locationId', // single links
-      'speciesIds', 'traitsIds', 'abilitiesIds', 'languagesIds', 'objectsIds', 
-      'institutionsIds', 'familyIds', 'friendsIds', 'rivalsIds' // multi links
-    ]);
-    
-    // Location fields  
-    this.registerFields([
-      'parentLocationId', 'zoneId', 'rivalId', 'partnerId', 'primaryPowerId', 'governingTitleId', // single
-      'populationsIds', 'foundersIds', 'secondaryPowersIds', 'cultsIds', 'delicaciesIds',
-      'extractionMethodsIds', 'extractionGoodsIds', 'industryMethodsIds', 'industryGoodsIds',
-      'extractionMarketsIds', 'industryMarketsIds', 'currenciesIds', 'buildingsIds',
-      'buildingMethodsIds', 'fightersIds', 'defensiveObjectsIds' // multi
-    ]);
-    
-    // Construct fields
-    this.registerFields([
-      'founderId', 'custodianId', // single
-      'charactersIds', 'speciesIds', 'creaturesIds', 'familiesIds', 'collectivesIds',
-      'objectsIds', 'constructsIds', 'abilitiesIds', 'traitsIds', 'phenomenaIds',
-      'locationsIds', 'zonesIds', 'institutionsIds', 'eventsIds', 'narrativesIds',
-      'titlesIds', 'languagesIds', 'relationsIds' // multi
-    ]);
-    
-    // Event fields
-    this.registerFields([
-      'actorId', // single
-      'charactersIds', 'collectivesIds', 'creaturesIds', 'familiesIds', 'speciesIds',
-      'locationsIds', 'zonesIds', 'institutionsIds', 'objectsIds', 'constructsIds',
-      'phenomenaIds', 'abilitiesIds', 'traitsIds', 'titlesIds', 'languagesIds',
-      'eventsIds', 'narrativesIds', 'relationsIds', 'affinitiesIds' // multi
-    ]);
-    
-    // Zone fields
-    this.registerFields([
-      'charactersIds', 'speciesIds', 'creaturesIds', 'familiesIds', 'collectivesIds',
-      'locationsIds', 'zonesIds', 'institutionsIds', 'objectsIds', 'constructsIds',
-      'phenomenaIds', 'abilitiesIds', 'traitsIds', 'titlesIds', 'languagesIds',
-      'eventsIds', 'narrativesIds', 'relationsIds', 'populationsIds' // multi
-    ]);
-    
-    // Phenomenon fields
-    this.registerFields([
-      'materialsIds', 'consumesIds', 'effectsIds', 'affinitiesIds',
-      'charactersIds', 'speciesIds', 'creaturesIds', 'familiesIds', 'collectivesIds',
-      'locationsIds', 'zonesIds', 'institutionsIds', 'objectsIds', 'constructsIds',
-      'phenomenaIds', 'abilitiesIds', 'traitsIds', 'titlesIds', 'languagesIds',
-      'eventsIds', 'narrativesIds', 'relationsIds' // multi
-    ]);
-    
-    // Also register the field names without Id/Ids suffix for API compatibility
-    this.registerApiFieldNames();
-  }
-  
-  private registerFields(fields: string[]) {
-    fields.forEach(field => {
-      if (field.endsWith('Ids')) {
-        this.multiLinkFields.add(field);
-        // Also add without suffix for API compatibility
-        const withoutSuffix = field.slice(0, -3);
-        this.multiLinkFields.add(withoutSuffix);
-        this.mapFieldToCategory(withoutSuffix);
-      } else if (field.endsWith('Id')) {
-        this.singleLinkFields.add(field);
-        // Also add without suffix for API compatibility
-        const withoutSuffix = field.slice(0, -2);
-        this.singleLinkFields.add(withoutSuffix);
-        this.mapFieldToCategory(withoutSuffix);
-      }
-    });
-  }
-  
-  private registerApiFieldNames() {
-    // Common patterns from the API that don't have Id/Ids suffix
-    const apiSingleLinks = [
-      'location', 'birthplace', 'parentLocation', 'parent_location',
-      'zone', 'actor', 'leader', 'creator', 'owner', 'rival', 'partner',
-      'primaryPower', 'primary_power', 'governingTitle', 'governing_title',
-      'parentObject', 'parent_object', 'custodian', 'operator', 'narrator',
-      'conservator', 'antagonist', 'protagonist', 'author', 'founder', 'issuer',
-      'parent_institution', 'parent_law', 'parent_species', 'parent_narrative',
-      'superior_title', 'anti_trait', 'parent_map'
-    ];
-    
-    const apiMultiLinks = [
-      'species', 'traits', 'abilities', 'languages', 'family', 'friends',
-      'rivals', 'inhabitants', 'populations', 'founders', 'buildings',
-      'characters', 'objects', 'locations', 'institutions', 'events',
-      'collectivities', 'collectives', 'zones', 'cults', 'phenomena', 
-      'families', 'titles', 'constructs', 'narratives', 'relations', 'creatures',
-      'secondaryPowers', 'secondary_powers', 'extractionMethods', 'extraction_methods',
-      'industryMethods', 'industry_methods', 'affinities', 
-      'extractionMarkets', 'extraction_markets', 'industryMarkets', 'industry_markets'
-    ];
-    
-    apiSingleLinks.forEach(field => {
-      this.singleLinkFields.add(field);
-      this.mapFieldToCategory(field);
-    });
-    
-    apiMultiLinks.forEach(field => {
-      this.multiLinkFields.add(field);
-      this.mapFieldToCategory(field);
-    });
-  }
-  
-  private mapFieldToCategory(fieldName: string) {
-    // Map field names to their likely linked categories
+  private initializeFieldMappings() {
+    // Map field names to their linked element categories
+    // Based on OnlyWorlds schema verified via MCP server
     const categoryMap: Record<string, string> = {
-      // Locations
+      // Location fields (verified via MCP)
       'location': 'location',
-      'birthplace': 'location',
-      'parentLocation': 'location',
-      'parent_location': 'location',
+      'birthplace': 'location',  // Character -> Location
+      'parent_location': 'location',  // Location -> Location
       'zone': 'zone',
       'zones': 'zone',
-      'extractionMarkets': 'location',
-      'extraction_markets': 'location',
-      'industryMarkets': 'location',
-      'industry_markets': 'location',
+      'extraction_markets': 'location',  // Location -> Location
+      'industry_markets': 'location',  // Location -> Location
       'locations': 'location',
+      'rival': 'location',  // Location -> Location  
+      'partner': 'location',  // Location -> Location
       
-      // Characters  
-      'owner': 'character',
-      'creator': 'character',
-      'leader': 'character',
-      'actor': 'character',
-      'primaryPower': 'character',
-      'primary_power': 'character',
-      'fighters': 'character',
-      'founders': 'character',
-      'inhabitants': 'character',
+      // Character fields (verified via MCP)
+      'founder': 'character',  // Construct -> Character
+      'founders': 'character',  // Location -> Character
       'characters': 'character',
-      'friends': 'character',
-      'rivals': 'character',
-      'rival': 'character',
-      'partner': 'character',
-      'protagonist': 'character',
-      'antagonist': 'character',
-      'narrator': 'character',
-      'conservator': 'character',
-      'custodian': 'character',
-      'operator': 'character',
-      'author': 'character',
-      'issuer': 'character',
+      'friends': 'character',  // Character -> Character
+      'rivals': 'character',  // Character -> Character (plural)
+      'actor': 'character',  // Relation -> Character
+      'protagonist': 'character',  // Narrative -> Character
+      'antagonist': 'character',  // Narrative -> Character  
+      'narrator': 'character',  // Narrative -> Character
       
-      // Species
+      // Institution fields (verified via MCP)
+      'primary_power': 'institution',  // Location -> Institution
+      'secondary_powers': 'institution',  // Location -> Institution
+      'institutions': 'institution',
+      'custodian': 'institution',  // Construct -> Institution
+      'author': 'institution',  // Law -> Institution
+      'issuer': 'institution',  // Title -> Institution
+      'operator': 'institution',  // Collective -> Institution
+      'conservator': 'institution',  // Narrative -> Institution
+      'allies': 'institution',  // Institution -> Institution
+      'adversaries': 'institution',  // Institution -> Institution
+      'parent_institution': 'institution',  // Institution -> Institution
+      
+      // Species fields
       'species': 'species',
+      'delicacies': 'species',  // Location -> Species
+      'parent_species': 'species',  // Species -> Species
+      'predators': 'species',  // Species -> Species
+      'prey': 'species',  // Species -> Species
+      'variants': 'species',  // Species -> Species
+      'carriers': 'species',  // Trait -> Species
+      'reproduction': 'construct',  // Species -> Construct
       
-      // Traits
+      // Trait fields
       'traits': 'trait',
+      'affinities': 'trait',  // Object -> Trait
+      'anti_trait': 'trait',  // Trait -> Trait
+      'interactions': 'trait',  // Trait -> Trait
       
-      // Abilities
+      // Ability fields
       'abilities': 'ability',
+      'empowered_abilities': 'ability',  // Trait -> Ability
+      'empowerments': 'ability',  // Phenomenon -> Ability
+      'actions': 'ability',  // Creature -> Ability
       
-      // Languages
+      // Language fields
       'languages': 'language',
       'language': 'language',
       
-      // Family
-      'family': 'family',
+      // Family fields
+      'family': 'family',  // Character -> Family
       'families': 'family',
+      'ancestors': 'character',  // Family -> Character
+      'estates': 'location',  // Family -> Location
+      'governs': 'institution',  // Family -> Institution
+      'heirlooms': 'object',  // Family -> Object
       
-      // Objects
-      'materials': 'object',
-      'technology': 'object',
-      'effects': 'object',
-      'consumes': 'object',
-      'defensiveObjects': 'object',
-      'defensive_objects': 'object',
-      'extractionGoods': 'object',
-      'extraction_goods': 'object',
-      'industryGoods': 'object',
-      'industry_goods': 'object',
-      'delicacies': 'object',
-      'currencies': 'object',
+      // Object fields
+      'defensive_objects': 'object',  // Location -> Object
+      'buildings': 'object',  // Location -> Object
       'objects': 'object',
-      'parentObject': 'object',
-      'parent_object': 'object',
+      'parent_object': 'object',  // Object -> Object
       
-      // Constructs
-      'buildings': 'construct',
+      // Construct fields
+      'materials': 'construct',  // Object -> Construct
+      'technology': 'construct',  // Object -> Construct
+      'consumes': 'construct',  // Object -> Construct
+      'extraction_goods': 'construct',  // Location -> Construct
+      'industry_goods': 'construct',  // Location -> Construct
+      'currencies': 'construct',  // Location -> Construct
       'constructs': 'construct',
-      'buildingMethods': 'object',
-      'building_methods': 'object',
+      'building_methods': 'construct',  // Location -> Construct
+      'extraction_methods': 'construct',  // Location -> Construct
+      'industry_methods': 'construct',  // Location -> Construct
+      'cults': 'construct',  // Location -> Construct
+      'fighters': 'construct',  // Location -> Construct
+      'traditions': 'construct',  // Family -> Construct
       
-      // Institutions
-      'institutions': 'institution',
-      'secondaryPowers': 'institution',
-      'secondary_powers': 'institution',
-      'cults': 'institution',
-      
-      // Collectives
-      'populations': 'collective',
+      // Collective fields
+      'populations': 'collective',  // Location -> Collective
       'collectives': 'collective',
-      'collectivities': 'collective',
+      'equipment': 'construct',  // Collective -> Construct
+      'symbolism': 'construct',  // Collective -> Construct
       
-      // Other
-      'governingTitle': 'title',
-      'governing_title': 'title',
-      'titles': 'title',
-      'extractionMethods': 'phenomenon',
-      'extraction_methods': 'phenomenon',
-      'industryMethods': 'phenomenon',
-      'industry_methods': 'phenomenon',
-      'affinities': 'phenomenon',
+      // Phenomenon fields
+      'effects': 'phenomenon',  // Multiple types -> Phenomenon
       'phenomena': 'phenomenon',
+      'catalysts': 'object',  // Phenomenon -> Object
+      'wielders': 'character',  // Phenomenon -> Character
+      'environments': 'location',  // Phenomenon/Trait -> Location
+      'triggers': 'event',  // Event/Phenomenon -> Event
+      'prohibitions': 'phenomenon',  // Law -> Phenomenon
+      'system': 'phenomenon',  // Phenomenon -> Phenomenon
+      
+      // Title fields
+      'governing_title': 'title',  // Location -> Title
+      'titles': 'title',
+      'superior_title': 'title',  // Title -> Title
+      'holders': 'character',  // Title -> Character
+      'adjudicators': 'title',  // Law -> Title
+      'enforcers': 'title',  // Law -> Title
+      'body': 'institution',  // Title -> Institution (single link)
+      
+      // Law fields
+      'laws': 'law',
+      'parent_law': 'law',  // Law -> Law
+      'penalties': 'construct',  // Law -> Construct
+      'principles': 'law',  // Zone -> Law
+      
+      // Ability link fields
+      'instruments': 'object',  // Ability -> Object
+      'talents': 'trait',  // Ability -> Trait
+      'requisites': 'construct',  // Ability -> Construct
+      'locus': 'location',  // Ability -> Location
+      'source': 'phenomenon',  // Ability -> Phenomenon
+      'tradition': 'construct',  // Ability -> Construct
+      'systems': 'construct',  // Ability -> Construct
+      
+      // Language link fields
+      'dialects': 'language',  // Language -> Language
+      'spread': 'location',  // Language/Species -> Location
+      
+      // Map fields
+      'parent_map': 'map',  // Map -> Map
+      'map_id': 'map',  // Pin -> Map
+      'map': 'map',  // Marker -> Map
+      'marker_map': 'map',  // Marker -> Map
+      'markers': 'marker',  // Map -> Marker
+      'routes': 'construct',  // Map -> Construct
+      'boundaries': 'construct',  // Map -> Construct
+      
+      // Other element type fields
       'relations': 'relation',
       'creatures': 'creature',
       'events': 'event',
       'narratives': 'narrative',
+      'parent_narrative': 'narrative',  // Narrative -> Narrative
+      'maps': 'map',
+      'pins': 'pin',
+      'linked_zones': 'zone',  // Zone -> Zone
+      
+      // Common cross-type fields
+      'symbols': 'object',  // Title -> Object
+      
+      // Collective-specific fields (major update needed)
+      'members': 'character',  // Collective -> Character
+      'collective_characters': 'character',
+      'collective_institutions': 'institution',
+      'collective_collectives': 'collective',
+      'collective_zones': 'zone',
+      'resources': 'construct',  // Collective -> Construct
+      'collective_locations': 'location',
+      'affiliated_creatures': 'creature',
+      'collective_objects': 'object',
+      'collective_constructs': 'construct',
+      'collective_abilities': 'ability',
+      'collective_phenomena': 'phenomenon',
+      'collective_languages': 'language',
+      'collective_families': 'family',
+      'collective_relations': 'relation',
+      'collective_titles': 'title',
+      'collective_events': 'event',
+      'collective_narratives': 'narrative',
+      'collective_traits': 'trait',
+      'allied_collectives': 'collective',
+      
+      // Pin references
+      'element_id': 'any',  // Pin -> Any element type (special case)
+      'element_type': 'contenttype'  // Pin -> ContentType
     };
     
-    if (categoryMap[fieldName]) {
-      this.fieldCategoryMap.set(fieldName, categoryMap[fieldName]);
+    // Set all mappings
+    Object.entries(categoryMap).forEach(([field, category]) => {
+      this.fieldCategoryMap.set(field, category);
+    });
+  }
+  
+  // Convert camelCase to snake_case
+  private toSnakeCase(str: string): string {
+    return str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
+  }
+  
+  // Normalize field name for comparison
+  private normalizeFieldName(fieldName: string): string {
+    // Convert to lowercase
+    let normalized = fieldName.toLowerCase();
+    
+    // Convert camelCase to snake_case if needed
+    if (normalized !== fieldName) {
+      // If it had uppercase letters, also check snake_case version
+      const snakeVersion = this.toSnakeCase(fieldName);
+      if (this.fieldCategoryMap.has(snakeVersion)) {
+        return snakeVersion;
+      }
     }
+    
+    // Remove _id or _ids suffix for base name
+    if (normalized.endsWith('_ids')) {
+      normalized = normalized.slice(0, -4);
+    } else if (normalized.endsWith('_id')) {
+      normalized = normalized.slice(0, -3);
+    } else if (normalized.endsWith('ids') && normalized.length > 3) {
+      // Handle camelCase like "speciesIds"
+      normalized = normalized.slice(0, -3);
+    } else if (normalized.endsWith('id') && normalized.length > 2) {
+      // Handle camelCase like "locationId"
+      normalized = normalized.slice(0, -2);
+    }
+    
+    return normalized;
   }
   
   isSingleLinkField(fieldName: string): boolean {
-    return this.singleLinkFields.has(fieldName);
+    // Normalize the field name
+    const normalized = this.normalizeFieldName(fieldName);
+    
+    // Check for exact _id suffix patterns
+    const lowerField = fieldName.toLowerCase();
+    if (lowerField.endsWith('_id') || 
+        (lowerField.endsWith('id') && lowerField.length > 2 && !lowerField.endsWith('_id'))) {
+      return true;
+    }
+    
+    // Known single link fields without _id suffix
+    const singleLinkFields = new Set([
+      'location', 'birthplace', 'parent_location', 'zone',
+      'rival', 'partner', 'primary_power', 'governing_title',
+      'parent_object', 'custodian', 'founder', 'actor',
+      'language', 'protagonist', 'antagonist', 'narrator',
+      'author', 'issuer', 'operator', 'conservator',
+      'parent_institution', 'parent_species', 'anti_trait',
+      'parent_law', 'superior_title', 'parent_map', 'body',
+      'element_id', 'element_type', 'map_id', 'marker_map', 'parent_narrative',
+      'locus', 'source', 'tradition', 'map', 'system'
+    ]);
+    
+    return singleLinkFields.has(normalized);
   }
   
   isMultiLinkField(fieldName: string): boolean {
-    return this.multiLinkFields.has(fieldName);
+    // Normalize the field name
+    const normalized = this.normalizeFieldName(fieldName);
+    const lowerField = fieldName.toLowerCase();
+    
+    // Check for exact _ids suffix patterns
+    if (lowerField.endsWith('_ids') || 
+        (lowerField.endsWith('ids') && lowerField.length > 3 && !lowerField.endsWith('_ids'))) {
+      return true;
+    }
+    
+    // Known multi-link fields (most are plural, but not all plurals are multi-link)
+    const multiLinkFields = new Set([
+      'family',  // exception: singular but multi-link
+      'friends', 'rivals', 'characters', 'species', 'traits',
+      'abilities', 'languages', 'objects', 'families',
+      'founders', 'populations', 'collectives', 'institutions',
+      'secondary_powers', 'buildings', 'defensive_objects',
+      'extraction_goods', 'industry_goods', 'extraction_markets',
+      'industry_markets', 'delicacies', 'currencies', 'zones',
+      'locations', 'constructs', 'building_methods', 'extraction_methods',
+      'industry_methods', 'cults', 'fighters', 'effects', 'phenomena',
+      'titles', 'relations', 'creatures', 'events', 'narratives',
+      'materials', 'technology', 'consumes', 'affinities',
+      // Family additional fields
+      'ancestors', 'estates', 'governs', 'heirlooms',
+      // Institution additional fields  
+      'allies', 'adversaries',
+      // Trait additional fields
+      'empowered_abilities', 'interactions', 'carriers', 'populations',
+      // Title/Law additional fields
+      'holders', 'adjudicators', 'enforcers', 'symbols',
+      // Law additional fields
+      'laws', 'prohibitions', 'penalties', 'principles',
+      // Event/Phenomenon triggers
+      'triggers',
+      // Ability additional fields
+      'instruments', 'talents', 'requisites', 'systems',
+      // Collective additional fields
+      'equipment', 'symbolism',
+      // Phenomenon additional fields
+      'catalysts', 'empowerments', 'wielders', 'environments',
+      // Language additional fields
+      'dialects', 'spread',
+      // Map additional fields
+      'markers', 'pins', 'routes', 'boundaries',
+      // Species additional fields
+      'predators', 'prey', 'variants', 'reproduction',
+      // Creature additional field
+      'actions',
+      // Zone additional field
+      'linked_zones',
+      // Collective additional fields
+      'members', 'collective_characters', 'collective_institutions',
+      'collective_collectives', 'collective_zones', 'resources',
+      'collective_locations', 'affiliated_creatures', 'collective_objects',
+      'collective_constructs', 'collective_abilities', 'collective_phenomena',
+      'collective_languages', 'collective_families', 'collective_relations',
+      'collective_titles', 'collective_events', 'collective_narratives',
+      'collective_traits', 'allied_collectives'
+    ]);
+    
+    // Check if it's a known multi-link field
+    if (multiLinkFields.has(normalized)) {
+      return true;
+    }
+    
+    // Don't assume all plural fields are multi-link
+    // (e.g., "status", "consensus" end in 's' but aren't link fields)
+    return false;
   }
   
   getLinkedCategory(fieldName: string): string | undefined {
-    // Remove Id/Ids suffix if present
-    let baseName = fieldName;
-    if (fieldName.endsWith('Ids')) {
-      baseName = fieldName.slice(0, -3);
-    } else if (fieldName.endsWith('Id')) {
-      baseName = fieldName.slice(0, -2);
+    // Normalize field name for lookup
+    const normalized = this.normalizeFieldName(fieldName);
+    
+    // Try exact match first
+    let category = this.fieldCategoryMap.get(normalized);
+    
+    // If not found, try snake_case version
+    if (!category) {
+      const snakeCase = this.toSnakeCase(normalized);
+      category = this.fieldCategoryMap.get(snakeCase);
     }
     
-    return this.fieldCategoryMap.get(baseName) || baseName.toLowerCase();
+    return category;
   }
 }
 

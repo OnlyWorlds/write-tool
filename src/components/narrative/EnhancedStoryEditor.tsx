@@ -4,14 +4,15 @@ import { useWorldContext } from '../../contexts/WorldContext';
 import { StoryEditor, type StoryEditorRef } from './StoryEditor';
 import { ElementLinker, type ElementMatch } from './ElementLinker';
 import { SuggestionPopover } from './SuggestionPopover';
+// import { ElementDetectionLayer } from './ElementDetectionLayer'; // Commented out - using direct DOM manipulation instead
 import type { Element } from '../../types/world';
+import './ElementDetection.css';
 
 interface EnhancedStoryEditorProps {
   element: Element;
   onSave: (content: string) => Promise<boolean>;
   onContentChange?: (content: string) => void;
   onDetectionChange?: (detected: number, linked: number) => void;
-  onShowSuggestions?: () => void;
   onFieldUpdate?: (fieldName: string, value: any) => void;
   className?: string;
 }
@@ -23,18 +24,18 @@ export interface EnhancedStoryEditorRef extends StoryEditorRef {
 }
 
 export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedStoryEditorProps>(
-  ({ element, onSave, onContentChange, onDetectionChange, onShowSuggestions, onFieldUpdate, className = '' }, ref) => {
+  ({ element, onSave, onContentChange, onDetectionChange, onFieldUpdate, className = '' }, ref) => {
     const { elements } = useWorldContext();
     const storyEditorRef = useRef<StoryEditorRef>(null);
+    const editorContainerRef = useRef<HTMLDivElement>(null);
     const [content, setContent] = useState(element.story || '');
     const [debouncedContent] = useDebounce(content, 1000); // Debounce for detection
     const [elementLinker, setElementLinker] = useState<ElementLinker | null>(null);
     const [suggestions, setSuggestions] = useState<ElementMatch[]>([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [ignoredMatches, setIgnoredMatches] = useState<Set<string>>(new Set());
-    const [acceptedMatches, setAcceptedMatches] = useState<Set<string>>(new Set());
 
-    // Initialize ElementLinker
+    // Initialize ElementLinker - re-initialize when element fields change
     useEffect(() => {
       // Collect all linked element IDs from narrative fields
       // Note: API returns fields WITHOUT 'Ids' suffix (e.g., events, characters)
@@ -57,6 +58,10 @@ export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedSt
         ...(element.titles || element.titlesIds || []),
         ...(element.constructs || element.constructsIds || []),
         ...(element.laws || element.lawsIds || []),
+        ...(element.maps || element.mapsIds || []),
+        ...(element.markers || element.markersIds || []),
+        ...(element.narratives || element.narrativesIds || []),
+        ...(element.pins || element.pinsIds || []),
         // Also include single reference fields (these don't have 'Id' suffix in API)
         ...(element.protagonist || element.protagonistId ? [element.protagonist || element.protagonistId] : []),
         ...(element.antagonist || element.antagonistId ? [element.antagonist || element.antagonistId] : []),
@@ -76,42 +81,98 @@ export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedSt
       
       const linker = new ElementLinker(elements, linkedIds);
       setElementLinker(linker);
-    }, [elements, element]);
+    }, [
+      elements, 
+      element,
+      // Track all the multilink fields to re-init when they change
+      element.events,
+      element.characters,
+      element.locations,
+      element.families,
+      element.collectives,
+      element.objects,
+      element.species,
+      element.creatures,
+      element.institutions,
+      element.traits,
+      element.zones,
+      element.abilities,
+      element.phenomena,
+      element.languages,
+      element.relations,
+      element.titles,
+      element.constructs,
+      element.laws,
+      element.maps,
+      element.markers,
+      element.narratives,
+      element.pins,
+    ]);
 
-    // Detect elements in content
+    // Detect elements in content and apply visual indicators
     useEffect(() => {
       if (!elementLinker || !debouncedContent) return;
 
       const detectedMatches = elementLinker.detectElementMentions(debouncedContent);
       
-      console.log('[DEBUG] Detected matches:', detectedMatches.map(m => ({
-        text: m.text,
-        id: m.suggestedElement.id,
-        name: m.suggestedElement.name,
-        isLinked: m.isLinked,
-      })));
-      
-      // Count linked elements BEFORE filtering (from all detected matches)
-      const linkedCount = detectedMatches.filter(match => match.isLinked).length;
-      console.log('[DEBUG] Linked count from detected matches:', linkedCount);
-      
-      // Filter out already accepted or ignored matches
+      // Filter out ignored matches
       const filteredMatches = detectedMatches.filter(match => {
         const matchKey = `${match.startIndex}-${match.suggestedElement.id}`;
-        return !acceptedMatches.has(matchKey) && !ignoredMatches.has(matchKey);
+        return !ignoredMatches.has(matchKey);
       });
 
       setSuggestions(filteredMatches);
       
-      // Count new (unlinked) elements from filtered matches
-      const newCount = filteredMatches.filter(match => !match.isLinked).length;
+      // Count unlinked and linked elements
+      const unlinkedCount = filteredMatches.filter(match => !match.isLinked).length;
+      const linkedCount = filteredMatches.filter(match => match.isLinked).length;
       
-      console.log('[DEBUG] Detection results:', { newCount, linkedCount, totalDetected: newCount + linkedCount });
+      // Notify parent with counts
+      onDetectionChange?.(unlinkedCount + linkedCount, linkedCount);
       
-      // Notify parent with total detected count and linked count
-      // Total detected = new unlinked + already linked
-      onDetectionChange?.(newCount + linkedCount, linkedCount);
-    }, [debouncedContent, elementLinker, acceptedMatches, ignoredMatches, element, onDetectionChange]);
+      // Apply visual indicators to detected text spans
+      setTimeout(() => applyVisualIndicators(filteredMatches), 100);
+    }, [debouncedContent, elementLinker, ignoredMatches, element, onDetectionChange]);
+
+    // Handle clicks on markdown links for navigation
+    useEffect(() => {
+      if (!editorContainerRef.current) return;
+
+      const handleLinkClick = (e: MouseEvent) => {
+        const target = e.target as HTMLElement;
+        
+        // Check if clicked element is a link with our special format
+        if (target.tagName === 'A' && target.getAttribute('href')?.includes(':')) {
+          e.preventDefault();
+          
+          const href = target.getAttribute('href') || '';
+          const [category, elementId] = href.split(':');
+          
+          if ((e.ctrlKey || e.metaKey) && elementId) {
+            // Navigate to the element
+            const targetElement = elements.get(elementId);
+            if (targetElement) {
+              // Open element in new tab or navigate
+              const elementUrl = `/browse-tool/element/${elementId}`;
+              if (e.shiftKey) {
+                // Shift+Ctrl+Click opens in new tab
+                window.open(elementUrl, '_blank');
+              } else {
+                // Ctrl+Click navigates in same tab
+                window.location.href = elementUrl;
+              }
+            }
+          }
+        }
+      };
+
+      const container = editorContainerRef.current;
+      container.addEventListener('click', handleLinkClick);
+      
+      return () => {
+        container.removeEventListener('click', handleLinkClick);
+      };
+    }, [elements]);
 
     const handleContentChange = (newContent: string) => {
       setContent(newContent);
@@ -120,10 +181,6 @@ export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedSt
 
     const handleAcceptSuggestion = async (match: ElementMatch) => {
       if (!elementLinker) return;
-
-      // Mark as accepted
-      const matchKey = `${match.startIndex}-${match.suggestedElement.id}`;
-      setAcceptedMatches(prev => new Set(prev).add(matchKey));
 
       // Only insert a link if the element is not already linked
       if (!match.isLinked) {
@@ -158,26 +215,30 @@ export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedSt
     
     // Helper to get the field name for a category
     const getCategoryFieldName = (category: string): string | null => {
-      // Map categories to their multilink field names
+      // Map categories to their multilink field names (plural form)
       const categoryToField: Record<string, string> = {
-        'event': 'events',
+        'ability': 'abilities',
         'character': 'characters',
-        'location': 'locations',
-        'family': 'families',
         'collective': 'collectives',
-        'object': 'objects',
-        'species': 'species',
+        'construct': 'constructs',
         'creature': 'creatures',
+        'event': 'events',
+        'family': 'families',
         'institution': 'institutions',
+        'language': 'languages',
+        'law': 'laws',
+        'location': 'locations',
+        'map': 'maps',
+        'marker': 'markers',
+        'narrative': 'narratives',
+        'object': 'objects',
+        'phenomenon': 'phenomena',
+        'pin': 'pins',
+        'relation': 'relations',
+        'species': 'species', // same singular and plural
+        'title': 'titles',
         'trait': 'traits',
         'zone': 'zones',
-        'ability': 'abilities',
-        'phenomenon': 'phenomena',
-        'language': 'languages',
-        'relation': 'relations',
-        'title': 'titles',
-        'construct': 'constructs',
-        'law': 'laws',
       };
       return categoryToField[category] || null;
     };
@@ -220,14 +281,128 @@ export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedSt
       getSuggestions: () => suggestions,
     }));
 
+    // Apply visual indicators to detected elements in the editor
+    const applyVisualIndicators = (matches: ElementMatch[]) => {
+      if (!editorContainerRef.current) return;
+      
+      // Remove existing indicators
+      const existingIndicators = editorContainerRef.current.querySelectorAll('.element-highlight-wrapper');
+      existingIndicators.forEach(el => {
+        const textNode = document.createTextNode(el.textContent || '');
+        el.parentNode?.replaceChild(textNode, el);
+      });
+      
+      const contentEditable = editorContainerRef.current.querySelector('[contenteditable="true"]');
+      if (!contentEditable) return;
+      
+      // Sort matches by position (reverse order to maintain positions)
+      const sortedMatches = [...matches].sort((a, b) => b.startIndex - a.startIndex);
+      
+      sortedMatches.forEach(match => {
+        const walker = document.createTreeWalker(
+          contentEditable,
+          NodeFilter.SHOW_TEXT,
+          null
+        );
+        
+        let currentOffset = 0;
+        let node: Node | null;
+        
+        while (node = walker.nextNode()) {
+          const textContent = node.textContent || '';
+          const nodeLength = textContent.length;
+          
+          // Check if this node contains our match
+          if (currentOffset <= match.startIndex && currentOffset + nodeLength >= match.endIndex) {
+            const startOffset = match.startIndex - currentOffset;
+            const endOffset = match.endIndex - currentOffset;
+            
+            // Skip if this is already inside a link
+            const parent = node.parentElement;
+            if (parent?.tagName === 'A') break;
+            
+            try {
+              // Split the text node and wrap the matched text
+              const textNode = node as Text;
+              const beforeText = textContent.substring(0, startOffset);
+              const matchedText = textContent.substring(startOffset, endOffset);
+              const afterText = textContent.substring(endOffset);
+              
+              const wrapper = document.createElement('span');
+              wrapper.className = `element-highlight-wrapper ${match.isLinked ? 'element-detected-linked' : 'element-detected-unlinked'}`;
+              wrapper.textContent = matchedText;
+              wrapper.dataset.elementId = match.suggestedElement.id;
+              wrapper.dataset.elementType = match.elementType;
+              wrapper.style.cursor = 'pointer';
+              
+              // Add click handler
+              wrapper.addEventListener('click', (e) => {
+                if ((e.ctrlKey || e.metaKey) && match.isLinked) {
+                  e.preventDefault();
+                  const elementUrl = `/browse-tool/element/${match.suggestedElement.id}`;
+                  if (e.shiftKey) {
+                    window.open(elementUrl, '_blank');
+                  } else {
+                    window.location.href = elementUrl;
+                  }
+                }
+              });
+              
+              const parent = textNode.parentNode;
+              if (parent) {
+                const beforeNode = document.createTextNode(beforeText);
+                const afterNode = document.createTextNode(afterText);
+                
+                parent.replaceChild(afterNode, textNode);
+                parent.insertBefore(wrapper, afterNode);
+                parent.insertBefore(beforeNode, wrapper);
+              }
+            } catch (e) {
+              console.warn('Could not apply visual indicator:', e);
+            }
+            
+            break;
+          }
+          
+          currentOffset += nodeLength;
+        }
+      });
+    };
+
+    const handleElementDetectionClick = (match: ElementMatch, event: React.MouseEvent) => {
+      // Handle Ctrl+Click for navigation
+      if ((event.ctrlKey || event.metaKey) && match.isLinked) {
+        event.preventDefault();
+        const elementUrl = `/browse-tool/element/${match.suggestedElement.id}`;
+        if (event.shiftKey) {
+          // Shift+Ctrl+Click opens in new tab
+          window.open(elementUrl, '_blank');
+        } else {
+          // Ctrl+Click navigates in same tab
+          window.location.href = elementUrl;
+        }
+      } else if (!match.isLinked) {
+        // Regular click on unlinked element shows linking option
+        handleAcceptSuggestion(match);
+      }
+    };
+
     return (
-      <div className={`relative ${className}`}>
+      <div ref={editorContainerRef} className={`relative ${className}`}>
         <StoryEditor
           ref={storyEditorRef}
           element={element}
           onSave={onSave}
           onContentChange={handleContentChange}
         />
+        
+        {/* Visual indicators overlay - commented out in favor of direct DOM manipulation
+        <ElementDetectionLayer
+          content={content}
+          detectedElements={suggestions}
+          onElementClick={handleElementDetectionClick}
+          editorRef={editorContainerRef}
+        /> */}
 
         {showSuggestions && suggestions.length > 0 && (
           <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">

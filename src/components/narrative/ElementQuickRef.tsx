@@ -5,46 +5,62 @@ import type { Element } from '../../types/world';
 interface ElementQuickRefProps {
   narrative: Element;
   onElementInsert: (elementId: string, elementName: string, elementType: string) => void;
+  onElementUnlink?: (elementId: string, elementType: string) => void;
 }
 
 interface LinkedElementItemProps {
   element: Element;
   isInText: boolean;
   onInsert: () => void;
+  onUnlink?: () => void;
 }
 
-function LinkedElementItem({ element, isInText, onInsert }: LinkedElementItemProps) {
+function LinkedElementItem({ element, isInText, onInsert, onUnlink }: LinkedElementItemProps) {
   const [showPreview, setShowPreview] = useState(false);
 
   return (
     <div
-      className="relative"
+      className="relative group"
       onMouseEnter={() => setShowPreview(true)}
       onMouseLeave={() => setShowPreview(false)}
     >
-      <button
-        onClick={onInsert}
-        className="w-full text-left px-3 py-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors group"
-      >
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 flex-1 min-w-0">
-            <span className="text-sm font-medium text-gray-900 dark:text-gray-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 truncate">
-              {element.name}
-            </span>
-            {isInText && (
-              <span className="flex-shrink-0 px-1.5 py-0.5 text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded" title="Already mentioned in text">
-                in text
+      <div className="flex items-center gap-1">
+        <button
+          onClick={onInsert}
+          className="flex-1 text-left px-3 py-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors group"
+        >
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-gray-900 dark:text-gray-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 truncate">
+                {element.name}
               </span>
-            )}
+              {isInText && (
+                <span className="flex-shrink-0 px-1.5 py-0.5 text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded" title="Already mentioned in text">
+                  in text
+                </span>
+              )}
+            </div>
+            <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+              {element.category}
+            </div>
           </div>
-          <svg className="w-4 h-4 flex-shrink-0 text-gray-400 dark:text-gray-500 group-hover:text-blue-600 dark:group-hover:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-        </div>
-        <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
-          {element.category}
-        </div>
-      </button>
+        </button>
+        
+        {onUnlink && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onUnlink();
+            }}
+            className="p-2 text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors opacity-0 group-hover:opacity-100"
+            title="Unlink from narrative"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+            </svg>
+          </button>
+        )}
+      </div>
 
       {/* Hover preview */}
       {showPreview && element.description && (
@@ -67,29 +83,33 @@ function LinkedElementItem({ element, isInText, onInsert }: LinkedElementItemPro
   );
 }
 
-// Category field mapping - only category-based multilink fields
+// Category field mapping - all category-based multilink fields
 const CATEGORY_FIELDS: Record<string, string> = {
-  'events': 'event',
+  'abilities': 'ability',
   'characters': 'character',
-  'locations': 'location',
-  'families': 'family',
   'collectives': 'collective',
-  'objects': 'object',
-  'species': 'species',
+  'constructs': 'construct',
   'creatures': 'creature',
+  'events': 'event',
+  'families': 'family',
   'institutions': 'institution',
+  'languages': 'language',
+  'laws': 'law',
+  'locations': 'location',
+  'maps': 'map',
+  'markers': 'marker',
+  'narratives': 'narrative',
+  'objects': 'object',
+  'phenomena': 'phenomenon',
+  'pins': 'pin',
+  'relations': 'relation',
+  'species': 'species',
+  'titles': 'title',
   'traits': 'trait',
   'zones': 'zone',
-  'abilities': 'ability',
-  'phenomena': 'phenomenon',
-  'languages': 'language',
-  'relations': 'relation',
-  'titles': 'title',
-  'constructs': 'construct',
-  'laws': 'law',
 };
 
-export function ElementQuickRef({ narrative, onElementInsert }: ElementQuickRefProps) {
+export function ElementQuickRef({ narrative, onElementInsert, onElementUnlink }: ElementQuickRefProps) {
   const { elements } = useWorldContext();
   const [searchTerm, setSearchTerm] = useState('');
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -149,15 +169,16 @@ export function ElementQuickRef({ narrative, onElementInsert }: ElementQuickRefP
     }
     
     // Group by category for display
-    const grouped = new Map<string, Array<{ element: Element; isInText: boolean }>>();
+    const grouped = new Map<string, Array<{ element: Element; isInText: boolean; fieldName: string }>>();
     
-    filtered.forEach(({ element, category }) => {
+    filtered.forEach(({ element, category, fieldName }) => {
       if (!grouped.has(category)) {
         grouped.set(category, []);
       }
       grouped.get(category)!.push({
         element,
-        isInText: elementsInText.has(element.id)
+        isInText: elementsInText.has(element.id),
+        fieldName
       });
     });
     
@@ -275,12 +296,13 @@ export function ElementQuickRef({ narrative, onElementInsert }: ElementQuickRefP
                   {category}s ({elements.length})
                 </h4>
                 <div className="space-y-1">
-                  {elements.map(({ element, isInText }) => (
+                  {elements.map(({ element, isInText, fieldName }) => (
                     <LinkedElementItem
                       key={element.id}
                       element={element}
                       isInText={isInText}
                       onInsert={() => onElementInsert(element.id, element.name, element.category)}
+                      onUnlink={onElementUnlink ? () => onElementUnlink(element.id, element.category) : undefined}
                     />
                   ))}
                 </div>
@@ -293,7 +315,7 @@ export function ElementQuickRef({ narrative, onElementInsert }: ElementQuickRefP
       {/* Insert tip */}
       <div className="p-3 border-t border-gray-200 dark:border-dark-bg-border bg-gray-100 dark:bg-dark-bg-tertiary">
         <p className="text-xs text-gray-600 dark:text-gray-400">
-          <span className="font-medium">Tip:</span> Click any element to insert a link at cursor. Green badge = already in text.
+          <span className="font-medium">Tip:</span> Click to insert link • Hover and click − to unlink • Green = in text
         </p>
       </div>
     </div>

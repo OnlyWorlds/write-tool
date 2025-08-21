@@ -8,7 +8,7 @@ export interface ElementMatch {
   confidence: number;
   suggestedElement: Element;
   elementType: string;
-  isLinked: boolean;
+  isLinked: boolean; // true if element is in any Involves field
 }
 
 export interface LinkSuggestion {
@@ -33,8 +33,14 @@ export class ElementLinker {
   }
 
   private initializeFuseInstances() {
-    // Group elements by category
-    const categories = ['event', 'character', 'location', 'family', 'collective', 'species', 'institution'];
+    // Group elements by category - include ALL OnlyWorlds element types
+    const categories = [
+      'ability', 'character', 'collective', 'construct', 'creature', 
+      'event', 'family', 'institution', 'language', 'law', 
+      'location', 'map', 'marker', 'narrative', 'object', 
+      'phenomenon', 'pin', 'relation', 'species', 'title', 
+      'trait', 'zone'
+    ];
     
     categories.forEach(category => {
       const categoryElements = Array.from(this.elements.values())
@@ -47,6 +53,7 @@ export class ElementLinker {
           threshold: 0.3, // Lower is more strict (0.0 = exact match, 1.0 = match anything)
           ignoreLocation: true,
           minMatchCharLength: 3,
+          isCaseSensitive: false, // Case-insensitive matching
         });
         
         this.fuseInstances.set(category, fuse);
@@ -57,9 +64,7 @@ export class ElementLinker {
   detectElementMentions(text: string): ElementMatch[] {
     const matches: ElementMatch[] = [];
     
-    // First, extract already-linked elements from the markdown
-    const linkedInText = this.extractLinkedElements(text);
-    
+    // Get all potential element names from the text
     const words = this.extractPotentialNames(text);
     
     words.forEach(({ word, startIndex }) => {
@@ -88,19 +93,8 @@ export class ElementLinker {
               : confidence;
             
             if (boostedConfidence >= threshold) {
-              // Check if this element is linked in the narrative fields OR in the text itself
-              const isLinkedInFields = this.linkedElements.has(result.item.id);
-              const isLinkedInText = linkedInText.has(result.item.id);
-              
-              if (isLinkedInFields || isLinkedInText) {
-                console.log('[ElementLinker] Found linked element:', {
-                  name: result.item.name,
-                  id: result.item.id,
-                  isLinkedInFields,
-                  isLinkedInText,
-                  linkedElementsSet: Array.from(this.linkedElements),
-                });
-              }
+              // Simple check: is this element in any of the narrative's Involves fields?
+              const isLinked = this.linkedElements.has(result.item.id);
               
               matches.push({
                 text: word,
@@ -109,7 +103,7 @@ export class ElementLinker {
                 confidence: boostedConfidence,
                 suggestedElement: result.item,
                 elementType: category,
-                isLinked: isLinkedInFields || isLinkedInText,
+                isLinked: isLinked,
               });
             }
           }

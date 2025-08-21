@@ -17,11 +17,11 @@ export const ONLYWORLDS_CATEGORIES = [
   'relation',
   'event',
   'construct',
-  'marker',
   'pin',
   'narrative',
-  'map',
-  'world'
+  'map'
+  // 'marker' removed - not needed in sidebar
+  // 'world' removed - World is not an element type, it's a container
 ] as const;
 
 export type OnlyWorldsCategory = typeof ONLYWORLDS_CATEGORIES[number];
@@ -45,11 +45,9 @@ export const CATEGORY_ICONS: Record<OnlyWorldsCategory, string> = {
   relation: 'link',
   event: 'saved_search',
   construct: 'api',
-  marker: 'place',
   pin: 'push_pin',
   narrative: 'menu_book',
-  map: 'map',
-  world: 'public'
+  map: 'map'
 };
 
 export const CATEGORY_DISPLAY_NAMES: Record<OnlyWorldsCategory, string> = {
@@ -71,9 +69,7 @@ export const CATEGORY_DISPLAY_NAMES: Record<OnlyWorldsCategory, string> = {
   relation: 'Relation',
   event: 'Event',
   construct: 'Construct',
-  marker: 'Marker',
   pin: 'Pin',
   narrative: 'Narrative',
-  map: 'Map',
-  world: 'World'
+  map: 'Map'
 };

@@ -1,0 +1,120 @@
+/* Visual indicators for element detection in narrative editor */
+
+/* Unlinked elements - green underline for elements not in any Involves field */
+.element-detected-unlinked {
+  border-bottom: 2px solid #10b981;
+  border-bottom-style: wavy;
+  cursor: pointer;
+  position: relative;
+  transition: background-color 0.2s ease;
+}
+
+.element-detected-unlinked:hover {
+  background-color: rgba(16, 185, 129, 0.1);
+}
+
+/* Linked elements - blue underline for elements in Involves fields */
+.element-detected-linked {
+  border-bottom: 2px solid #3b82f6;
+  border-bottom-style: wavy;
+  cursor: pointer;
+  position: relative;
+  transition: background-color 0.2s ease;
+}
+
+.element-detected-linked:hover {
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+/* Style markdown links that represent linked elements */
+.mdxeditor-root-contenteditable a[href*=":"] {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 2px solid #3b82f6;
+  border-bottom-style: wavy;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.mdxeditor-root-contenteditable a[href*=":"]:hover {
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+/* Dark mode support */
+.dark .element-detected-unlinked {
+  border-bottom-color: #34d399;
+}
+
+.dark .element-detected-unlinked:hover {
+  background-color: rgba(52, 211, 153, 0.1);
+}
+
+.dark .element-detected-linked {
+  border-bottom-color: #60a5fa;
+}
+
+.dark .element-detected-linked:hover {
+  background-color: rgba(96, 165, 250, 0.1);
+}
+
+.dark .mdxeditor-root-contenteditable a[href*=":"] {
+  border-bottom-color: #60a5fa;
+}
+
+.dark .mdxeditor-root-contenteditable a[href*=":"]:hover {
+  background-color: rgba(96, 165, 250, 0.1);
+}
+
+/* Detection overlay for visual indicators */
+.element-detection-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.element-detection-indicator {
+  position: absolute;
+  pointer-events: auto;
+  display: inline-block;
+}
+
+/* Apply visual indicators to detected elements within MDXEditor */
+.mdxeditor-root-contenteditable .element-detected-unlinked {
+  border-bottom: 2px solid #10b981;
+  border-bottom-style: wavy;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.mdxeditor-root-contenteditable .element-detected-linked {
+  border-bottom: 2px solid #3b82f6;
+  border-bottom-style: wavy;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+/* Tooltip for element detection */
+.element-detection-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  font-size: 12px;
+  border-radius: 4px;
+  white-space: nowrap;
+  margin-bottom: 4px;
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+
+.element-detection-indicator:hover .element-detection-tooltip {
+  opacity: 1;
+}

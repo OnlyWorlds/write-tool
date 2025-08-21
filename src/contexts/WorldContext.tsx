@@ -229,7 +229,7 @@ export function WorldProvider({ children }: { children: ReactNode }) {
     const updatedElement = { ...element, ...updates };
     
     try {
-      const returnedElement = await ApiService.updateElement(state.worldKey, state.pin, updatedElement, state.elements);
+      const returnedElement = await ApiService.updateElement(state.worldKey, state.pin, updatedElement, state.elements, updates);
       if (returnedElement) {
         // Merge the server response intelligently
         // Keep our link field values if server returns empty arrays/nulls

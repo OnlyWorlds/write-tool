@@ -93,40 +93,11 @@ function transformElementFromApi(element: any): any {
   return transformed;
 }
 
-// Helper to guess linked category from field name
-function guessLinkedCategoryFromFieldName(fieldName: string): string {
-  // Remove common suffixes
-  const baseName = fieldName
-    .replace(/_ids?$/i, '')
-    .replace(/Ids?$/i, '')
-    .replace(/s$/, ''); // Remove plural 's'
-  
-  // Map common field names to categories
-  const fieldToCategoryMap: Record<string, string> = {
-    'cult': 'collective',
-    'founder': 'character',
-    'fighter': 'character',
-    'building': 'construct',
-    'population': 'species',
-    'secondary_power': 'character',
-    'defensive_object': 'object',
-    'delicacy': 'object',
-    'extraction_good': 'object',
-    'industry_good': 'object',
-    'extraction_market': 'location',
-    'industry_market': 'location',
-    'currency': 'object',
-    'building_method': 'ability',
-    'extraction_method': 'ability',
-    'industry_method': 'ability',
-  };
-  
-  return fieldToCategoryMap[baseName] || baseName;
-}
 
 // Transform link fields to API format with proper field naming
+// OnlyWorlds API requires _id suffix for single links and _ids suffix for multi-links
 function transformElementForApi(element: any, allElements?: Map<string, Element>): any {
-  const transformed = { ...element };
+  const transformed: any = {};
   
   // Process fields to ensure proper format for API
   for (const [key, value] of Object.entries(element)) {
@@ -136,21 +107,22 @@ function transformElementForApi(element: any, allElements?: Map<string, Element>
     // Analyze field to determine if it's a link
     const fieldInfo = analyzeOnlyWorldsField(key, value, element.category);
     
-    // Handle single link fields
+    // Handle single link fields - add _id suffix for API
     if (fieldInfo.type === 'single_link' && typeof value === 'string' && value) {
-      // For single link fields, convert ID to URL
-      const linkedCategory = fieldInfo.linkedCategory || guessLinkedCategoryFromFieldName(key);
-      const url = `${API_BASE_URL}/${linkedCategory}/${value}/`;
-      console.log(`[API] Converting single link field ${key}: ${value} -> ${url}`);
-      transformed[key] = url;
+      // API expects fieldname_id for foreign keys (e.g., location_id, birthplace_id)
+      const apiFieldName = key.endsWith('_id') ? key : `${key}_id`;
+      transformed[apiFieldName] = value;
     }
-    // Handle multi-link fields
+    // Handle multi-link fields - add _ids suffix for API
     else if (fieldInfo.type === 'multi_link' && Array.isArray(value)) {
-      // For multi-link fields, just send the IDs directly
-      // The API seems to handle them differently than single links
+      // API expects fieldname_ids for many-to-many relationships (e.g., languages_ids, family_ids)
+      const apiFieldName = key.endsWith('_ids') ? key : `${key}_ids`;
       const ids = value.filter(id => typeof id === 'string' && id);
-      console.log(`[API] Keeping multi-link field ${key} as IDs: [${ids.join(', ')}]`);
-      transformed[key] = ids;
+      transformed[apiFieldName] = ids;
+    }
+    // For non-link fields, keep as-is
+    else {
+      transformed[key] = value;
     }
   }
   
@@ -307,23 +279,32 @@ export class ApiService {
     return allElements;
   }
 
-  static async updateElement(worldKey: string, pin: string, element: Element, allElements?: Map<string, Element>): Promise<Element | null> {
+  static async updateElement(worldKey: string, pin: string, element: Element, allElements?: Map<string, Element>, updates?: Partial<Element>): Promise<Element | null> {
     try {
       const elementType = element.category || 'object';
       const url = `${API_BASE_URL}/${elementType}/${element.id}/`;
       
-      // Transform the element for API
-      const transformedElement = transformElementForApi(element, allElements);
+      // If we have specific updates, only send those fields (for PATCH)
+      // Otherwise send the full element (for backwards compatibility)
+      // For PATCH requests, we can send just the fields we want to update
+      const dataToSend = updates || element;
+      // Don't send the category field as it's not part of the API schema
+      if ('category' in dataToSend) {
+        delete dataToSend.category;
+      }
       
-      console.log('Updating element:', { url, elementType, id: element.id });
-      console.log('Original element:', element);
-      console.log('Transformed for API:', transformedElement);
+      // Transform the element for API
+      const transformedElement = transformElementForApi(dataToSend, allElements);
+      
+      // Log update details for debugging
+      if (updates) {
+        console.log(`[API] Updating ${elementType} ${element.id} with:`, updates);
+      }
       
       const requestBody = JSON.stringify(transformedElement);
-      console.log('Request body being sent:', requestBody);
       
       const response = await fetch(url, {
-        method: 'PUT',
+        method: 'PATCH',
         headers: {
           'API-Key': worldKey,
           'API-Pin': pin,
@@ -342,9 +323,7 @@ export class ApiService {
       
       // Return the updated element from the API, properly transformed
       const updatedElement = await response.json();
-      console.log('API response:', updatedElement);
       const transformed = transformElementFromApi(updatedElement);
-      console.log('Transformed response:', transformed);
       return transformed;
     } catch (error) {
       console.error('Update error:', error);

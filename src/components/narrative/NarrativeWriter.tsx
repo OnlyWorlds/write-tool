@@ -390,9 +390,9 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
       </div>
 
       {/* Main Editor Area */}
-      <div className="flex relative flex-1 overflow-y-auto">
+      <div className="flex relative flex-1 overflow-hidden">
         {/* Editor */}
-        <div className="flex-1">
+        <div className="flex-1 overflow-y-auto">
           <EnhancedStoryEditor
             ref={editorRef}
             element={currentElement}

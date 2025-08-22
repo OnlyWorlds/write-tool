@@ -284,7 +284,7 @@ export function ElementQuickRef({ narrative, onElementInsert, onElementUnlink }:
 
   if (isCollapsed) {
     return (
-      <div className="w-12 bg-gray-50 dark:bg-dark-bg-secondary border-l border-gray-200 dark:border-dark-bg-border flex flex-col items-center py-4">
+      <div className="w-12 bg-gray-50 dark:bg-dark-bg-secondary border-l border-gray-200 dark:border-dark-bg-border flex flex-col items-center py-4 h-full">
         <button
           onClick={() => setIsCollapsed(false)}
           className="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-300"
@@ -302,7 +302,7 @@ export function ElementQuickRef({ narrative, onElementInsert, onElementUnlink }:
   }
 
   return (
-    <div className="w-80 bg-gray-50 dark:bg-dark-bg-secondary border-l border-gray-200 dark:border-dark-bg-border flex flex-col">
+    <div className="w-80 bg-gray-50 dark:bg-dark-bg-secondary border-l border-gray-200 dark:border-dark-bg-border flex flex-col h-full">
       {/* Header */}
       <div className="px-3 py-2 border-b border-gray-200 dark:border-dark-bg-border bg-white dark:bg-dark-bg-tertiary">
         <div className="flex items-center justify-between">

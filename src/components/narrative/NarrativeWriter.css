@@ -141,32 +141,30 @@
 }
 
 /* Toolbar toggle buttons - make bold/italic/underline white in both light and dark modes */
-.narrative-editor-wrapper [class*="_toggleItem"] {
-  color: #ffffff !important; /* Make text white in light mode too */
+/* Only target the B/I/U toggle buttons in the toolbar, not other buttons */
+.narrative-editor-wrapper [class*="_toolbar"] button[data-state="on"] svg,
+.narrative-editor-wrapper [class*="_toolbar"] button[data-state="off"] svg {
+  color: #ffffff !important;
+  fill: #ffffff !important;
 }
 
-.narrative-editor-wrapper [class*="_toggleItem"][data-state="on"] {
-  background-color: #60a5fa !important; /* Blue when active in light mode */
-  color: #ffffff !important; /* White when active */
+/* Active state for toolbar toggle buttons */
+.narrative-editor-wrapper [class*="_toolbar"] button[data-state="on"] {
+  background-color: #60a5fa !important;
 }
 
-.narrative-editor-wrapper [class*="_toggleItem"]:hover {
-  background-color: #93bbfc !important; /* Light blue on hover in light mode */
-  color: #ffffff !important; /* White on hover */
+/* Hover state for toolbar toggle buttons */
+.narrative-editor-wrapper [class*="_toolbar"] button:hover {
+  background-color: rgba(96, 165, 250, 0.3) !important;
 }
 
-.dark .narrative-editor-wrapper [class*="_toggleItem"] {
-  color: #f3f4f6 !important; /* Make text white */
-}
-
-.dark .narrative-editor-wrapper [class*="_toggleItem"][data-state="on"] {
+/* Dark mode specific adjustments for toolbar toggle buttons */
+.dark .narrative-editor-wrapper [class*="_toolbar"] button[data-state="on"] {
   background-color: #475569 !important;
-  color: #ffffff !important; /* Bright white when active */
 }
 
-.dark .narrative-editor-wrapper [class*="_toggleItem"]:hover {
-  background-color: #475569 !important;
-  color: #ffffff !important; /* White on hover */
+.dark .narrative-editor-wrapper [class*="_toolbar"] button:hover {
+  background-color: rgba(71, 85, 105, 0.5) !important;
 }
 
 /* Make the main editor area lighter in dark mode */

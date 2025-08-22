@@ -355,41 +355,35 @@ export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedSt
     const insertLinkAtCursor = (elementId: string, elementName: string, elementType: string) => {
       if (!elementLinker || !storyEditorRef.current) return;
 
-      // Get current content to check if we need a space before
+      // First ensure the editor is focused
+      storyEditorRef.current.focus();
+      
+      // Get current content and append the element name with a space
       const currentContent = storyEditorRef.current.getContent() || '';
-      const lastChar = currentContent[currentContent.length - 1];
       
-      // Add a space before the element name if the last character isn't already a space or newline
-      const textToInsert = (!lastChar || lastChar === ' ' || lastChar === '\n') 
-        ? elementName 
-        : ' ' + elementName;
+      // Add a space before the element name
+      const updatedContent = currentContent + ' ' + elementName;
       
-      // Insert just the element name as plain text instead of markdown link
-      storyEditorRef.current.insertMarkdown(textToInsert);
+      // Set the new content
+      storyEditorRef.current.setContent(updatedContent);
       
-      // Place cursor at end of document as a fallback since precise positioning is complex
+      // Move cursor to the end after a short delay
       setTimeout(() => {
-        if (editorContainerRef.current) {
-          const contentEditable = editorContainerRef.current.querySelector('[contenteditable="true"]');
-          if (contentEditable) {
-            contentEditable.focus();
-            
-            // Move cursor to end of content
-            const selection = window.getSelection();
-            if (selection) {
-              const range = document.createRange();
-              range.selectNodeContents(contentEditable);
-              range.collapse(false); // Collapse to end
-              selection.removeAllRanges();
-              selection.addRange(range);
-            }
-          }
+        storyEditorRef.current?.focus();
+        // Try to place cursor at end
+        const editorDiv = editorContainerRef.current?.querySelector('[contenteditable="true"]');
+        if (editorDiv) {
+          const range = document.createRange();
+          const selection = window.getSelection();
+          range.selectNodeContents(editorDiv);
+          range.collapse(false); // false = collapse to end
+          selection?.removeAllRanges();
+          selection?.addRange(range);
         }
-      }, 10);
+      }, 100);
       
-      // Get the updated content and notify parent
-      const newContent = storyEditorRef.current.getContent();
-      handleContentChange(newContent);
+      // Notify parent of content change
+      handleContentChange(updatedContent);
     };
 
     // Expose methods via ref

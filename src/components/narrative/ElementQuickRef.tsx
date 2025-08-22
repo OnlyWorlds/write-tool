@@ -12,11 +12,12 @@ interface ElementQuickRefProps {
 interface LinkedElementItemProps {
   element: Element;
   isInText: boolean;
+  mentionCount: number;
   onInsert: () => void;
   onUnlink?: () => void;
 }
 
-function LinkedElementItem({ element, isInText, onInsert, onUnlink }: LinkedElementItemProps) {
+function LinkedElementItem({ element, isInText, mentionCount, onInsert, onUnlink }: LinkedElementItemProps) {
   const [showPreview, setShowPreview] = useState(false);
 
   return (
@@ -37,8 +38,11 @@ function LinkedElementItem({ element, isInText, onInsert, onUnlink }: LinkedElem
                 className="text-lg text-gray-600 dark:text-gray-400"
               />
             </div>
-            <span className="text-sm font-medium text-gray-900 dark:text-gray-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 truncate">
-              {element.name}
+            <span className="flex-1 flex items-center text-sm font-medium text-gray-900 dark:text-gray-200 group-hover:text-blue-600 dark:group-hover:text-blue-400">
+              <span className="truncate">{element.name}</span>
+              {mentionCount > 0 && (
+                <span className="ml-auto mr-2 text-xs text-gray-500 dark:text-gray-400">({mentionCount})</span>
+              )}
             </span>
             {isInText && (
               <span className="flex-shrink-0 px-1.5 py-0.5 text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded" title="Already mentioned in text">
@@ -170,6 +174,39 @@ export function ElementQuickRef({ narrative, onElementInsert, onElementUnlink }:
     return textIds;
   }, [narrative.story]);
 
+  // Compute mention counts for each element
+  const elementMentionCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    const storyText = narrative.story || '';
+    
+    if (!storyText) return counts;
+    
+    // Count mentions for each linked element
+    linkedElements.forEach(({ element }) => {
+      let count = 0;
+      
+      // Count markdown links for this element
+      const linkPattern = new RegExp(`\\[[^\\]]*\\]\\([^):]+:${element.id}\\)`, 'g');
+      const linkMatches = storyText.match(linkPattern);
+      if (linkMatches) {
+        count += linkMatches.length;
+      }
+      
+      // Count plain text mentions of the element name (case-insensitive)
+      // Use word boundaries to avoid partial matches
+      const nameEscaped = element.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const namePattern = new RegExp(`\\b${nameEscaped}\\b`, 'gi');
+      const nameMatches = storyText.match(namePattern);
+      if (nameMatches) {
+        count += nameMatches.length;
+      }
+      
+      counts.set(element.id, count);
+    });
+    
+    return counts;
+  }, [narrative.story, linkedElements]);
+
   // Filter linked elements based on filter mode
   const filteredElements = useMemo(() => {
     let filtered = linkedElements;
@@ -181,22 +218,29 @@ export function ElementQuickRef({ narrative, onElementInsert, onElementUnlink }:
       filtered = filtered.filter(({ element }) => !elementsInText.has(element.id));
     }
     
-    // Create flat list with element info
+    // Create flat list with element info including mention counts
     const flatList = filtered.map(({ element, fieldName }) => ({
       element,
       isInText: elementsInText.has(element.id),
+      mentionCount: elementMentionCounts.get(element.id) || 0,
       fieldName
     }));
     
-    // Sort by: in-text first, then by name
+    // Sort by: mention count (highest first), then in-text, then by name
     flatList.sort((a, b) => {
+      // First sort by mention count (descending)
+      if (a.mentionCount !== b.mentionCount) {
+        return b.mentionCount - a.mentionCount;
+      }
+      // Then by in-text status
       if (a.isInText && !b.isInText) return -1;
       if (!a.isInText && b.isInText) return 1;
+      // Finally alphabetically
       return a.element.name.localeCompare(b.element.name);
     });
     
     return flatList;
-  }, [linkedElements, filterMode, elementsInText]);
+  }, [linkedElements, filterMode, elementsInText, elementMentionCounts]);
 
   // Count statistics
   const stats = useMemo(() => {
@@ -285,11 +329,12 @@ export function ElementQuickRef({ narrative, onElementInsert, onElementUnlink }:
           </p>
         ) : (
           <div className="space-y-1">
-            {filteredElements.map(({ element, isInText, fieldName }) => (
+            {filteredElements.map(({ element, isInText, mentionCount, fieldName }) => (
               <LinkedElementItem
                 key={element.id}
                 element={element}
                 isInText={isInText}
+                mentionCount={mentionCount}
                 onInsert={() => onElementInsert(element.id, element.name, element.category)}
                 onUnlink={onElementUnlink ? () => onElementUnlink(element.id, element.category) : undefined}
               />

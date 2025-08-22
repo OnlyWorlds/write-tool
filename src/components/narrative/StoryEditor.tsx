@@ -15,6 +15,7 @@ export interface StoryEditorRef {
   getContent: () => string;
   setContent: (content: string) => void;
   focus: () => void;
+  insertMarkdown: (markdown: string) => void;
 }
 
 export const StoryEditor = forwardRef<StoryEditorRef, StoryEditorProps>(
@@ -32,7 +33,8 @@ export const StoryEditor = forwardRef<StoryEditorRef, StoryEditorProps>(
         setContent(newContent);
         editorRef.current?.setMarkdown(newContent);
       },
-      focus: () => editorRef.current?.focus()
+      focus: () => editorRef.current?.focus(),
+      insertMarkdown: (markdown: string) => editorRef.current?.insertMarkdown(markdown)
     }));
 
     // Auto-save effect

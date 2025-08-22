@@ -258,13 +258,13 @@ export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedSt
     const insertLinkAtCursor = (elementId: string, elementName: string, elementType: string) => {
       if (!elementLinker || !storyEditorRef.current) return;
 
-      const currentContent = storyEditorRef.current.getContent();
       const link = `[${elementName}](${elementType}:${elementId})`;
       
-      // For now, append at the end (MDXEditor doesn't expose cursor position easily)
-      // In a real implementation, you'd need to integrate with MDXEditor's API
-      const newContent = currentContent + ' ' + link;
-      storyEditorRef.current.setContent(newContent);
+      // Use MDXEditor's insertMarkdown method to insert at cursor position
+      storyEditorRef.current.insertMarkdown(link);
+      
+      // Get the updated content and notify parent
+      const newContent = storyEditorRef.current.getContent();
       handleContentChange(newContent);
     };
 
@@ -412,6 +412,12 @@ export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedSt
                 onAccept={handleAcceptSuggestion}
                 onReject={handleRejectSuggestion}
                 onClose={() => setShowSuggestions(false)}
+                onLinkAll={() => {
+                  // Link all unlinked suggestions
+                  const unlinkedSuggestions = suggestions.filter(s => !s.isLinked);
+                  unlinkedSuggestions.forEach(suggestion => handleAcceptSuggestion(suggestion));
+                  setShowSuggestions(false);
+                }}
               />
             </div>
           </div>

@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useWorldContext } from '../../contexts/WorldContext';
+import { CategoryIcon } from '../../utils/categoryIcons';
 import type { Element } from '../../types/world';
 
 interface ElementQuickRefProps {
@@ -29,20 +30,21 @@ function LinkedElementItem({ element, isInText, onInsert, onUnlink }: LinkedElem
           onClick={onInsert}
           className="flex-1 text-left px-3 py-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors group"
         >
-          <div className="flex flex-col">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-gray-900 dark:text-gray-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 truncate">
-                {element.name}
+          <div className="flex items-center gap-2">
+            <div className="flex-shrink-0" title={element.category}>
+              <CategoryIcon 
+                category={element.category} 
+                className="text-lg text-gray-600 dark:text-gray-400"
+              />
+            </div>
+            <span className="text-sm font-medium text-gray-900 dark:text-gray-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 truncate">
+              {element.name}
+            </span>
+            {isInText && (
+              <span className="flex-shrink-0 px-1.5 py-0.5 text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded" title="Already mentioned in text">
+                in text
               </span>
-              {isInText && (
-                <span className="flex-shrink-0 px-1.5 py-0.5 text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded" title="Already mentioned in text">
-                  in text
-                </span>
-              )}
-            </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
-              {element.category}
-            </div>
+            )}
           </div>
         </button>
         
@@ -111,9 +113,8 @@ const CATEGORY_FIELDS: Record<string, string> = {
 
 export function ElementQuickRef({ narrative, onElementInsert, onElementUnlink }: ElementQuickRefProps) {
   const { elements } = useWorldContext();
-  const [searchTerm, setSearchTerm] = useState('');
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [showOnlyInText, setShowOnlyInText] = useState(false);
+  const [filterMode, setFilterMode] = useState<'all' | 'in-text' | 'not-in-text'>('all');
 
   // Get all linked elements from category-based fields
   const linkedElements = useMemo(() => {
@@ -152,49 +153,33 @@ export function ElementQuickRef({ narrative, onElementInsert, onElementUnlink }:
     return textIds;
   }, [narrative.story]);
 
-  // Filter linked elements based on search
+  // Filter linked elements based on filter mode
   const filteredElements = useMemo(() => {
     let filtered = linkedElements;
     
-    if (searchTerm) {
-      filtered = filtered.filter(({ element }) =>
-        element.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        element.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        element.category.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-    
-    if (showOnlyInText) {
+    // Apply filter mode
+    if (filterMode === 'in-text') {
       filtered = filtered.filter(({ element }) => elementsInText.has(element.id));
+    } else if (filterMode === 'not-in-text') {
+      filtered = filtered.filter(({ element }) => !elementsInText.has(element.id));
     }
     
-    // Group by category for display
-    const grouped = new Map<string, Array<{ element: Element; isInText: boolean; fieldName: string }>>();
+    // Create flat list with element info
+    const flatList = filtered.map(({ element, fieldName }) => ({
+      element,
+      isInText: elementsInText.has(element.id),
+      fieldName
+    }));
     
-    filtered.forEach(({ element, category, fieldName }) => {
-      if (!grouped.has(category)) {
-        grouped.set(category, []);
-      }
-      grouped.get(category)!.push({
-        element,
-        isInText: elementsInText.has(element.id),
-        fieldName
-      });
+    // Sort by: in-text first, then by name
+    flatList.sort((a, b) => {
+      if (a.isInText && !b.isInText) return -1;
+      if (!a.isInText && b.isInText) return 1;
+      return a.element.name.localeCompare(b.element.name);
     });
     
-    // Sort categories and elements within each category
-    const sortedCategories = Array.from(grouped.entries()).sort((a, b) => a[0].localeCompare(b[0]));
-    sortedCategories.forEach(([_, elements]) => {
-      elements.sort((a, b) => {
-        // Sort by: in-text first, then by name
-        if (a.isInText && !b.isInText) return -1;
-        if (!a.isInText && b.isInText) return 1;
-        return a.element.name.localeCompare(b.element.name);
-      });
-    });
-    
-    return sortedCategories;
-  }, [linkedElements, searchTerm, showOnlyInText, elementsInText]);
+    return flatList;
+  }, [linkedElements, filterMode, elementsInText]);
 
   // Count statistics
   const stats = useMemo(() => {
@@ -226,9 +211,9 @@ export function ElementQuickRef({ narrative, onElementInsert, onElementUnlink }:
   return (
     <div className="w-80 bg-gray-50 dark:bg-dark-bg-secondary border-l border-gray-200 dark:border-dark-bg-border flex flex-col">
       {/* Header */}
-      <div className="px-4 py-2 border-b border-gray-200 dark:border-dark-bg-border bg-white dark:bg-dark-bg-tertiary">
+      <div className="px-4 py-1 border-b border-gray-200 dark:border-dark-bg-border bg-white dark:bg-dark-bg-tertiary">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-medium text-gray-800 dark:text-gray-200">Linked Elements</h3>
+          <h3 className="text-xs font-normal text-gray-800 dark:text-gray-200">Linked Elements</h3>
           <button
             onClick={() => setIsCollapsed(true)}
             className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400"
@@ -258,55 +243,39 @@ export function ElementQuickRef({ narrative, onElementInsert, onElementUnlink }:
         </div>
       </div>
 
-      {/* Search and filter */}
-      <div className="p-3 bg-white dark:bg-dark-bg-tertiary border-b border-gray-200 dark:border-dark-bg-border space-y-2">
-        <input
-          type="text"
-          placeholder="Search linked elements..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+      {/* Filter dropdown */}
+      <div className="p-3 bg-white dark:bg-dark-bg-tertiary border-b border-gray-200 dark:border-dark-bg-border">
+        <select
+          value={filterMode}
+          onChange={(e) => setFilterMode(e.target.value as 'all' | 'in-text' | 'not-in-text')}
           className="w-full px-3 py-2 text-sm bg-white dark:bg-dark-bg-secondary border border-gray-300 dark:border-dark-bg-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-200"
-        />
-        <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={showOnlyInText}
-            onChange={(e) => setShowOnlyInText(e.target.checked)}
-            className="rounded border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-dark-bg-primary text-blue-600 focus:ring-blue-500"
-          />
-          <span>Show only elements in text</span>
-        </label>
+        >
+          <option value="all">Show all</option>
+          <option value="in-text">Show in text</option>
+          <option value="not-in-text">Show not in text</option>
+        </select>
       </div>
 
       {/* Element list */}
       <div className="flex-1 overflow-y-auto p-3">
         {filteredElements.length === 0 ? (
           <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-8">
-            {searchTerm 
-              ? 'No matching linked elements found'
-              : showOnlyInText 
-                ? 'No linked elements found in text'
+            {filterMode === 'in-text' 
+              ? 'No linked elements found in text'
+              : filterMode === 'not-in-text'
+                ? 'All linked elements are in text'
                 : 'No elements linked to this narrative yet'}
           </p>
         ) : (
-          <div className="space-y-4">
-            {filteredElements.map(([category, elements]) => (
-              <div key={category}>
-                <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-                  {category}s ({elements.length})
-                </h4>
-                <div className="space-y-1">
-                  {elements.map(({ element, isInText, fieldName }) => (
-                    <LinkedElementItem
-                      key={element.id}
-                      element={element}
-                      isInText={isInText}
-                      onInsert={() => onElementInsert(element.id, element.name, element.category)}
-                      onUnlink={onElementUnlink ? () => onElementUnlink(element.id, element.category) : undefined}
-                    />
-                  ))}
-                </div>
-              </div>
+          <div className="space-y-1">
+            {filteredElements.map(({ element, isInText, fieldName }) => (
+              <LinkedElementItem
+                key={element.id}
+                element={element}
+                isInText={isInText}
+                onInsert={() => onElementInsert(element.id, element.name, element.category)}
+                onUnlink={onElementUnlink ? () => onElementUnlink(element.id, element.category) : undefined}
+              />
             ))}
           </div>
         )}

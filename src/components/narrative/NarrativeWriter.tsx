@@ -283,34 +283,35 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
             </div>
           )}
           
-          {/* Element detection widget - only show when unlinked elements are available */}
-          {detectedCount - linkedCount > 0 && (
-            <div className="flex items-center gap-2">
+          {/* Element detection widget */}
+          <div className="flex items-center gap-1">
+            {detectedCount - linkedCount > 0 && (
               <button
                 onClick={handleShowSuggestions}
-                className="px-3 py-1.5 text-sm bg-green-100 dark:bg-green-900/30 hover:bg-green-200 dark:hover:bg-green-900/40 text-green-800 dark:text-green-300 rounded-lg transition-colors flex items-center gap-2"
+                className="px-2 py-1 text-xs bg-green-100 dark:bg-green-900/30 hover:bg-green-200 dark:hover:bg-green-900/40 text-green-800 dark:text-green-300 rounded transition-colors flex items-center gap-1"
                 title="View available elements to link"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
                 <span className="font-medium">
-                  {detectedCount - linkedCount} available
+                  {detectedCount - linkedCount} elements detected
                 </span>
               </button>
-              
-              <button
-                onClick={handleLinkAll}
-                className="px-3 py-1.5 text-sm bg-green-100 dark:bg-green-900/30 hover:bg-green-200 dark:hover:bg-green-900/40 text-green-800 dark:text-green-300 rounded-lg transition-colors flex items-center gap-1"
-                title="Link all available elements"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                </svg>
-                Link All
-              </button>
-            </div>
-          )}
+            )}
+            <button
+              onClick={() => {
+                // Force refresh by re-triggering detection
+                editorRef.current?.showSuggestions();
+              }}
+              className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded transition-colors"
+              title="Refresh element detection"
+            >
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </button>
+          </div>
           
         </div>
         
@@ -336,7 +337,7 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
           <button
             onClick={handleManualSave}
             disabled={isSaving}
-            className={`px-4 py-2 text-sm font-medium rounded-lg transition-all flex items-center gap-2 ${
+            className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
               isSaving 
                 ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
                 : saveSuccess
@@ -346,28 +347,11 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
             title="Save now (Ctrl+S)"
           >
             {isSaving ? (
-              <>
-                <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Saving...
-              </>
+'Saving...'
             ) : saveSuccess ? (
-              <>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                Saved!
-              </>
+'Saved!'
             ) : (
-              <>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-                        d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V2" />
-                  </svg>
-                  Save
-                </>
+'Save'
             )}
           </button>
         </div>

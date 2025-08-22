@@ -7,6 +7,7 @@ interface SuggestionPopoverProps {
   onAccept: (match: ElementMatch) => void;
   onReject: (match: ElementMatch) => void;
   onClose: () => void;
+  onLinkAll?: () => void;
   position?: { top: number; left: number };
 }
 
@@ -15,6 +16,7 @@ export function SuggestionPopover({
   onAccept, 
   onReject, 
   onClose,
+  onLinkAll,
   position 
 }: SuggestionPopoverProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -167,7 +169,7 @@ export function SuggestionPopover({
             onClick={() => handleElementClick(group)}
             onMouseEnter={() => setSelectedIndex(index)}
           >
-            <div className="flex-shrink-0 mt-1">
+            <div className="flex-shrink-0 mt-1" title={group.elementType}>
               <CategoryIcon 
                 category={group.elementType} 
                 className="text-lg text-green-600"
@@ -184,9 +186,6 @@ export function SuggestionPopover({
                     {group.mentions.length} mentions
                   </span>
                 )}
-                <span className={`text-xs px-2 py-0.5 rounded-full border ${getCategoryColor(group.elementType)}`}>
-                  {group.elementType}
-                </span>
                 <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 border border-gray-200">
                   {Math.round(group.confidence * 100)}% match
                 </span>
@@ -198,24 +197,8 @@ export function SuggestionPopover({
                 </p>
               )}
               
-              <div className="text-xs text-gray-400 mt-2">
-                Found: {group.mentions.map(m => `"${m.text}"`).join(', ')}
-              </div>
             </div>
 
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                // Reject all mentions of this element
-                group.mentions.forEach(match => onReject(match));
-              }}
-              className="flex-shrink-0 text-gray-400 hover:text-red-600"
-              title="Ignore all mentions"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
           </div>
         ))}
       </div>
@@ -226,8 +209,20 @@ export function SuggestionPopover({
             <svg className="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
-            Click to link element • Esc to close
+            Click to link • Esc to close
           </span>
+          {onLinkAll && (
+            <button
+              onClick={onLinkAll}
+              className="px-2 py-1 text-xs bg-green-600 hover:bg-green-700 text-white rounded transition-colors flex items-center gap-1"
+              title="Link all detected elements"
+            >
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+              </svg>
+              Link All
+            </button>
+          )}
         </div>
       </div>
     </div>

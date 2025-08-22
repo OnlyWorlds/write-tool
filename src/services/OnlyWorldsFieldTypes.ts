@@ -165,7 +165,22 @@ export function analyzeOnlyWorldsField(
     'age', 'level', 'height', 'weight', 'population', 'elevation',
     'charisma', 'coercion', 'competence', 'compassion', 'creativity', 'courage',
     'hitPoints', 'hit_points', 'STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA',
-    'birthDate', 'birth_date', 'foundingDate', 'founding_date', 'amount'
+    'birthDate', 'birth_date', 'foundingDate', 'founding_date', 'amount',
+    // Date fields
+    'start_date', 'startDate', 'end_date', 'endDate', 'formation_date', 'formationDate',
+    'grant_date', 'grantDate', 'revoke_date', 'revokeDate', 'date',
+    // Ability number fields
+    'potency', 'range', 'duration',
+    // Collective number fields
+    'count',
+    // Map number fields  
+    'hierarchy', 'width', 'height', 'depth',
+    // Coordinate fields
+    'x', 'y', 'z',
+    // Other number fields
+    'intensity', 'life_span', 'lifeSpan', 'order',
+    // Gaming stats
+    'challenge_rating', 'challengeRating', 'armor_class', 'armorClass', 'speed'
   ];
   
   if (integerFields.includes(fieldName) || 

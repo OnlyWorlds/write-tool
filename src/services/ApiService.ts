@@ -1,5 +1,5 @@
 import type { Element, WorldMetadata } from '../types/world';
-import { analyzeOnlyWorldsField } from './OnlyWorldsFieldTypes';
+import { analyzeOnlyWorldsField } from './UnifiedFieldTypeService';
 
 const API_BASE_URL = 'https://www.onlyworlds.com/api/worldapi';
 

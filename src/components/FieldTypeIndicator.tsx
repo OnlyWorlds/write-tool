@@ -1,4 +1,4 @@
-import { detectFieldType } from '../services/FieldTypeDetector';
+import { detectFieldType } from '../services/UnifiedFieldTypeService';
 
 interface FieldTypeIndicatorProps {
   fieldName: string;

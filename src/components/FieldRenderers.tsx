@@ -1,7 +1,7 @@
 import { memo, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useWorldContext } from '../contexts/WorldContext';
-import { detectFieldType, type FieldTypeInfo } from '../services/FieldTypeDetector';
+import { detectFieldType, type FieldTypeInfo } from '../services/UnifiedFieldTypeService';
 import { useSidebarStore } from '../stores/uiStore';
 import { ComboBox } from './ComboBox';
 import { TypeManagementService } from '../services/TypeManagementService';

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useWorldContext } from '../contexts/WorldContext';
 import { useSidebarStore, useEditorStore } from '../stores/uiStore';
 import { FieldRenderer } from './FieldRenderers';
-import { detectFieldType } from '../services/FieldTypeDetector';
+import { detectFieldType } from '../services/UnifiedFieldTypeService';
 import { ReverseRelationsPanel } from './ReverseRelationsPanel';
 import { TypeManagementService } from '../services/TypeManagementService';
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { analyzeOnlyWorldsField } from '../OnlyWorldsFieldTypes';
+import { analyzeOnlyWorldsField } from '../UnifiedFieldTypeService';
 
 describe('OnlyWorldsFieldTypes', () => {
   describe('analyzeOnlyWorldsField', () => {

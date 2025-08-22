@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { detectFieldType } from '../FieldTypeDetector';
+import { detectFieldType } from '../UnifiedFieldTypeService';
 
 describe('FieldTypeDetector', () => {
   describe('detectFieldType', () => {

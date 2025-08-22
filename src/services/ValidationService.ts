@@ -1,5 +1,5 @@
 import type { Element } from '../types/world';
-import { analyzeOnlyWorldsField } from './OnlyWorldsFieldTypes';
+import { analyzeOnlyWorldsField } from './UnifiedFieldTypeService';
 
 export interface ValidationError {
   field: string;

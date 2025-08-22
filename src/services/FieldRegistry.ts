@@ -57,6 +57,8 @@ class FieldRegistryClass {
       'variants': 'species',  // Species -> Species
       'carriers': 'species',  // Trait -> Species
       'reproduction': 'construct',  // Species -> Construct
+      'adaptations': 'ability',  // Species -> Ability
+      'nourishment': 'species',  // Species -> Species
       
       // Trait fields
       'traits': 'trait',
@@ -146,6 +148,7 @@ class FieldRegistryClass {
       // Language link fields
       'dialects': 'language',  // Language -> Language
       'spread': 'location',  // Language/Species -> Location
+      'classification': 'construct',  // Language -> Construct
       
       // Map fields
       'parent_map': 'map',  // Map -> Map
@@ -258,7 +261,7 @@ class FieldRegistryClass {
       'parent_institution', 'parent_species', 'anti_trait',
       'parent_law', 'superior_title', 'parent_map', 'body',
       'element_id', 'element_type', 'map_id', 'marker_map', 'parent_narrative',
-      'locus', 'source', 'tradition', 'map', 'system'
+      'locus', 'source', 'tradition', 'map', 'system', 'classification'
     ]);
     
     return singleLinkFields.has(normalized);
@@ -311,7 +314,7 @@ class FieldRegistryClass {
       // Map additional fields
       'markers', 'pins', 'routes', 'boundaries',
       // Species additional fields
-      'predators', 'prey', 'variants', 'reproduction',
+      'predators', 'prey', 'variants', 'reproduction', 'adaptations', 'nourishment',
       // Creature additional field
       'actions',
       // Zone additional field

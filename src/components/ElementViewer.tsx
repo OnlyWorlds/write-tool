@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useWorldContext } from '../contexts/WorldContext';
 import { useElementSections } from '../hooks/useElementSections';
 import { ApiService, type ShowcasePublishRequest } from '../services/ApiService';
-import { detectFieldType } from '../services/FieldTypeDetector';
+import { detectFieldType } from '../services/UnifiedFieldTypeService';
 import { useEditorStore, useSidebarStore } from '../stores/uiStore';
 import { CategoryIcon } from '../utils/categoryIcons';
 import { exportElementToPdf, isPdfExportSupported } from '../utils/pdfExport';

@@ -4,6 +4,7 @@ import { useWorldContext } from '../../contexts/WorldContext';
 import { StoryEditor, type StoryEditorRef } from './StoryEditor';
 import { ElementLinker, type ElementMatch } from './ElementLinker';
 import { SuggestionPopover } from './SuggestionPopover';
+import './ElementHighlights.css';
 import type { Element } from '../../types/world';
 
 interface EnhancedStoryEditorProps {
@@ -21,6 +22,9 @@ export interface EnhancedStoryEditorRef extends StoryEditorRef {
   insertLinkAtCursor: (elementId: string, elementName: string, elementType: string) => void;
   showSuggestions: () => void;
   getSuggestions: () => ElementMatch[];
+  refreshHighlights: () => void;
+  clearHighlights: () => void;
+  setHighlightsEnabled: (enabled: boolean) => void;
 }
 
 export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedStoryEditorProps>(
@@ -35,6 +39,17 @@ export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedSt
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [ignoredMatches, setIgnoredMatches] = useState<Set<string>>(new Set());
     const [popupPosition, setPopupPosition] = useState<{ top: number; left: number } | null>(null);
+    const [highlightsEnabled, setHighlightsEnabled] = useState(false);
+    const [currentMatches, setCurrentMatches] = useState<ElementMatch[]>([]);
+    
+    // Check for CSS Highlights API support on mount
+    useEffect(() => {
+      if (typeof CSS !== 'undefined' && CSS.highlights) {
+        console.log('CSS Custom Highlight API is supported');
+      } else {
+        console.log('CSS Custom Highlight API is NOT supported');
+      }
+    }, []);
 
     // Initialize ElementLinker - re-initialize when element fields change
     useEffect(() => {
@@ -103,7 +118,7 @@ export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedSt
       element.pins,
     ]);
 
-    // Detect elements in content
+    // Detect elements in content (but don't auto-highlight)
     useEffect(() => {
       if (!elementLinker || !debouncedContent) {
         return;
@@ -118,6 +133,7 @@ export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedSt
       });
 
       setSuggestions(filteredMatches);
+      setCurrentMatches(filteredMatches);
       
       // Count unlinked and linked elements
       const unlinkedCount = filteredMatches.filter(match => !match.isLinked).length;
@@ -126,11 +142,142 @@ export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedSt
       // Notify parent with counts
       onDetectionChange?.(unlinkedCount + linkedCount, linkedCount);
     }, [debouncedContent, elementLinker, ignoredMatches, onDetectionChange]);
+    
+    // Manual highlight refresh function
+    const refreshHighlights = () => {
+      if (!highlightsEnabled || !elementLinker || !content) return;
+      
+      const detectedMatches = elementLinker.detectElementMentions(content);
+      const filteredMatches = detectedMatches.filter(match => {
+        const matchKey = `${match.startIndex}-${match.suggestedElement.id}`;
+        return !ignoredMatches.has(matchKey);
+      });
+      
+      setCurrentMatches(filteredMatches);
+      
+      // Apply highlights with proper timing
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          applyCSSSHighlights(filteredMatches);
+        });
+      });
+    };
 
 
     const handleContentChange = (newContent: string) => {
       setContent(newContent);
       onContentChange?.(newContent);
+    };
+    
+    // Apply CSS Custom Highlights API
+    const applyCSSSHighlights = (matches: ElementMatch[]) => {
+      
+      if (!editorContainerRef.current) return;
+      if (!CSS.highlights) return;
+
+      // Clear existing highlights
+      clearCSSHighlights();
+
+      if (matches.length === 0) return;
+
+      // Find the contenteditable element - MDXEditor specific selectors
+      const contentEditable = 
+        editorContainerRef.current.querySelector('.mdxeditor-root-contenteditable') ||
+        editorContainerRef.current.querySelector('.mdxeditor') ||
+        editorContainerRef.current.querySelector('[contenteditable="true"]') ||
+        editorContainerRef.current.querySelector('[role="textbox"]');
+      
+      if (!contentEditable) return;
+
+      // Group matches by linked status
+      const linkedRanges: Range[] = [];
+      const unlinkedRanges: Range[] = [];
+
+      // Create a text node walker
+      const walker = document.createTreeWalker(
+        contentEditable,
+        NodeFilter.SHOW_TEXT,
+        null
+      );
+
+      // Build a map of text content to nodes for faster lookup
+      const textNodes: { node: Node; offset: number; text: string }[] = [];
+      let currentOffset = 0;
+      let node: Node | null;
+      
+      while (node = walker.nextNode()) {
+        const text = node.textContent || '';
+        textNodes.push({ node, offset: currentOffset, text });
+        currentOffset += text.length;
+      }
+
+      // Create ranges for each match
+      matches.forEach(match => {
+        
+        // Try to find the text in the actual DOM
+        const fullText = textNodes.map(n => n.text).join('');
+        const matchText = match.text.toLowerCase();
+        const searchStart = Math.max(0, match.startIndex - 10); // Look a bit before expected position
+        const searchEnd = Math.min(fullText.length, match.endIndex + 10); // Look a bit after
+        const searchText = fullText.substring(searchStart, searchEnd).toLowerCase();
+        
+        // Find the actual position of this text
+        const actualIndex = searchText.indexOf(matchText);
+        if (actualIndex === -1) return;
+        
+        const actualStart = searchStart + actualIndex;
+        const actualEnd = actualStart + match.text.length;
+        
+        // Find the text nodes that contain this match
+        for (const textNode of textNodes) {
+          const nodeEnd = textNode.offset + textNode.text.length;
+          
+          // Check if this node contains part of our match
+          if (actualStart < nodeEnd && actualEnd > textNode.offset) {
+            // Calculate the portion of the match within this node
+            const startInNode = Math.max(0, actualStart - textNode.offset);
+            const endInNode = Math.min(textNode.text.length, actualEnd - textNode.offset);
+            
+            try {
+              const range = document.createRange();
+              range.setStart(textNode.node, startInNode);
+              range.setEnd(textNode.node, endInNode);
+              
+              if (match.isLinked) {
+                linkedRanges.push(range);
+              } else {
+                unlinkedRanges.push(range);
+              }
+              break; // Found the match, move to next
+            } catch (e) {
+              // Silently skip if range creation fails
+            }
+          }
+        }
+      });
+
+      // Create and register highlights
+      try {
+        if (unlinkedRanges.length > 0) {
+          const unlinkedHighlight = new Highlight(...unlinkedRanges);
+          CSS.highlights.set('element-unlinked', unlinkedHighlight);
+        }
+        
+        if (linkedRanges.length > 0) {
+          const linkedHighlight = new Highlight(...linkedRanges);
+          CSS.highlights.set('element-linked', linkedHighlight);
+        }
+      } catch (e) {
+        // Silently fail if highlights can't be applied
+      }
+    };
+    
+    // Clear all CSS highlights
+    const clearCSSHighlights = () => {
+      if (CSS.highlights) {
+        CSS.highlights.delete('element-unlinked');
+        CSS.highlights.delete('element-linked');
+      }
     };
 
     const handleAcceptSuggestion = async (match: ElementMatch) => {
@@ -154,6 +301,11 @@ export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedSt
       setSuggestions(prev => prev.filter(s => s !== match));
       if (suggestions.length <= 1) {
         setShowSuggestions(false);
+      }
+      
+      // Refresh highlights if enabled
+      if (highlightsEnabled) {
+        setTimeout(() => refreshHighlights(), 100);
       }
     };
     
@@ -251,6 +403,16 @@ export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedSt
         }
       },
       getSuggestions: () => suggestions,
+      refreshHighlights,
+      clearHighlights: clearCSSHighlights,
+      setHighlightsEnabled: (enabled: boolean) => {
+        setHighlightsEnabled(enabled);
+        if (enabled) {
+          refreshHighlights();
+        } else {
+          clearCSSHighlights();
+        }
+      },
     }));
 
 

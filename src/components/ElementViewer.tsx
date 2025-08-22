@@ -422,7 +422,7 @@ export function ElementViewer() {
                       <span 
                         className="text-sm text-accent dark:text-blue-400 bg-info-bg dark:bg-blue-900/20 px-3 py-1 rounded-full cursor-help" 
                         data-exclude-from-export
-                        title={`Unsaved changes in: ${unsavedFieldsForElement.map(f => f.fieldName.replace(/_/g, ' ')).join(', ')}`}
+                        title={`unsaved changes in: ${unsavedFieldsForElement.map(f => f.fieldName.replace(/_/g, ' ')).join(', ')}`}
                       >
                         {unsavedFieldsForElement.length} unsaved {unsavedFieldsForElement.length === 1 ? 'change' : 'changes'}
                       </span>
@@ -724,7 +724,7 @@ export function ElementViewer() {
                             <span className="text-xs text-blue-600">edited</span>
                           )}
                           {hasUnsavedEdit && editMode === 'edit' && (
-                            <span className="inline-flex w-2 h-2 bg-amber-500 rounded-full ml-1" title="Unsaved changes"></span>
+                            <span className="inline-flex w-2 h-2 bg-amber-500 rounded-full ml-1" title="unsaved changes"></span>
                           )}
                         </div>
                       </div>
@@ -879,7 +879,7 @@ export function ElementViewer() {
                             <span className="text-xs text-blue-600">edited</span>
                           )}
                           {hasUnsavedEdit && editMode === 'edit' && (
-                            <span className="inline-flex w-2 h-2 bg-amber-500 rounded-full ml-1" title="Unsaved changes"></span>
+                            <span className="inline-flex w-2 h-2 bg-amber-500 rounded-full ml-1" title="unsaved changes"></span>
                           )}
                         </div>
                       </div>

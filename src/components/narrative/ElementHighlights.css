@@ -1,0 +1,24 @@
+/* CSS Custom Highlight API styles for element detection */
+
+/* Unlinked elements - yellow highlight */
+::highlight(element-unlinked) {
+  background-color: rgba(245, 158, 11, 0.25) !important;
+  color: inherit !important;
+}
+
+/* Linked elements - green highlight */
+::highlight(element-linked) {
+  background-color: rgba(16, 185, 129, 0.2) !important;
+  color: inherit !important;
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  ::highlight(element-unlinked) {
+    background-color: rgba(251, 191, 36, 0.3) !important;
+  }
+
+  ::highlight(element-linked) {
+    background-color: rgba(52, 211, 153, 0.25) !important;
+  }
+}

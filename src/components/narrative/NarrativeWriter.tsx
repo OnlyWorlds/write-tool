@@ -1,10 +1,10 @@
-import { useState, useRef, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useWorldContext } from '../../contexts/WorldContext';
 import type { Element } from '../../types/world';
-import { EnhancedStoryEditor, type EnhancedStoryEditorRef } from './EnhancedStoryEditor';
-import { WritingStats } from './WritingStats';
 import { ElementQuickRef } from './ElementQuickRef';
+import { EnhancedStoryEditor, type EnhancedStoryEditorRef } from './EnhancedStoryEditor';
 import './NarrativeWriter.css';
+import { WritingStats } from './WritingStats';
 
 interface NarrativeWriterProps {
   element: Element;
@@ -32,6 +32,7 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
   const [linkedCount, setLinkedCount] = useState(0);
   const [isDirty, setIsDirty] = useState(false);
   const [autosaveEnabled, setAutosaveEnabled] = useState(true);
+  const [highlightsEnabled, setHighlightsEnabled] = useState(false);
   const editorRef = useRef<EnhancedStoryEditorRef>(null);
   const detectionWidgetRef = useRef<HTMLButtonElement>(null);
 
@@ -48,6 +49,10 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
 
   const handleElementInsert = (elementId: string, elementName: string, elementType: string) => {
     editorRef.current?.insertLinkAtCursor(elementId, elementName, elementType);
+    // Refresh highlights after inserting an element
+    if (highlightsEnabled) {
+      setTimeout(() => editorRef.current?.refreshHighlights(), 100);
+    }
   };
   
   const handleElementUnlink = async (elementId: string, elementType: string) => {
@@ -68,11 +73,9 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
     setCurrentElement(updated);
     updateElement(updated);
     
-    // Refresh detection to update visual indicators
-    const editor = editorRef.current;
-    if (editor) {
-      const currentContent = editor.getContent();
-      editor.setContent(currentContent);
+    // Refresh highlights after unlinking
+    if (highlightsEnabled) {
+      setTimeout(() => editorRef.current?.refreshHighlights(), 100);
     }
   };
 
@@ -166,11 +169,9 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
       // Don't modify story content or dirty state since we're only updating fields
     }
     
-    // Refresh detection to update visual indicators
-    const editor = editorRef.current;
-    if (editor) {
-      const currentContent = editor.getContent();
-      editor.setContent(currentContent);
+    // Refresh highlights after unlinking
+    if (highlightsEnabled) {
+      setTimeout(() => editorRef.current?.refreshHighlights(), 100);
     }
   };
   
@@ -224,7 +225,7 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
                 <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M10 2a8 8 0 100 16 8 8 0 000-16zM8 7a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1zm1 4a1 1 0 000 2h2a1 1 0 100-2H9z"/>
                 </svg>
-                <span>Unsaved changes</span>
+                <span>unsaved changes</span>
               </div>
               <button
                 onClick={handleRevertChanges}
@@ -279,24 +280,46 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
               </button>
             )}
             
+          </div>
+          
+          {/* Highlight toggle and refresh */}
+          <div className="flex items-center gap-1 ml-2 px-2 border-l border-gray-300 dark:border-gray-600">
             <button
-              onClick={(e) => {
-                e.stopPropagation();
-                // Force refresh by re-triggering detection without showing popup
-                const editor = editorRef.current;
-                if (editor) {
-                  // Get current content to force re-detection
-                  const content = editor.getContent();
-                  editor.setContent(content);
-                }
+              onClick={() => {
+                const newState = !highlightsEnabled;
+                setHighlightsEnabled(newState);
+                editorRef.current?.setHighlightsEnabled(newState);
               }}
-              className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded transition-colors"
-              title="Refresh element detection"
+              className={`p-1 rounded transition-colors ${
+                highlightsEnabled 
+                  ? 'text-blue-600 bg-blue-100 dark:text-blue-400 dark:bg-blue-900/30' 
+                  : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
+              }`}
+              title={highlightsEnabled ? "Hide element highlights" : "Show element highlights"}
             >
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                  d={highlightsEnabled 
+                    ? "M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                    : "M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                  } 
+                />
               </svg>
             </button>
+            
+            {highlightsEnabled && (
+              <button
+                onClick={() => {
+                  editorRef.current?.refreshHighlights();
+                }}
+                className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded transition-colors"
+                title="Refresh highlights"
+              >
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              </button>
+            )}
           </div>
           
         </div>

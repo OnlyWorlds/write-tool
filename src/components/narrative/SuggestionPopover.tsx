@@ -1,6 +1,6 @@
-import { useEffect, useState, useRef } from 'react';
-import type { ElementMatch } from './ElementLinker';
+import { useEffect, useRef, useState } from 'react';
 import { CategoryIcon } from '../../utils/categoryIcons';
+import type { ElementMatch } from './ElementLinker';
 
 interface SuggestionPopoverProps {
   matches: ElementMatch[];
@@ -137,7 +137,7 @@ export function SuggestionPopover({
         <div className="flex items-center justify-between">
           <div>
             <span className="text-sm font-medium text-gray-700">
-              Available Elements to Link
+              Detected Elements
             </span>
             <div className="text-xs text-gray-500 mt-0.5">
               {uniqueElements.length} unique element{uniqueElements.length !== 1 ? 's' : ''} detected ({unlinkedMatches.length} total mention{unlinkedMatches.length !== 1 ? 's' : ''})

@@ -226,9 +226,9 @@ export function ElementQuickRef({ narrative, onElementInsert, onElementUnlink }:
   return (
     <div className="w-80 bg-gray-50 dark:bg-dark-bg-secondary border-l border-gray-200 dark:border-dark-bg-border flex flex-col">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-gray-200 dark:border-dark-bg-border bg-white dark:bg-dark-bg-tertiary">
+      <div className="px-4 py-2 border-b border-gray-200 dark:border-dark-bg-border bg-white dark:bg-dark-bg-tertiary">
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-gray-800 dark:text-gray-200">Linked Elements</h3>
+          <h3 className="text-sm font-medium text-gray-800 dark:text-gray-200">Linked Elements</h3>
           <button
             onClick={() => setIsCollapsed(true)}
             className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400"
@@ -272,7 +272,7 @@ export function ElementQuickRef({ narrative, onElementInsert, onElementUnlink }:
             type="checkbox"
             checked={showOnlyInText}
             onChange={(e) => setShowOnlyInText(e.target.checked)}
-            className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
+            className="rounded border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-dark-bg-primary text-blue-600 focus:ring-blue-500"
           />
           <span>Show only elements in text</span>
         </label>
@@ -312,12 +312,6 @@ export function ElementQuickRef({ narrative, onElementInsert, onElementUnlink }:
         )}
       </div>
 
-      {/* Insert tip */}
-      <div className="p-3 border-t border-gray-200 dark:border-dark-bg-border bg-gray-100 dark:bg-dark-bg-tertiary">
-        <p className="text-xs text-gray-600 dark:text-gray-400">
-          <span className="font-medium">Tip:</span> Click to insert link • Hover and click − to unlink • Green = in text
-        </p>
-      </div>
     </div>
   );
 }

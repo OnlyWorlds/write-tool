@@ -140,7 +140,21 @@
   background-color: #475569 !important;
 }
 
-/* Toolbar toggle buttons - make bold/italic/underline white */
+/* Toolbar toggle buttons - make bold/italic/underline white in both light and dark modes */
+.narrative-editor-wrapper [class*="_toggleItem"] {
+  color: #ffffff !important; /* Make text white in light mode too */
+}
+
+.narrative-editor-wrapper [class*="_toggleItem"][data-state="on"] {
+  background-color: #60a5fa !important; /* Blue when active in light mode */
+  color: #ffffff !important; /* White when active */
+}
+
+.narrative-editor-wrapper [class*="_toggleItem"]:hover {
+  background-color: #93bbfc !important; /* Light blue on hover in light mode */
+  color: #ffffff !important; /* White on hover */
+}
+
 .dark .narrative-editor-wrapper [class*="_toggleItem"] {
   color: #f3f4f6 !important; /* Make text white */
 }

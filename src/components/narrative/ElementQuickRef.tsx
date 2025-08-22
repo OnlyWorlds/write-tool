@@ -45,11 +45,6 @@ function LinkedElementItem({ element, isInText, mentionCount, onInsert, onUnlink
                 <span className="ml-auto mr-2 text-xs text-gray-500 dark:text-gray-400">({mentionCount})</span>
               )}
             </span>
-            {isInText && (
-              <span className="flex-shrink-0 px-1.5 py-0.5 text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded" title="Already mentioned in text">
-                in text
-              </span>
-            )}
           </div>
         </button>
         
@@ -159,22 +154,32 @@ export function ElementQuickRef({ narrative, onElementInsert, onElementUnlink }:
     return linked;
   }, [narrative, elements]);
 
-  // Check which elements are mentioned in the text
+  // Check which elements are mentioned in the text (either as links or plain text)
   const elementsInText = useMemo(() => {
     const textIds = new Set<string>();
     const storyText = narrative.story || '';
     
-    // Match markdown links with element references like [Name](type:id)
-    const linkRegex = /\[([^\]]+)\]\(([^):]+):([^)]+)\)/g;
-    let match;
+    if (!storyText) return textIds;
     
-    while ((match = linkRegex.exec(storyText)) !== null) {
-      const elementId = match[3];
-      textIds.add(elementId);
-    }
+    // Check each linked element to see if it appears in the text
+    linkedElements.forEach(({ element }) => {
+      // Check for markdown links
+      const linkPattern = new RegExp(`\\[[^\\]]*\\]\\([^):]+:${element.id}\\)`, 'g');
+      if (storyText.match(linkPattern)) {
+        textIds.add(element.id);
+        return; // Already found, no need to check plain text
+      }
+      
+      // Check for plain text mentions (using same strict pattern as counting)
+      const nameEscaped = element.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const namePattern = new RegExp(`(?<![a-zA-Z0-9])${nameEscaped}(?![a-zA-Z0-9])`, 'gi');
+      if (storyText.match(namePattern)) {
+        textIds.add(element.id);
+      }
+    });
     
     return textIds;
-  }, [narrative.story]);
+  }, [narrative.story, linkedElements]);
 
   // Compute mention counts for each element
   const elementMentionCounts = useMemo(() => {
@@ -299,15 +304,17 @@ export function ElementQuickRef({ narrative, onElementInsert, onElementUnlink }:
   return (
     <div className="w-80 bg-gray-50 dark:bg-dark-bg-secondary border-l border-gray-200 dark:border-dark-bg-border flex flex-col">
       {/* Header */}
-      <div className="px-4 py-1 border-b border-gray-200 dark:border-dark-bg-border bg-white dark:bg-dark-bg-tertiary">
+      <div className="px-3 py-2 border-b border-gray-200 dark:border-dark-bg-border bg-white dark:bg-dark-bg-tertiary">
         <div className="flex items-center justify-between">
-          <h3 className="text-xs font-normal text-gray-800 dark:text-gray-200" title="These are elements linked to fields in the 'Involves' section">Linked Elements</h3>
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300" title="Elements linked to fields in the 'Involves' section">
+            Linked Elements
+          </h3>
           <button
             onClick={() => setIsCollapsed(true)}
-            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400"
+            className="p-1 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors"
             title="Collapse panel"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </button>
@@ -315,7 +322,7 @@ export function ElementQuickRef({ narrative, onElementInsert, onElementUnlink }:
       </div>
 
       {/* Stats bar */}
-      <div className="px-4 py-2 bg-white dark:bg-dark-bg-tertiary border-b border-gray-200 dark:border-dark-bg-border">
+      <div className="px-3 py-1.5 bg-gray-100 dark:bg-dark-bg-tertiary border-b border-gray-200 dark:border-dark-bg-border">
         <div className="flex items-center justify-between text-xs">
           <div className="flex items-center gap-3">
             <span className="text-gray-600 dark:text-gray-400">
@@ -332,12 +339,12 @@ export function ElementQuickRef({ narrative, onElementInsert, onElementUnlink }:
       </div>
 
       {/* Filter and Sort dropdowns */}
-      <div className="p-3 bg-white dark:bg-dark-bg-tertiary border-b border-gray-200 dark:border-dark-bg-border">
+      <div className="p-2 bg-white dark:bg-dark-bg-tertiary border-b border-gray-200 dark:border-dark-bg-border">
         <div className="flex gap-2">
           <select
             value={filterMode}
             onChange={(e) => setFilterMode(e.target.value as 'all' | 'in-text' | 'not-in-text')}
-            className="flex-1 px-3 py-2 text-sm bg-white dark:bg-dark-bg-secondary border border-gray-300 dark:border-dark-bg-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-200"
+            className="flex-1 px-2 py-1 text-xs bg-white dark:bg-dark-bg-secondary border border-gray-300 dark:border-dark-bg-border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-200"
           >
             <option value="all">Show all</option>
             <option value="in-text">Show in text</option>
@@ -347,7 +354,7 @@ export function ElementQuickRef({ narrative, onElementInsert, onElementUnlink }:
           <select
             value={sortMode}
             onChange={(e) => setSortMode(e.target.value as 'count' | 'alphabet' | 'category')}
-            className="flex-1 px-3 py-2 text-sm bg-white dark:bg-dark-bg-secondary border border-gray-300 dark:border-dark-bg-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-200"
+            className="flex-1 px-2 py-1 text-xs bg-white dark:bg-dark-bg-secondary border border-gray-300 dark:border-dark-bg-border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-200"
           >
             <option value="count">Sort by count</option>
             <option value="alphabet">Sort by name</option>

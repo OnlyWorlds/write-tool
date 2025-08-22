@@ -9,6 +9,7 @@ interface StoryEditorProps {
   onSave: (content: string) => Promise<boolean>;
   onContentChange?: (content: string) => void;
   className?: string;
+  autosaveEnabled?: boolean;
 }
 
 export interface StoryEditorRef {
@@ -19,7 +20,7 @@ export interface StoryEditorRef {
 }
 
 export const StoryEditor = forwardRef<StoryEditorRef, StoryEditorProps>(
-  ({ element, onSave, onContentChange, className = '' }, ref) => {
+  ({ element, onSave, onContentChange, className = '', autosaveEnabled = true }, ref) => {
     const editorRef = useRef<MDXEditorMethods>(null);
     const [content, setContent] = useState(element.story || '');
     const [debouncedContent] = useDebounce(content, 30000); // 30 seconds
@@ -39,7 +40,7 @@ export const StoryEditor = forwardRef<StoryEditorRef, StoryEditorProps>(
 
     // Auto-save effect
     useEffect(() => {
-      if (debouncedContent && debouncedContent !== lastSavedContent) {
+      if (autosaveEnabled && debouncedContent && debouncedContent !== lastSavedContent) {
         setSaveStatus('saving');
         onSave(debouncedContent)
           .then((success) => {
@@ -63,7 +64,7 @@ export const StoryEditor = forwardRef<StoryEditorRef, StoryEditorProps>(
             console.error('Auto-save failed:', error);
           });
       }
-    }, [debouncedContent, element.id, onSave, lastSavedContent]);
+    }, [debouncedContent, element.id, onSave, lastSavedContent, autosaveEnabled]);
 
     // Check for localStorage backup on mount
     useEffect(() => {

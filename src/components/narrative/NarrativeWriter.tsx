@@ -31,7 +31,9 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
   const [detectedCount, setDetectedCount] = useState(0);
   const [linkedCount, setLinkedCount] = useState(0);
   const [isDirty, setIsDirty] = useState(false);
+  const [autosaveEnabled, setAutosaveEnabled] = useState(true);
   const editorRef = useRef<EnhancedStoryEditorRef>(null);
+  const detectionWidgetRef = useRef<HTMLButtonElement>(null);
 
   const handleSave = async (newContent: string) => {
     const success = await saveElement(currentElement.id, { story: newContent });
@@ -46,7 +48,6 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
 
   const handleElementInsert = (elementId: string, elementName: string, elementType: string) => {
     editorRef.current?.insertLinkAtCursor(elementId, elementName, elementType);
-    editorRef.current?.focus();
   };
   
   const handleElementUnlink = async (elementId: string, elementType: string) => {
@@ -61,47 +62,18 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
     const updatedIds = currentIds.filter((id: string) => id !== elementId);
     const updated = { ...currentElement, [fieldName]: updatedIds };
     
-    // Also remove markdown links from the story text
-    const currentContent = editorRef.current?.getContent() || content;
-    if (currentContent) {
-      // Remove all markdown links pointing to this element
-      // Pattern: [anything](elementType:elementId)
-      // Escape special regex characters in elementId
-      const escapedId = elementId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const linkPattern = new RegExp(`\\[([^\\]]+)\\]\\(${elementType}:${escapedId}\\)`, 'g');
-      const newContent = currentContent.replace(linkPattern, '$1'); // Replace with just the link text
-      
-      // Update the editor content
-      editorRef.current?.setContent(newContent);
-      setContent(newContent);
-      
-      // Save draft to localStorage
-      localStorage.setItem(`narrative_draft_${currentElement.id}`, newContent);
-      
-      // Mark as dirty since content changed
-      setIsDirty(newContent !== element.story);
-      
-      // Update current element with new story content
-      updated.story = newContent;
-      
-      // Save both field update and story update
-      const success = await saveElement(currentElement.id, { 
-        [fieldName]: updatedIds,
-        story: newContent 
-      });
-      
-      if (success) {
-        // Clear dirty state after successful save
-        setIsDirty(false);
-        localStorage.removeItem(`narrative_draft_${currentElement.id}`);
-      }
-    } else {
-      // Just save the field update if no content
-      await saveElement(currentElement.id, { [fieldName]: updatedIds });
-    }
+    // Save the field update (no need to modify story content since we're using visual indicators only)
+    await saveElement(currentElement.id, { [fieldName]: updatedIds });
     
     setCurrentElement(updated);
     updateElement(updated);
+    
+    // Refresh detection to update visual indicators
+    const editor = editorRef.current;
+    if (editor) {
+      const currentContent = editor.getContent();
+      editor.setContent(currentContent);
+    }
   };
 
   const handleManualSave = async () => {
@@ -165,8 +137,7 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
       elementGroups.get(id)!.push(suggestion);
     });
     
-    // Process each unique element
-    let updatedContent = editorRef.current?.getContent() || content;
+    // Process each unique element - just add to fields, don't modify text
     const fieldsToUpdate: Record<string, string[]> = {};
     
     for (const [elementId, mentions] of elementGroups) {
@@ -182,40 +153,25 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
           }
           fieldsToUpdate[fieldName].push(elementId);
         }
-        
-        // Replace all mentions with markdown links (process in reverse order to maintain positions)
-        const sortedMentions = [...mentions].sort((a, b) => b.startIndex - a.startIndex);
-        for (const mention of sortedMentions) {
-          const beforeMatch = updatedContent.substring(0, mention.startIndex);
-          const afterMatch = updatedContent.substring(mention.endIndex);
-          const link = `[${mention.text}](${mention.elementType}:${elementId})`;
-          updatedContent = beforeMatch + link + afterMatch;
-        }
       }
     }
     
-    // Update the editor content with all links
-    if (updatedContent !== content) {
-      editorRef.current?.setContent(updatedContent);
-      setContent(updatedContent);
-      localStorage.setItem(`narrative_draft_${currentElement.id}`, updatedContent);
-      setIsDirty(true);
-    }
-    
     // Update all fields and save
-    const updates = { ...fieldsToUpdate, story: updatedContent };
-    const newElement = { ...currentElement, ...fieldsToUpdate, story: updatedContent };
+    const newElement = { ...currentElement, ...fieldsToUpdate };
     setCurrentElement(newElement);
     updateElement(newElement);
     
-    const success = await saveElement(currentElement.id, updates);
+    const success = await saveElement(currentElement.id, fieldsToUpdate);
     if (success) {
-      setIsDirty(false);
-      localStorage.removeItem(`narrative_draft_${currentElement.id}`);
+      // Don't modify story content or dirty state since we're only updating fields
     }
     
-    // Refresh detection
-    editorRef.current?.showSuggestions();
+    // Refresh detection to update visual indicators
+    const editor = editorRef.current;
+    if (editor) {
+      const currentContent = editor.getContent();
+      editor.setContent(currentContent);
+    }
   };
   
   // Helper to get the field name for a category
@@ -248,7 +204,6 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
   };
   
   const handleFieldUpdate = async (fieldName: string, value: any) => {
-    console.log('[NarrativeWriter] Field update:', fieldName, value);
     const updated = { ...currentElement, [fieldName]: value };
     setCurrentElement(updated);
     updateElement(updated);
@@ -283,26 +238,57 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
             </div>
           )}
           
-          {/* Element detection widget */}
+          {/* Element detection widget - Enhanced with inline badges */}
           <div className="flex items-center gap-1">
+            {/* Show linked elements */}
+            {linkedCount > 0 && (
+              <div className="flex items-center gap-1 px-2 py-1 text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span>{linkedCount} linked</span>
+              </div>
+            )}
+            
+            {/* Show unlinked elements with action */}
             {detectedCount - linkedCount > 0 && (
               <button
+                ref={detectionWidgetRef}
                 onClick={handleShowSuggestions}
-                className="px-2 py-1 text-xs bg-green-100 dark:bg-green-900/30 hover:bg-green-200 dark:hover:bg-green-900/40 text-green-800 dark:text-green-300 rounded transition-colors flex items-center gap-1"
+                className="px-2 py-1 text-xs bg-yellow-100 dark:bg-yellow-900/30 hover:bg-yellow-200 dark:hover:bg-yellow-900/40 text-yellow-800 dark:text-yellow-300 rounded transition-colors flex items-center gap-1"
                 title="View available elements to link"
               >
+                <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                <span className="font-medium">
+                  {detectedCount - linkedCount} unlinked
+                </span>
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
-                <span className="font-medium">
-                  {detectedCount - linkedCount} elements detected
-                </span>
               </button>
             )}
+            
+            {/* Quick link all button */}
+            {detectedCount - linkedCount > 0 && (
+              <button
+                onClick={handleLinkAll}
+                className="p-1 text-yellow-600 hover:text-yellow-700 dark:text-yellow-400 dark:hover:text-yellow-300 rounded transition-colors"
+                title="Link all detected elements"
+              >
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                </svg>
+              </button>
+            )}
+            
             <button
-              onClick={() => {
-                // Force refresh by re-triggering detection
-                editorRef.current?.showSuggestions();
+              onClick={(e) => {
+                e.stopPropagation();
+                // Force refresh by re-triggering detection without showing popup
+                const editor = editorRef.current;
+                if (editor) {
+                  // Get current content to force re-detection
+                  const content = editor.getContent();
+                  editor.setContent(content);
+                }
               }}
               className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded transition-colors"
               title="Refresh element detection"
@@ -316,6 +302,19 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
         </div>
         
         <div className="flex items-center gap-2">
+          {/* Autosave toggle */}
+          <div className="flex items-center gap-2">
+            <label className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={autosaveEnabled}
+                onChange={(e) => setAutosaveEnabled(e.target.checked)}
+                className="w-3 h-3 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 dark:focus:ring-green-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+              />
+              <span>Auto-save</span>
+            </label>
+          </div>
+          
           <button
             onClick={toggleFullscreen}
             className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
@@ -377,6 +376,8 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
             onDetectionChange={handleDetectionChange}
             onFieldUpdate={handleFieldUpdate}
             className="h-full"
+            popupAnchorRef={detectionWidgetRef}
+            autosaveEnabled={autosaveEnabled}
           />
         </div>
 
@@ -392,7 +393,12 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
 
       {/* Footer */}
       <div className="flex-shrink-0 px-6 py-2 border-t border-gray-200 dark:border-dark-bg-border bg-gray-50 dark:bg-dark-bg-secondary text-xs text-gray-500 dark:text-gray-400">
-        <span>Auto-save every 30 seconds • Last saved content backed up to browser storage</span>
+        <span>
+          {autosaveEnabled 
+            ? "Auto-save every 30 seconds • Last saved content backed up to browser storage"
+            : "Auto-save disabled • Content backed up to browser storage • Use Save button to save changes"
+          }
+        </span>
       </div>
     </div>
   );

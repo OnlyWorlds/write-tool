@@ -4,9 +4,7 @@ import { useWorldContext } from '../../contexts/WorldContext';
 import { StoryEditor, type StoryEditorRef } from './StoryEditor';
 import { ElementLinker, type ElementMatch } from './ElementLinker';
 import { SuggestionPopover } from './SuggestionPopover';
-// import { ElementDetectionLayer } from './ElementDetectionLayer'; // Commented out - using direct DOM manipulation instead
 import type { Element } from '../../types/world';
-import './ElementDetection.css';
 
 interface EnhancedStoryEditorProps {
   element: Element;
@@ -15,6 +13,8 @@ interface EnhancedStoryEditorProps {
   onDetectionChange?: (detected: number, linked: number) => void;
   onFieldUpdate?: (fieldName: string, value: any) => void;
   className?: string;
+  popupAnchorRef?: React.RefObject<HTMLElement>;
+  autosaveEnabled?: boolean;
 }
 
 export interface EnhancedStoryEditorRef extends StoryEditorRef {
@@ -24,7 +24,7 @@ export interface EnhancedStoryEditorRef extends StoryEditorRef {
 }
 
 export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedStoryEditorProps>(
-  ({ element, onSave, onContentChange, onDetectionChange, onFieldUpdate, className = '' }, ref) => {
+  ({ element, onSave, onContentChange, onDetectionChange, onFieldUpdate, className = '', popupAnchorRef, autosaveEnabled = true }, ref) => {
     const { elements } = useWorldContext();
     const storyEditorRef = useRef<StoryEditorRef>(null);
     const editorContainerRef = useRef<HTMLDivElement>(null);
@@ -34,6 +34,7 @@ export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedSt
     const [suggestions, setSuggestions] = useState<ElementMatch[]>([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [ignoredMatches, setIgnoredMatches] = useState<Set<string>>(new Set());
+    const [popupPosition, setPopupPosition] = useState<{ top: number; left: number } | null>(null);
 
     // Initialize ElementLinker - re-initialize when element fields change
     useEffect(() => {
@@ -70,14 +71,7 @@ export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedSt
         ...(element.parent_narrative || element.parentNarrativeId ? [element.parent_narrative || element.parentNarrativeId] : []),
       ];
       
-      console.log('[DEBUG] Narrative element fields:', {
-        events: element.events,
-        characters: element.characters,
-        locations: element.locations,
-        allFields: Object.keys(element),
-      });
-      console.log('[DEBUG] Collected linkedIds:', linkedIds);
-      console.log('[DEBUG] LinkedIds count:', linkedIds.length);
+      // Initialize ElementLinker with collected linked IDs
       
       const linker = new ElementLinker(elements, linkedIds);
       setElementLinker(linker);
@@ -109,9 +103,11 @@ export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedSt
       element.pins,
     ]);
 
-    // Detect elements in content and apply visual indicators
+    // Detect elements in content
     useEffect(() => {
-      if (!elementLinker || !debouncedContent) return;
+      if (!elementLinker || !debouncedContent) {
+        return;
+      }
 
       const detectedMatches = elementLinker.detectElementMentions(debouncedContent);
       
@@ -129,50 +125,8 @@ export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedSt
       
       // Notify parent with counts
       onDetectionChange?.(unlinkedCount + linkedCount, linkedCount);
-      
-      // Apply visual indicators to detected text spans
-      setTimeout(() => applyVisualIndicators(filteredMatches), 100);
-    }, [debouncedContent, elementLinker, ignoredMatches, element, onDetectionChange]);
+    }, [debouncedContent, elementLinker, ignoredMatches, onDetectionChange]);
 
-    // Handle clicks on markdown links for navigation
-    useEffect(() => {
-      if (!editorContainerRef.current) return;
-
-      const handleLinkClick = (e: MouseEvent) => {
-        const target = e.target as HTMLElement;
-        
-        // Check if clicked element is a link with our special format
-        if (target.tagName === 'A' && target.getAttribute('href')?.includes(':')) {
-          e.preventDefault();
-          
-          const href = target.getAttribute('href') || '';
-          const [category, elementId] = href.split(':');
-          
-          if ((e.ctrlKey || e.metaKey) && elementId) {
-            // Navigate to the element
-            const targetElement = elements.get(elementId);
-            if (targetElement) {
-              // Open element in new tab or navigate
-              const elementUrl = `/browse-tool/element/${elementId}`;
-              if (e.shiftKey) {
-                // Shift+Ctrl+Click opens in new tab
-                window.open(elementUrl, '_blank');
-              } else {
-                // Ctrl+Click navigates in same tab
-                window.location.href = elementUrl;
-              }
-            }
-          }
-        }
-      };
-
-      const container = editorContainerRef.current;
-      container.addEventListener('click', handleLinkClick);
-      
-      return () => {
-        container.removeEventListener('click', handleLinkClick);
-      };
-    }, [elements]);
 
     const handleContentChange = (newContent: string) => {
       setContent(newContent);
@@ -182,19 +136,9 @@ export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedSt
     const handleAcceptSuggestion = async (match: ElementMatch) => {
       if (!elementLinker) return;
 
-      // Only insert a link if the element is not already linked
+      // Only link if the element is not already linked
       if (!match.isLinked) {
-        // Replace the text with a markdown link
-        const currentContent = storyEditorRef.current?.getContent() || content;
-        const beforeMatch = currentContent.substring(0, match.startIndex);
-        const afterMatch = currentContent.substring(match.endIndex);
-        const link = elementLinker.createMarkdownLink(match.suggestedElement, match.elementType);
-        
-        const newContent = beforeMatch + link + afterMatch;
-        storyEditorRef.current?.setContent(newContent);
-        handleContentChange(newContent);
-        
-        // Also add to the appropriate multilink field
+        // Don't modify the text content - just add to the appropriate multilink field
         const fieldName = getCategoryFieldName(match.elementType);
         if (fieldName && onFieldUpdate) {
           const currentIds = element[fieldName] || [];
@@ -258,10 +202,28 @@ export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedSt
     const insertLinkAtCursor = (elementId: string, elementName: string, elementType: string) => {
       if (!elementLinker || !storyEditorRef.current) return;
 
-      const link = `[${elementName}](${elementType}:${elementId})`;
+      // Insert just the element name as plain text instead of markdown link
+      storyEditorRef.current.insertMarkdown(elementName);
       
-      // Use MDXEditor's insertMarkdown method to insert at cursor position
-      storyEditorRef.current.insertMarkdown(link);
+      // Place cursor at end of document as a fallback since precise positioning is complex
+      setTimeout(() => {
+        if (editorContainerRef.current) {
+          const contentEditable = editorContainerRef.current.querySelector('[contenteditable="true"]');
+          if (contentEditable) {
+            contentEditable.focus();
+            
+            // Move cursor to end of content
+            const selection = window.getSelection();
+            if (selection) {
+              const range = document.createRange();
+              range.selectNodeContents(contentEditable);
+              range.collapse(false); // Collapse to end
+              selection.removeAllRanges();
+              selection.addRange(range);
+            }
+          }
+        }
+      }, 10);
       
       // Get the updated content and notify parent
       const newContent = storyEditorRef.current.getContent();
@@ -277,146 +239,50 @@ export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedSt
       },
       focus: () => storyEditorRef.current?.focus(),
       insertLinkAtCursor,
-      showSuggestions: () => setShowSuggestions(true),
+      showSuggestions: () => {
+        setShowSuggestions(true);
+        // Calculate position when showing
+        if (popupAnchorRef?.current) {
+          const rect = popupAnchorRef.current.getBoundingClientRect();
+          setPopupPosition({
+            top: rect.bottom + 8,
+            left: rect.left
+          });
+        }
+      },
       getSuggestions: () => suggestions,
     }));
 
-    // Apply visual indicators to detected elements in the editor
-    const applyVisualIndicators = (matches: ElementMatch[]) => {
-      if (!editorContainerRef.current) return;
-      
-      // Remove existing indicators
-      const existingIndicators = editorContainerRef.current.querySelectorAll('.element-highlight-wrapper');
-      existingIndicators.forEach(el => {
-        const textNode = document.createTextNode(el.textContent || '');
-        el.parentNode?.replaceChild(textNode, el);
-      });
-      
-      const contentEditable = editorContainerRef.current.querySelector('[contenteditable="true"]');
-      if (!contentEditable) return;
-      
-      // Sort matches by position (reverse order to maintain positions)
-      const sortedMatches = [...matches].sort((a, b) => b.startIndex - a.startIndex);
-      
-      sortedMatches.forEach(match => {
-        const walker = document.createTreeWalker(
-          contentEditable,
-          NodeFilter.SHOW_TEXT,
-          null
-        );
-        
-        let currentOffset = 0;
-        let node: Node | null;
-        
-        while (node = walker.nextNode()) {
-          const textContent = node.textContent || '';
-          const nodeLength = textContent.length;
-          
-          // Check if this node contains our match
-          if (currentOffset <= match.startIndex && currentOffset + nodeLength >= match.endIndex) {
-            const startOffset = match.startIndex - currentOffset;
-            const endOffset = match.endIndex - currentOffset;
-            
-            // Skip if this is already inside a link
-            const parent = node.parentElement;
-            if (parent?.tagName === 'A') break;
-            
-            try {
-              // Split the text node and wrap the matched text
-              const textNode = node as Text;
-              const beforeText = textContent.substring(0, startOffset);
-              const matchedText = textContent.substring(startOffset, endOffset);
-              const afterText = textContent.substring(endOffset);
-              
-              const wrapper = document.createElement('span');
-              wrapper.className = `element-highlight-wrapper ${match.isLinked ? 'element-detected-linked' : 'element-detected-unlinked'}`;
-              wrapper.textContent = matchedText;
-              wrapper.dataset.elementId = match.suggestedElement.id;
-              wrapper.dataset.elementType = match.elementType;
-              wrapper.style.cursor = 'pointer';
-              
-              // Add click handler
-              wrapper.addEventListener('click', (e) => {
-                if ((e.ctrlKey || e.metaKey) && match.isLinked) {
-                  e.preventDefault();
-                  const elementUrl = `/browse-tool/element/${match.suggestedElement.id}`;
-                  if (e.shiftKey) {
-                    window.open(elementUrl, '_blank');
-                  } else {
-                    window.location.href = elementUrl;
-                  }
-                }
-              });
-              
-              const parent = textNode.parentNode;
-              if (parent) {
-                const beforeNode = document.createTextNode(beforeText);
-                const afterNode = document.createTextNode(afterText);
-                
-                parent.replaceChild(afterNode, textNode);
-                parent.insertBefore(wrapper, afterNode);
-                parent.insertBefore(beforeNode, wrapper);
-              }
-            } catch (e) {
-              console.warn('Could not apply visual indicator:', e);
-            }
-            
-            break;
-          }
-          
-          currentOffset += nodeLength;
-        }
-      });
-    };
 
-    const handleElementDetectionClick = (match: ElementMatch, event: React.MouseEvent) => {
-      // Handle Ctrl+Click for navigation
-      if ((event.ctrlKey || event.metaKey) && match.isLinked) {
-        event.preventDefault();
-        const elementUrl = `/browse-tool/element/${match.suggestedElement.id}`;
-        if (event.shiftKey) {
-          // Shift+Ctrl+Click opens in new tab
-          window.open(elementUrl, '_blank');
-        } else {
-          // Ctrl+Click navigates in same tab
-          window.location.href = elementUrl;
-        }
-      } else if (!match.isLinked) {
-        // Regular click on unlinked element shows linking option
-        handleAcceptSuggestion(match);
-      }
-    };
+
 
     return (
-      <div ref={editorContainerRef} className={`relative ${className}`}>
+      <div ref={editorContainerRef} className={`relative ${className}`} style={{ position: 'relative' }}>
         <StoryEditor
           ref={storyEditorRef}
           element={element}
           onSave={onSave}
           onContentChange={handleContentChange}
+          autosaveEnabled={autosaveEnabled}
         />
-        
-        {/* Visual indicators overlay - commented out in favor of direct DOM manipulation
-        <ElementDetectionLayer
-          content={content}
-          detectedElements={suggestions}
-          onElementClick={handleElementDetectionClick}
-          editorRef={editorContainerRef}
-        /> */}
 
-        {showSuggestions && suggestions.length > 0 && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
-            <div className="pointer-events-auto">
+        {showSuggestions && suggestions.length > 0 && popupPosition && (
+          <div className="fixed inset-0 z-50 pointer-events-none">
+            <div className="pointer-events-auto absolute" style={{ top: popupPosition.top, left: popupPosition.left }}>
               <SuggestionPopover
                 matches={suggestions}
                 onAccept={handleAcceptSuggestion}
                 onReject={handleRejectSuggestion}
-                onClose={() => setShowSuggestions(false)}
+                onClose={() => {
+                  setShowSuggestions(false);
+                  setPopupPosition(null);
+                }}
                 onLinkAll={() => {
                   // Link all unlinked suggestions
                   const unlinkedSuggestions = suggestions.filter(s => !s.isLinked);
                   unlinkedSuggestions.forEach(suggestion => handleAcceptSuggestion(suggestion));
                   setShowSuggestions(false);
+                  setPopupPosition(null);
                 }}
               />
             </div>

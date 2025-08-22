@@ -26,8 +26,8 @@ export class ElementLinker {
     this.linkedElements = new Set(linkedElementIds);
     this.fuseInstances = new Map();
     
-    console.log('[ElementLinker] Initialized with linkedElementIds:', linkedElementIds);
-    console.log('[ElementLinker] LinkedElements Set size:', this.linkedElements.size);
+  //  console.log('[ElementLinker] Initialized with linkedElementIds:', linkedElementIds);
+  //  console.log('[ElementLinker] LinkedElements Set size:', this.linkedElements.size);
     
     this.initializeFuseInstances();
   }

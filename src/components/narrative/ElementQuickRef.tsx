@@ -48,20 +48,37 @@ function LinkedElementItem({ element, isInText, onInsert, onUnlink }: LinkedElem
           </div>
         </button>
         
-        {onUnlink && (
+        <div className="flex items-center opacity-0 group-hover:opacity-100">
+          {/* Go to element button */}
           <button
             onClick={(e) => {
               e.stopPropagation();
-              onUnlink();
+              const elementUrl = `/browse-tool/element/${element.id}`;
+              window.open(elementUrl, '_blank');
             }}
-            className="p-2 text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors opacity-0 group-hover:opacity-100"
-            title="Unlink from narrative"
+            className="p-2 text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors"
+            title="Open element in new tab"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
             </svg>
           </button>
-        )}
+          
+          {onUnlink && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onUnlink();
+              }}
+              className="p-2 text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+              title="Unlink from narrative"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+              </svg>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Hover preview */}
@@ -213,7 +230,7 @@ export function ElementQuickRef({ narrative, onElementInsert, onElementUnlink }:
       {/* Header */}
       <div className="px-4 py-1 border-b border-gray-200 dark:border-dark-bg-border bg-white dark:bg-dark-bg-tertiary">
         <div className="flex items-center justify-between">
-          <h3 className="text-xs font-normal text-gray-800 dark:text-gray-200">Linked Elements</h3>
+          <h3 className="text-xs font-normal text-gray-800 dark:text-gray-200" title="These are elements linked to fields in the 'Involves' section">Linked Elements</h3>
           <button
             onClick={() => setIsCollapsed(true)}
             className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400"

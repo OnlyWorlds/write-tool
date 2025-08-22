@@ -229,7 +229,7 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
   };
 
   return (
-    <div className={`narrative-editor-wrapper bg-white dark:bg-dark-bg-primary flex flex-col ${isFullscreen ? 'fixed inset-0 z-50' : 'relative h-[calc(100vh-12rem)]'}`}>
+    <div className={`narrative-editor-wrapper bg-white dark:bg-dark-bg-primary flex flex-col ${isFullscreen ? 'fixed inset-0 z-50' : 'relative h-[600px]'}`}>
       {/* Header - Compact toolbar (sticky in write mode) */}
       <div className="flex-shrink-0 flex items-center justify-between px-6 py-2 border-b border-gray-200 dark:border-dark-bg-border bg-gradient-to-r from-green-50 to-blue-50 dark:from-dark-bg-secondary dark:to-dark-bg-tertiary shadow-sm">
         <div className="flex items-center gap-4">

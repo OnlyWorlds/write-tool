@@ -179,5 +179,5 @@
 
 /* Simple approach - let MDXEditor fill container and ensure contenteditable expands */
 .narrative-editor-wrapper .mdxeditor [contenteditable="true"] {
-  min-height: calc(100vh - 300px) !important;
+  min-height: 480px !important;
 }

@@ -317,7 +317,7 @@ export function ElementViewer() {
   
   
   return (
-    <div className={`flex-1 h-screen pb-32 ${editMode === 'network' ? 'overflow-hidden' : 'overflow-y-auto'}`}>
+    <div className={`flex-1 h-screen pb-32 ${(editMode === 'network' || editMode === 'write') ? 'overflow-hidden' : 'overflow-y-auto'}`}>
       <div className="p-6 max-w-5xl">
         <div 
           id={editMode === 'showcase' ? `showcase-${selectedElementId}` : undefined}

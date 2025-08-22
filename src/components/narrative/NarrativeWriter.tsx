@@ -229,9 +229,9 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
   };
 
   return (
-    <div className={`narrative-editor-wrapper h-full bg-white dark:bg-dark-bg-primary ${isFullscreen ? 'fixed inset-0 z-50' : 'relative overflow-y-auto'}`}>
+    <div className={`narrative-editor-wrapper bg-white dark:bg-dark-bg-primary flex flex-col ${isFullscreen ? 'fixed inset-0 z-50' : 'relative h-[calc(100vh-12rem)]'}`}>
       {/* Header - Compact toolbar (sticky in write mode) */}
-      <div className="sticky top-0 z-40 flex-shrink-0 flex items-center justify-between px-6 py-2 border-b border-gray-200 dark:border-dark-bg-border bg-gradient-to-r from-green-50 to-blue-50 dark:from-dark-bg-secondary dark:to-dark-bg-tertiary shadow-sm">
+      <div className="flex-shrink-0 flex items-center justify-between px-6 py-2 border-b border-gray-200 dark:border-dark-bg-border bg-gradient-to-r from-green-50 to-blue-50 dark:from-dark-bg-secondary dark:to-dark-bg-tertiary shadow-sm">
         <div className="flex items-center gap-4">
           <WritingStats content={content} />
           
@@ -390,7 +390,7 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
       </div>
 
       {/* Main Editor Area */}
-      <div className="flex relative">
+      <div className="flex relative flex-1 overflow-y-auto">
         {/* Editor */}
         <div className="flex-1">
           <EnhancedStoryEditor

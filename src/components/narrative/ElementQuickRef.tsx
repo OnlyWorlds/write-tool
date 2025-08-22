@@ -1,8 +1,8 @@
-import { useState, useMemo } from 'react';
-import { useWorldContext } from '../../contexts/WorldContext';
-import { CategoryIcon } from '../../utils/categoryIcons';
-import type { Element } from '../../types/world';
+import { useMemo, useState } from 'react';
 import { ONLYWORLDS_CATEGORIES } from '../../constants/categories';
+import { useWorldContext } from '../../contexts/WorldContext';
+import type { Element } from '../../types/world';
+import { CategoryIcon } from '../../utils/categoryIcons';
 
 interface ElementQuickRefProps {
   narrative: Element;
@@ -331,9 +331,9 @@ export function ElementQuickRef({ narrative, onElementInsert, onElementUnlink }:
             <span className="text-green-600 dark:text-green-400">
               In text: <span className="font-medium">{stats.inText}</span>
             </span>
-            <span className="text-gray-500 dark:text-gray-400">
+            {/* <span className="text-gray-500 dark:text-gray-400">
               Not in text: <span className="font-medium">{stats.notInText}</span>
-            </span>
+            </span> */}
           </div>
         </div>
       </div>

@@ -160,7 +160,7 @@ export function AuthBar() {
           <span className="text-xs text-warning ml-2">{error}</span>
         )}
         {isAuthenticated && metadata && (
-          <span className="text-sm ml-4">
+          <span className="text-sm ml-4 font-bold">
             {metadata.name || 'No name found'}
           </span>
         )}

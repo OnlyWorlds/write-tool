@@ -85,7 +85,7 @@ export const StoryEditor = forwardRef<StoryEditorRef, StoryEditorProps>(
     };
 
     return (
-      <div className={`relative ${className}`}>
+      <div className={`relative h-full ${className}`}>
         {/* Auto-save status indicator */}
         <div className="absolute top-2 right-2 z-10 text-sm">
           {saveStatus === 'saving' && (
@@ -119,7 +119,8 @@ export const StoryEditor = forwardRef<StoryEditorRef, StoryEditorProps>(
           ref={editorRef}
           markdown={content}
           onChange={handleChange}
-          contentEditableClassName="min-h-[600px] p-8 focus:outline-none"
+          className="h-full flex flex-col"
+          contentEditableClassName="flex-1 min-h-[200px] p-8 focus:outline-none"
           plugins={[
             headingsPlugin(),
             listsPlugin(),

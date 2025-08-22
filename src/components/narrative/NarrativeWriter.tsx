@@ -22,10 +22,11 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
     return element.story || '';
   };
   
-  const [content, setContent] = useState(getDraftContent());
+  const draftContent = getDraftContent();
+  const [content, setContent] = useState(draftContent);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showQuickRef, setShowQuickRef] = useState(true);
-  const [currentElement, setCurrentElement] = useState(element);
+  const [currentElement, setCurrentElement] = useState({ ...element, story: draftContent });
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [detectedCount, setDetectedCount] = useState(0);
@@ -97,7 +98,9 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
       const originalContent = element.story || '';
       setContent(originalContent);
       setCurrentElement(prev => ({ ...prev, story: originalContent }));
-      editorRef.current?.setContent(originalContent);
+      if (editorRef.current) {
+        editorRef.current.setContent(originalContent);
+      }
       localStorage.removeItem(`narrative_draft_${element.id}`);
       setIsDirty(false);
     }
@@ -108,11 +111,25 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
     setIsFullscreen(!isFullscreen);
   };
   
-  // Check on mount if there's a draft that differs from saved content
+  // Check on mount and when element changes if there's a draft
   useEffect(() => {
     const draft = localStorage.getItem(`narrative_draft_${element.id}`);
     if (draft && draft !== element.story) {
       setIsDirty(true);
+      // Update the current element with draft content
+      setCurrentElement(prev => ({ ...prev, story: draft }));
+      setContent(draft);
+      // Update the editor if it exists
+      if (editorRef.current) {
+        editorRef.current.setContent(draft);
+      }
+    } else {
+      // No draft, use element's story
+      setCurrentElement(prev => ({ ...prev, story: element.story || '' }));
+      setContent(element.story || '');
+      if (editorRef.current) {
+        editorRef.current.setContent(element.story || '');
+      }
     }
   }, [element.id, element.story]);
   
@@ -220,7 +237,7 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
           
           {/* Dirty state indicator with revert button */}
           {isDirty && (
-            <div className="flex items-center gap-2 px-2 py-1 text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 rounded">
+            <div className="flex items-center gap-2 px-2 py-1 text-xs bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300 rounded">
               <div className="flex items-center gap-1">
                 <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M10 2a8 8 0 100 16 8 8 0 000-16zM8 7a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1zm1 4a1 1 0 000 2h2a1 1 0 100-2H9z"/>
@@ -229,7 +246,7 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
               </div>
               <button
                 onClick={handleRevertChanges}
-                className="hover:bg-yellow-200 dark:hover:bg-yellow-800/30 p-0.5 rounded transition-colors"
+                className="hover:bg-orange-200 dark:hover:bg-orange-800/30 p-0.5 rounded transition-colors"
                 title="Revert to last saved version"
               >
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -282,49 +299,49 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
             
           </div>
           
-          {/* Highlight toggle and refresh */}
-          <div className="flex items-center gap-1 ml-2 px-2 border-l border-gray-300 dark:border-gray-600">
-            <button
-              onClick={() => {
-                const newState = !highlightsEnabled;
-                setHighlightsEnabled(newState);
-                editorRef.current?.setHighlightsEnabled(newState);
-              }}
-              className={`p-1 rounded transition-colors ${
-                highlightsEnabled 
-                  ? 'text-blue-600 bg-blue-100 dark:text-blue-400 dark:bg-blue-900/30' 
-                  : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
-              }`}
-              title={highlightsEnabled ? "Hide element highlights" : "Show element highlights"}
-            >
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-                  d={highlightsEnabled 
-                    ? "M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                    : "M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
-                  } 
-                />
-              </svg>
-            </button>
-            
-            {highlightsEnabled && (
-              <button
-                onClick={() => {
-                  editorRef.current?.refreshHighlights();
-                }}
-                className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded transition-colors"
-                title="Refresh highlights"
-              >
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-              </button>
-            )}
-          </div>
-          
         </div>
         
         <div className="flex items-center gap-2">
+          {/* Highlight controls - moved to left of auto-save */}
+          {highlightsEnabled && (
+            <button
+              onClick={() => {
+                editorRef.current?.refreshHighlights();
+              }}
+              className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded transition-colors"
+              title="Refresh highlights"
+            >
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </button>
+          )}
+          
+          <button
+            onClick={() => {
+              const newState = !highlightsEnabled;
+              setHighlightsEnabled(newState);
+              editorRef.current?.setHighlightsEnabled(newState);
+            }}
+            className={`p-1 rounded transition-colors ${
+              highlightsEnabled 
+                ? 'text-blue-600 bg-blue-100 dark:text-blue-400 dark:bg-blue-900/30' 
+                : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
+            }`}
+            title={highlightsEnabled ? "Hide element highlights" : "Show element highlights"}
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                d={highlightsEnabled 
+                  ? "M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                  : "M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                } 
+              />
+            </svg>
+          </button>
+          
+          <div className="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1" />
+          
           {/* Autosave toggle */}
           <div className="flex items-center gap-2">
             <label className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400 cursor-pointer">
@@ -332,9 +349,9 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
                 type="checkbox"
                 checked={autosaveEnabled}
                 onChange={(e) => setAutosaveEnabled(e.target.checked)}
-                className="w-3 h-3 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 dark:focus:ring-green-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                className="w-3 h-3 text-green-600 bg-gray-200 dark:bg-gray-800 border-gray-300 dark:border-gray-600 rounded focus:ring-green-500 dark:focus:ring-green-600 dark:ring-offset-gray-800 focus:ring-2"
               />
-              <span>Auto-save</span>
+              <span>auto-save</span>
             </label>
           </div>
           

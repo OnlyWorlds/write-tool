@@ -143,9 +143,10 @@ export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedSt
       onDetectionChange?.(unlinkedCount + linkedCount, linkedCount);
     }, [debouncedContent, elementLinker, ignoredMatches, onDetectionChange]);
     
-    // Manual highlight refresh function
-    const refreshHighlights = () => {
-      if (!highlightsEnabled || !elementLinker || !content) return;
+    // Manual highlight refresh function (forceRefresh bypasses the enabled check)
+    const refreshHighlights = (forceRefresh = false) => {
+      if (!forceRefresh && !highlightsEnabled) return;
+      if (!elementLinker || !content) return;
       
       const detectedMatches = elementLinker.detectElementMentions(content);
       const filteredMatches = detectedMatches.filter(match => {
@@ -305,7 +306,7 @@ export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedSt
       
       // Refresh highlights if enabled
       if (highlightsEnabled) {
-        setTimeout(() => refreshHighlights(), 100);
+        setTimeout(() => refreshHighlights(false), 100);
       }
     };
     
@@ -408,7 +409,8 @@ export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedSt
       setHighlightsEnabled: (enabled: boolean) => {
         setHighlightsEnabled(enabled);
         if (enabled) {
-          refreshHighlights();
+          // Immediately refresh highlights when enabling (force refresh to bypass enabled check)
+          setTimeout(() => refreshHighlights(true), 50);
         } else {
           clearCSSHighlights();
         }

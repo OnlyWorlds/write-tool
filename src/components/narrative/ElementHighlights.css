@@ -2,7 +2,7 @@
 
 /* Unlinked elements - yellow highlight */
 ::highlight(element-unlinked) {
-  background-color: rgba(245, 158, 11, 0.25) !important;
+  background-color: rgba(250, 204, 21, 0.25) !important; /* yellow-400 */
   color: inherit !important;
 }
 
@@ -15,7 +15,7 @@
 /* Dark mode adjustments */
 @media (prefers-color-scheme: dark) {
   ::highlight(element-unlinked) {
-    background-color: rgba(251, 191, 36, 0.3) !important;
+    background-color: rgba(250, 204, 21, 0.3) !important; /* yellow-400 */
   }
 
   ::highlight(element-linked) {

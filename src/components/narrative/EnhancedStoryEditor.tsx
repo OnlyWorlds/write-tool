@@ -355,8 +355,17 @@ export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedSt
     const insertLinkAtCursor = (elementId: string, elementName: string, elementType: string) => {
       if (!elementLinker || !storyEditorRef.current) return;
 
+      // Get current content to check if we need a space before
+      const currentContent = storyEditorRef.current.getContent() || '';
+      const lastChar = currentContent[currentContent.length - 1];
+      
+      // Add a space before the element name if the last character isn't already a space or newline
+      const textToInsert = (!lastChar || lastChar === ' ' || lastChar === '\n') 
+        ? elementName 
+        : ' ' + elementName;
+      
       // Insert just the element name as plain text instead of markdown link
-      storyEditorRef.current.insertMarkdown(elementName);
+      storyEditorRef.current.insertMarkdown(textToInsert);
       
       // Place cursor at end of document as a fallback since precise positioning is complex
       setTimeout(() => {

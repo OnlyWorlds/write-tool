@@ -119,7 +119,8 @@ export class ElementLinker {
     const potentialNames: Array<{ word: string; startIndex: number }> = [];
     
     // Match capitalized words and phrases (proper nouns)
-    const capitalizedRegex = /\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*/g;
+    // Use stricter boundaries - not preceded or followed by letters/numbers
+    const capitalizedRegex = /(?<![a-zA-Z0-9])[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*(?![a-zA-Z0-9])/g;
     let match;
     
     while ((match = capitalizedRegex.exec(text)) !== null) {
@@ -132,7 +133,8 @@ export class ElementLinker {
     // Also check for known element names regardless of capitalization
     // This helps catch references that might not be properly capitalized
     this.elements.forEach(element => {
-      const nameRegex = new RegExp(`\\b${this.escapeRegex(element.name)}\\b`, 'gi');
+      // Use stricter matching - must be surrounded by non-letter/number characters
+      const nameRegex = new RegExp(`(?<![a-zA-Z0-9])${this.escapeRegex(element.name)}(?![a-zA-Z0-9])`, 'gi');
       let match: RegExpExecArray | null;
       
       while ((match = nameRegex.exec(text)) !== null) {

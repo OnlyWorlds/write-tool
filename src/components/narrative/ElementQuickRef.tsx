@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useWorldContext } from '../../contexts/WorldContext';
 import { CategoryIcon } from '../../utils/categoryIcons';
 import type { Element } from '../../types/world';
+import { ONLYWORLDS_CATEGORIES } from '../../constants/categories';
 
 interface ElementQuickRefProps {
   narrative: Element;
@@ -136,6 +137,7 @@ export function ElementQuickRef({ narrative, onElementInsert, onElementUnlink }:
   const { elements } = useWorldContext();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [filterMode, setFilterMode] = useState<'all' | 'in-text' | 'not-in-text'>('all');
+  const [sortMode, setSortMode] = useState<'count' | 'alphabet' | 'category'>('count');
 
   // Get all linked elements from category-based fields
   const linkedElements = useMemo(() => {
@@ -193,9 +195,12 @@ export function ElementQuickRef({ narrative, onElementInsert, onElementUnlink }:
       }
       
       // Count plain text mentions of the element name (case-insensitive)
-      // Use word boundaries to avoid partial matches
+      // Only match complete words - must have space/punctuation/start/end around them
+      // This prevents matching "car" in "scar" or "country" in "country's"
       const nameEscaped = element.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const namePattern = new RegExp(`\\b${nameEscaped}\\b`, 'gi');
+      // Match only when surrounded by whitespace, punctuation, or start/end of string
+      // but NOT by letters or numbers
+      const namePattern = new RegExp(`(?<![a-zA-Z0-9])${nameEscaped}(?![a-zA-Z0-9])`, 'gi');
       const nameMatches = storyText.match(namePattern);
       if (nameMatches) {
         count += nameMatches.length;
@@ -226,21 +231,43 @@ export function ElementQuickRef({ narrative, onElementInsert, onElementUnlink }:
       fieldName
     }));
     
-    // Sort by: mention count (highest first), then in-text, then by name
+    // Sort based on sort mode
     flatList.sort((a, b) => {
-      // First sort by mention count (descending)
-      if (a.mentionCount !== b.mentionCount) {
-        return b.mentionCount - a.mentionCount;
+      if (sortMode === 'count') {
+        // First sort by mention count (descending)
+        if (a.mentionCount !== b.mentionCount) {
+          return b.mentionCount - a.mentionCount;
+        }
+        // Then by in-text status
+        if (a.isInText && !b.isInText) return -1;
+        if (!a.isInText && b.isInText) return 1;
+        // Finally alphabetically
+        return a.element.name.localeCompare(b.element.name);
+      } else if (sortMode === 'alphabet') {
+        // Sort alphabetically by name
+        return a.element.name.localeCompare(b.element.name);
+      } else if (sortMode === 'category') {
+        // Sort by category order (as defined in ONLYWORLDS_CATEGORIES), then by name
+        const categoryIndexA = ONLYWORLDS_CATEGORIES.indexOf(a.element.category as any);
+        const categoryIndexB = ONLYWORLDS_CATEGORIES.indexOf(b.element.category as any);
+        
+        if (categoryIndexA !== categoryIndexB) {
+          // Both found in list, sort by index
+          if (categoryIndexA !== -1 && categoryIndexB !== -1) {
+            return categoryIndexA - categoryIndexB;
+          }
+          // Put unknown categories at the end
+          if (categoryIndexA === -1) return 1;
+          if (categoryIndexB === -1) return -1;
+        }
+        // Same category or both unknown, sort by name
+        return a.element.name.localeCompare(b.element.name);
       }
-      // Then by in-text status
-      if (a.isInText && !b.isInText) return -1;
-      if (!a.isInText && b.isInText) return 1;
-      // Finally alphabetically
-      return a.element.name.localeCompare(b.element.name);
+      return 0;
     });
     
     return flatList;
-  }, [linkedElements, filterMode, elementsInText, elementMentionCounts]);
+  }, [linkedElements, filterMode, elementsInText, elementMentionCounts, sortMode]);
 
   // Count statistics
   const stats = useMemo(() => {
@@ -304,17 +331,29 @@ export function ElementQuickRef({ narrative, onElementInsert, onElementUnlink }:
         </div>
       </div>
 
-      {/* Filter dropdown */}
+      {/* Filter and Sort dropdowns */}
       <div className="p-3 bg-white dark:bg-dark-bg-tertiary border-b border-gray-200 dark:border-dark-bg-border">
-        <select
-          value={filterMode}
-          onChange={(e) => setFilterMode(e.target.value as 'all' | 'in-text' | 'not-in-text')}
-          className="w-full px-3 py-2 text-sm bg-white dark:bg-dark-bg-secondary border border-gray-300 dark:border-dark-bg-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-200"
-        >
-          <option value="all">Show all</option>
-          <option value="in-text">Show in text</option>
-          <option value="not-in-text">Show not in text</option>
-        </select>
+        <div className="flex gap-2">
+          <select
+            value={filterMode}
+            onChange={(e) => setFilterMode(e.target.value as 'all' | 'in-text' | 'not-in-text')}
+            className="flex-1 px-3 py-2 text-sm bg-white dark:bg-dark-bg-secondary border border-gray-300 dark:border-dark-bg-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-200"
+          >
+            <option value="all">Show all</option>
+            <option value="in-text">Show in text</option>
+            <option value="not-in-text">Show not in text</option>
+          </select>
+          
+          <select
+            value={sortMode}
+            onChange={(e) => setSortMode(e.target.value as 'count' | 'alphabet' | 'category')}
+            className="flex-1 px-3 py-2 text-sm bg-white dark:bg-dark-bg-secondary border border-gray-300 dark:border-dark-bg-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-200"
+          >
+            <option value="count">Sort by count</option>
+            <option value="alphabet">Sort by name</option>
+            <option value="category">Sort by category</option>
+          </select>
+        </div>
       </div>
 
       {/* Element list */}

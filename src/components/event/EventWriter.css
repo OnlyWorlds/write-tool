@@ -1,0 +1,183 @@
+/* Custom styles for MDXEditor in event writing mode */
+
+/* Vertical text for collapsed panels */
+.writing-mode-vertical-rl {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+.event-editor-wrapper [contenteditable] {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  font-size: 16px;
+  line-height: 1.7;
+  color: #1a1a1a;
+  background-color: #ffffff;
+}
+
+/* Dark mode for content editable */
+.dark .event-editor-wrapper [contenteditable] {
+  background-color: #1e293b; /* dark-bg-secondary */
+  color: #e5e7eb;
+}
+
+.event-editor-wrapper h1 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  line-height: 1.2;
+  color: #111827;
+}
+
+.dark .event-editor-wrapper h1 {
+  color: #f3f4f6;
+}
+
+.event-editor-wrapper h2 {
+  font-size: 1.875rem;
+  font-weight: 600;
+  margin-top: 1.75rem;
+  margin-bottom: 0.875rem;
+  line-height: 1.3;
+  color: #1f2937;
+}
+
+.dark .event-editor-wrapper h2 {
+  color: #e5e7eb;
+}
+
+.event-editor-wrapper h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  line-height: 1.4;
+  color: #374151;
+}
+
+.dark .event-editor-wrapper h3 {
+  color: #d1d5db;
+}
+
+.event-editor-wrapper ul,
+.event-editor-wrapper ol {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+}
+
+.event-editor-wrapper li {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.event-editor-wrapper blockquote {
+  border-left: 4px solid #e5e7eb;
+  padding-left: 1rem;
+  margin: 1rem 0;
+  font-style: italic;
+  color: #6b7280;
+}
+
+.dark .event-editor-wrapper blockquote {
+  border-left-color: #475569;
+  color: #9ca3af;
+}
+
+.event-editor-wrapper p {
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.event-editor-wrapper a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.event-editor-wrapper a:hover {
+  color: #1d4ed8;
+}
+
+.dark .event-editor-wrapper a {
+  color: #60a5fa;
+}
+
+.dark .event-editor-wrapper a:hover {
+  color: #93bbfc;
+}
+
+.event-editor-wrapper strong {
+  font-weight: 600;
+}
+
+.event-editor-wrapper em {
+  font-style: italic;
+}
+
+.event-editor-wrapper code {
+  background-color: #f3f4f6;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-size: 0.875em;
+}
+
+.dark .event-editor-wrapper code {
+  background-color: #334155;
+  color: #e5e7eb;
+}
+
+/* MDXEditor toolbar styles for dark mode */
+.dark .event-editor-wrapper [class*="_toolbar"] {
+  background-color: #334155 !important; /* dark-bg-tertiary */
+  border-bottom-color: #475569 !important; /* dark-bg-border */
+}
+
+.dark .event-editor-wrapper [class*="_toolbarButton"] {
+  color: #d1d5db !important;
+}
+
+.dark .event-editor-wrapper [class*="_toolbarButton"]:hover {
+  background-color: #475569 !important;
+}
+
+/* Toolbar toggle buttons - make bold/italic/underline white in both light and dark modes */
+/* Only target the B/I/U toggle buttons in the toolbar, not other buttons */
+.event-editor-wrapper [class*="_toolbar"] button[data-state="on"] svg,
+.event-editor-wrapper [class*="_toolbar"] button[data-state="off"] svg {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+}
+
+/* Active state for toolbar toggle buttons */
+.event-editor-wrapper [class*="_toolbar"] button[data-state="on"] {
+  background-color: #60a5fa !important;
+}
+
+/* Hover state for toolbar toggle buttons */
+.event-editor-wrapper [class*="_toolbar"] button:hover {
+  background-color: rgba(96, 165, 250, 0.3) !important;
+}
+
+/* Dark mode specific adjustments for toolbar toggle buttons */
+.dark .event-editor-wrapper [class*="_toolbar"] button[data-state="on"] {
+  background-color: #475569 !important;
+}
+
+.dark .event-editor-wrapper [class*="_toolbar"] button:hover {
+  background-color: rgba(71, 85, 105, 0.5) !important;
+}
+
+/* Make the main editor area lighter in dark mode */
+.dark .event-editor-wrapper ._editorWrapper_o9l36_15 {
+  background-color: #1e293b; /* dark-bg-secondary */
+}
+
+/* Editor container background */
+.dark .event-editor-wrapper ._rootEditor_o9l36_1 {
+  background-color: #1e293b; /* dark-bg-secondary */
+}
+
+/* Simple approach - let MDXEditor fill container and ensure contenteditable expands */
+.event-editor-wrapper .mdxeditor [contenteditable="true"] {
+  min-height: 480px !important;
+}

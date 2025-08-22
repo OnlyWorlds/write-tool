@@ -1,4 +1,5 @@
 export const ONLYWORLDS_CATEGORIES = [
+  'event',
   'character',
   'object',
   'location',
@@ -15,12 +16,11 @@ export const ONLYWORLDS_CATEGORIES = [
   'phenomenon',
   'law',
   'relation',
-  'event',
   'construct',
-  'pin',
   'narrative',
   'map'
   // 'marker' removed - not needed in sidebar
+  // 'pin' removed - not needed in this tool
   // 'world' removed - World is not an element type, it's a container
 ] as const;
 
@@ -45,7 +45,6 @@ export const CATEGORY_ICONS: Record<OnlyWorldsCategory, string> = {
   relation: 'link',
   event: 'saved_search',
   construct: 'api',
-  pin: 'push_pin',
   narrative: 'menu_book',
   map: 'map'
 };
@@ -69,7 +68,6 @@ export const CATEGORY_DISPLAY_NAMES: Record<OnlyWorldsCategory, string> = {
   relation: 'Relation',
   event: 'Event',
   construct: 'Construct',
-  pin: 'Pin',
   narrative: 'Narrative',
   map: 'Map'
 };

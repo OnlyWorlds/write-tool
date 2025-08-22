@@ -13,6 +13,7 @@ import { FieldRenderer } from './FieldRenderers';
 import { FieldTypeIcon } from './FieldTypeIcon';
 import { CollapseAllIcon, ExpandAllIcon } from './icons';
 import { NarrativeWriter } from './narrative/NarrativeWriter';
+import { EventWriter } from './event/EventWriter';
 import { NetworkView } from './NetworkView';
 import { NetworkView3D } from './NetworkView3D';
 
@@ -511,7 +512,7 @@ export function ElementViewer() {
                         <span>Network</span>
                       </button>
                     )}
-                    {selectedElement.category === 'narrative' && editMode !== 'write' && (
+                    {(selectedElement.category === 'narrative' || selectedElement.category === 'event') && editMode !== 'write' && (
                       <button
                         onClick={() => setMode('write')}
                         className="px-4 py-2 text-sm font-medium rounded-lg transition-all shadow-sm flex items-center gap-2 bg-green-100 dark:bg-green-900/50 hover:bg-green-200 dark:hover:bg-green-900/60 text-green-900 dark:text-green-200 border border-green-200 dark:border-green-700/50"
@@ -584,6 +585,8 @@ export function ElementViewer() {
           {/* Conditional rendering based on mode */}
           {editMode === 'write' && selectedElement.category === 'narrative' ? (
             <NarrativeWriter element={selectedElement} />
+          ) : editMode === 'write' && selectedElement.category === 'event' ? (
+            <EventWriter element={selectedElement} />
           ) : editMode === 'network' ? (
             <div className="relative network-view-no-scroll">
               {/* 2D/3D Toggle */}

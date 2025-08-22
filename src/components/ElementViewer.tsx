@@ -12,9 +12,9 @@ import { exportElementToPdf, isPdfExportSupported } from '../utils/pdfExport';
 import { FieldRenderer } from './FieldRenderers';
 import { FieldTypeIcon } from './FieldTypeIcon';
 import { CollapseAllIcon, ExpandAllIcon } from './icons';
+import { NarrativeWriter } from './narrative/NarrativeWriter';
 import { NetworkView } from './NetworkView';
 import { NetworkView3D } from './NetworkView3D';
-import { NarrativeWriter } from './narrative/NarrativeWriter';
 
 export function ElementViewer() {
   const { elements, worldKey, pin, deleteElement, updateElement, saveElement } = useWorldContext();
@@ -628,7 +628,7 @@ export function ElementViewer() {
           ) : (
           <div className={`px-4 pb-6 pt-0 ${editMode === 'showcase' ? 'bg-slate-100 dark:bg-dark-bg-secondary' : 'bg-gradient-to-b from-slate-100 to-slate-50 dark:from-dark-bg-secondary dark:to-dark-bg-tertiary'}`}>
             {/* Base fields section */}
-            <div className="pt-6 pb-4 border-b border-border/50 dark:border-dark-bg-border/50">
+            <div className="pt-6 pb-4 border-b border-border/50 dark:border-dark-bg-border/50 ml-5">
               {fields.filter(([fieldName]) => baseFields.includes(fieldName)).map(([fieldName, originalValue]) => {
                 const editedValue = selectedElementId ? getEditedValue(selectedElementId, fieldName) : undefined;
                 const value = editedValue !== undefined ? editedValue : originalValue;
@@ -666,6 +666,15 @@ export function ElementViewer() {
                             : 'bg-zinc-50 dark:bg-dark-bg-tertiary hover:bg-zinc-100 dark:hover:bg-dark-bg-hover shadow-sm hover:shadow-md cursor-pointer'
                     }`}
                   >
+                    {/* Category icon for link fields */}
+                    {!hideFieldIcons && editMode === 'edit' && (fieldTypeInfo.type === 'link' || fieldTypeInfo.type === 'links') && (
+                      <div className="absolute -left-5 top-4 flex items-center justify-center w-3 h-3">
+                        <CategoryIcon 
+                          category={fieldTypeInfo.linkedCategory || 'category'} 
+                          className="text-[12px] text-slate-400/70"
+                        />
+                      </div>
+                    )}
                     {/* Field type icon */}
                     {!hideFieldIcons && editMode === 'edit' && !baseFields.includes(fieldName) && (
                       <div className="flex items-start justify-center w-8 pt-4 pl-2">
@@ -731,7 +740,7 @@ export function ElementViewer() {
             </div>
             
             {/* Category-specific fields section */}
-            <div className="pt-4">
+            <div className="pt-4 ml-5">
               {organizedSections.map(section => {
                 const isCollapsed = collapsedSections.has(section.name);
                 const hasVisibleFields = section.fields.some(([fieldName, value]) => {
@@ -812,6 +821,15 @@ export function ElementViewer() {
                             : 'bg-zinc-50 dark:bg-dark-bg-tertiary hover:bg-zinc-100 dark:hover:bg-dark-bg-hover shadow-sm hover:shadow-md cursor-pointer'
                     }`}
                   >
+                    {/* Category icon for link fields */}
+                    {!hideFieldIcons && editMode === 'edit' && (fieldTypeInfo.type === 'link' || fieldTypeInfo.type === 'links') && (
+                      <div className="absolute -left-5 top-4 flex items-center justify-center w-3 h-3">
+                        <CategoryIcon 
+                          category={fieldTypeInfo.linkedCategory || 'category'} 
+                          className="text-[12px] text-slate-400/70"
+                        />
+                      </div>
+                    )}
                     {/* Field type icon */}
                     {!hideFieldIcons && editMode === 'edit' && (
                       <div className="flex items-start justify-center w-8 pt-4 pl-2">

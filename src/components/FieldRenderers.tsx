@@ -274,7 +274,7 @@ const FieldEditor = memo(function FieldEditor({ fieldName, value, fieldTypeInfo,
     onChange?.(newValue);
   };
   
-  const baseInputClass = `w-full px-3 py-3 h-[48px] box-border leading-normal bg-white dark:bg-dark-bg-tertiary border border-blue-200 dark:border-dark-bg-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-colors hover:border-blue-300 dark:hover:border-gray-500 text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 ${className}`;
+  const baseInputClass = `w-full px-3 py-3 bg-white dark:bg-dark-bg-tertiary border border-blue-200 dark:border-dark-bg-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-colors hover:border-blue-300 dark:hover:border-gray-500 text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 ${className}`;
   
   const baseTextareaClass = `w-full px-3 py-3 box-border leading-normal bg-white dark:bg-dark-bg-tertiary border border-blue-200 dark:border-dark-bg-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-colors hover:border-blue-300 dark:hover:border-gray-500 text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 ${className}`;
   

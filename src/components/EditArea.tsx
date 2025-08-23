@@ -124,15 +124,6 @@ export function EditArea() {
               {isEdited && (
                 <>
                   <button
-                    onClick={() => selectedElementId && selectedFieldId && setFieldValue(selectedElementId, selectedFieldId, undefined)}
-                    className="text-xs text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 px-1 py-0.5 rounded transition-colors"
-                    title={`Discard changes to ${selectedFieldId.replace(/_/g, ' ')}`}
-                  >
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </button>
-                  <button
                     onClick={handleSaveField}
                     disabled={isSaving}
                     className="text-xs text-white bg-green-600 dark:bg-green-700 hover:bg-green-700 dark:hover:bg-green-600 px-2 py-0.5 rounded transition-colors disabled:opacity-50"
@@ -140,9 +131,18 @@ export function EditArea() {
                   >
                     Save
                   </button>
-                  <span className="text-xs text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/30 px-2 py-1 rounded-full">
-                    Modified
-                  </span>
+                  <div className="flex items-center text-xs text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/30 px-2 py-1 rounded-full">
+                    <span>Modified</span>
+                    <button
+                      onClick={() => selectedElementId && selectedFieldId && setFieldValue(selectedElementId, selectedFieldId, undefined)}
+                      className="ml-1.5 hover:text-amber-900 dark:hover:text-amber-100 transition-colors"
+                      title={`Discard changes to ${selectedFieldId.replace(/_/g, ' ')}`}
+                    >
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
                 </>
               )}
               <button

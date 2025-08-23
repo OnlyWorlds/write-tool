@@ -17,13 +17,8 @@ export function CategorySidebar() {
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      // Focus search with "/" key
-      if (event.key === '/' && !event.ctrlKey && !event.metaKey) {
-        event.preventDefault();
-        searchInputRef.current?.focus();
-      }
-      // Clear search with Escape key
-      if (event.key === 'Escape' && filterText) {
+      // Clear search with Escape key when search is focused
+      if (event.key === 'Escape' && document.activeElement === searchInputRef.current && filterText) {
         setFilterText('');
       }
     };

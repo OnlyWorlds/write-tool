@@ -13,6 +13,7 @@ interface EnhancedStoryEditorProps {
   onContentChange?: (content: string) => void;
   onDetectionChange?: (detected: number, linked: number) => void;
   onFieldUpdate?: (fieldName: string, value: any) => void;
+  onElementAutoLink?: (elementId: string, elementName: string, elementType: string) => void;
   className?: string;
   popupAnchorRef?: React.RefObject<HTMLElement>;
   autosaveEnabled?: boolean;
@@ -28,7 +29,7 @@ export interface EnhancedStoryEditorRef extends StoryEditorRef {
 }
 
 export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedStoryEditorProps>(
-  ({ element, onSave, onContentChange, onDetectionChange, onFieldUpdate, className = '', popupAnchorRef, autosaveEnabled = true }, ref) => {
+  ({ element, onSave, onContentChange, onDetectionChange, onFieldUpdate, onElementAutoLink, className = '', popupAnchorRef, autosaveEnabled = true }, ref) => {
     const { elements } = useWorldContext();
     const storyEditorRef = useRef<StoryEditorRef>(null);
     const editorContainerRef = useRef<HTMLDivElement>(null);
@@ -430,6 +431,7 @@ export const EnhancedStoryEditor = forwardRef<EnhancedStoryEditorRef, EnhancedSt
           element={element}
           onSave={onSave}
           onContentChange={handleContentChange}
+          onElementAutoLink={onElementAutoLink}
           autosaveEnabled={autosaveEnabled}
         />
 

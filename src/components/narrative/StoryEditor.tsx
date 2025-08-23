@@ -128,14 +128,10 @@ export const StoryEditor = forwardRef<StoryEditorRef, StoryEditorProps>(
         }
         
         if (bestMatch) {
-          console.log('[Auto-link] Found match:', bestMatch.name);
-          
           // Replace the pattern in the line
           const updatedLastLine = lastLine.replace(/\/\/[a-zA-Z0-9\s]+?(&#x20;|\s)$/, bestMatch.name + ' ');
           lines[lines.length - 1] = updatedLastLine;
           const newContentWithoutPattern = lines.join('\n');
-          
-          console.log('[Auto-link] New content:', newContentWithoutPattern);
           
           setContent(newContentWithoutPattern);
           onContentChange?.(newContentWithoutPattern);
@@ -143,26 +139,15 @@ export const StoryEditor = forwardRef<StoryEditorRef, StoryEditorProps>(
           // Trigger the auto-link callback
           onElementAutoLink(bestMatch.id, bestMatch.name, bestMatch.category);
           
-          console.log('[Auto-link] About to call setMarkdown');
           // Update editor
           editorRef.current?.setMarkdown(newContentWithoutPattern);
           
-          console.log('[Auto-link] setMarkdown called, setting up cursor positioning...');
-          
-          // Try multiple approaches to move cursor to end
-          // Approach 1: Immediate attempt
-          const immediateEditor = document.querySelector('.mdxeditor-root-contenteditable') || 
-                                 document.querySelector('[contenteditable="true"]');
-          console.log('[Auto-link] Immediate editor element found:', !!immediateEditor);
-          
-          // Approach 2: After short delay
+          // Move cursor to the end after a short delay
           setTimeout(() => {
-            console.log('[Auto-link] Attempting cursor positioning (50ms delay)');
             editorRef.current?.focus();
             
             const editorDiv = document.querySelector('.mdxeditor-root-contenteditable') || 
                              document.querySelector('[contenteditable="true"]');
-            console.log('[Auto-link] Editor div found:', !!editorDiv);
             
             if (editorDiv) {
               // Get all text nodes
@@ -178,8 +163,6 @@ export const StoryEditor = forwardRef<StoryEditorRef, StoryEditorProps>(
                 lastTextNode = node;
               }
               
-              console.log('[Auto-link] Last text node:', lastTextNode);
-              
               if (lastTextNode) {
                 const range = document.createRange();
                 const selection = window.getSelection();
@@ -190,7 +173,6 @@ export const StoryEditor = forwardRef<StoryEditorRef, StoryEditorProps>(
                 
                 selection?.removeAllRanges();
                 selection?.addRange(range);
-                console.log('[Auto-link] Cursor positioned at end of last text node');
               } else {
                 // Fallback: select all and collapse
                 const range = document.createRange();
@@ -199,14 +181,12 @@ export const StoryEditor = forwardRef<StoryEditorRef, StoryEditorProps>(
                 range.collapse(false); // false = collapse to end
                 selection?.removeAllRanges();
                 selection?.addRange(range);
-                console.log('[Auto-link] Cursor positioned using selectNodeContents');
               }
             }
           }, 50);
           
-          // Approach 3: After longer delay
+          // Additional fallback approach
           setTimeout(() => {
-            console.log('[Auto-link] Final cursor positioning attempt (200ms delay)');
             const editorDiv = document.querySelector('.mdxeditor-root-contenteditable') || 
                              document.querySelector('[contenteditable="true"]');
             if (editorDiv) {
@@ -214,7 +194,6 @@ export const StoryEditor = forwardRef<StoryEditorRef, StoryEditorProps>(
               // Try using execCommand to move to end
               document.execCommand('selectAll', false);
               document.getSelection()?.collapseToEnd();
-              console.log('[Auto-link] Used execCommand approach');
             }
           }, 200);
           

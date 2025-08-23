@@ -221,6 +221,36 @@ export function EventWriter({ element }: EventWriterProps) {
     updateElement(updated);
     await saveElement(currentElement.id, { [fieldName]: value });
   };
+  
+  // Handle auto-linking when user types //elementname
+  const handleElementAutoLink = async (elementId: string, elementName: string, elementType: string) => {
+    // Get the field name for this element type
+    const fieldName = getCategoryFieldName(elementType);
+    
+    if (!fieldName) {
+      return;
+    }
+    
+    // Get current IDs for this field
+    const currentIds = currentElement[fieldName] || [];
+    
+    // Add the element if not already linked
+    if (!currentIds.includes(elementId)) {
+      const updatedIds = [...currentIds, elementId];
+      const updated = { ...currentElement, [fieldName]: updatedIds };
+      
+      // Save the field update
+      await saveElement(currentElement.id, { [fieldName]: updatedIds });
+      
+      setCurrentElement(updated);
+      updateElement(updated);
+      
+      // Refresh highlights after auto-linking
+      if (highlightsEnabled) {
+        setTimeout(() => editorRef.current?.refreshHighlights(), 100);
+      }
+    }
+  };
 
   return (
     <div className={`event-editor-wrapper bg-white dark:bg-dark-bg-primary flex flex-col ${isFullscreen ? 'fixed inset-0 z-50' : 'relative h-[600px]'}`}>
@@ -402,6 +432,7 @@ export function EventWriter({ element }: EventWriterProps) {
             }}
             onDetectionChange={handleDetectionChange}
             onFieldUpdate={handleFieldUpdate}
+            onElementAutoLink={handleElementAutoLink}
             className="h-full"
             popupAnchorRef={detectionWidgetRef}
             autosaveEnabled={autosaveEnabled}

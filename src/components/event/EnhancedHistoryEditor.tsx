@@ -13,6 +13,7 @@ interface EnhancedHistoryEditorProps {
   onContentChange?: (content: string) => void;
   onDetectionChange?: (detected: number, linked: number) => void;
   onFieldUpdate?: (fieldName: string, value: any) => void;
+  onElementAutoLink?: (elementId: string, elementName: string, elementType: string) => void;
   className?: string;
   popupAnchorRef?: React.RefObject<HTMLElement>;
   autosaveEnabled?: boolean;
@@ -28,7 +29,7 @@ export interface EnhancedHistoryEditorRef extends HistoryEditorRef {
 }
 
 export const EnhancedHistoryEditor = forwardRef<EnhancedHistoryEditorRef, EnhancedHistoryEditorProps>(
-  ({ element, onSave, onContentChange, onDetectionChange, onFieldUpdate, className = '', popupAnchorRef, autosaveEnabled = true }, ref) => {
+  ({ element, onSave, onContentChange, onDetectionChange, onFieldUpdate, onElementAutoLink, className = '', popupAnchorRef, autosaveEnabled = true }, ref) => {
     const { elements } = useWorldContext();
     const historyEditorRef = useRef<HistoryEditorRef>(null);
     const editorContainerRef = useRef<HTMLDivElement>(null);
@@ -404,6 +405,7 @@ export const EnhancedHistoryEditor = forwardRef<EnhancedHistoryEditorRef, Enhanc
           element={element}
           onSave={onSave}
           onContentChange={handleContentChange}
+          onElementAutoLink={onElementAutoLink}
           autosaveEnabled={autosaveEnabled}
         />
 

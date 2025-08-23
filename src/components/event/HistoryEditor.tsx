@@ -3,11 +3,13 @@ import '@mdxeditor/editor/style.css';
 import { useDebounce } from 'use-debounce';
 import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react';
 import type { Element } from '../../types/world';
+import { useWorldContext } from '../../contexts/WorldContext';
 
 interface HistoryEditorProps {
   element: Element;
   onSave: (content: string) => Promise<boolean>;
   onContentChange?: (content: string) => void;
+  onElementAutoLink?: (elementId: string, elementName: string, elementType: string) => void;
   className?: string;
   autosaveEnabled?: boolean;
 }
@@ -20,12 +22,14 @@ export interface HistoryEditorRef {
 }
 
 export const HistoryEditor = forwardRef<HistoryEditorRef, HistoryEditorProps>(
-  ({ element, onSave, onContentChange, className = '', autosaveEnabled = true }, ref) => {
+  ({ element, onSave, onContentChange, onElementAutoLink, className = '', autosaveEnabled = true }, ref) => {
     const editorRef = useRef<MDXEditorMethods>(null);
     const [content, setContent] = useState(element.history || '');
     const [debouncedContent] = useDebounce(content, 30000); // 30 seconds
     const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
     const [lastSavedContent, setLastSavedContent] = useState(element.history || '');
+    const { elements } = useWorldContext();
+    const lastContentRef = useRef(element.history || '');
 
     // Expose methods via ref
     useImperativeHandle(ref, () => ({
@@ -80,8 +84,110 @@ export const HistoryEditor = forwardRef<HistoryEditorRef, HistoryEditorProps>(
     }, [element.id, element.history]);
 
     const handleChange = (newContent: string) => {
+      // Check if we just added a space after text starting with //
+      const lines = newContent.split('\n');
+      const lastLine = lines[lines.length - 1];
+      
+      // Decode HTML entities (MDXEditor encodes space as &#x20;)
+      const decodedLine = lastLine.replace(/&#x20;/g, ' ').replace(/&nbsp;/g, ' ');
+      
+      // Pattern: check if line ends with //word(s) followed by space
+      const autoLinkPattern = /\/\/([a-zA-Z0-9\s]+?)\s$/;
+      const match = decodedLine.match(autoLinkPattern);
+      
+      if (match && onElementAutoLink) {
+        const searchTerm = match[1].trim(); // Keep original case
+        
+        // Search for matching elements - ONLY exact match (case-sensitive)
+        let bestMatch: { id: string; name: string; category: string } | null = null;
+        
+        for (const [id, elem] of elements.entries()) {
+          // Exact match required - case-sensitive
+          if (elem.name === searchTerm) {
+            // Exact match found (case-sensitive)
+            bestMatch = { id, name: elem.name, category: elem.category || 'unknown' };
+            break;
+          }
+        }
+        
+        if (bestMatch) {
+          // Replace the pattern in the line
+          const updatedLastLine = lastLine.replace(/\/\/[a-zA-Z0-9\s]+?(&#x20;|\s)$/, bestMatch.name + ' ');
+          lines[lines.length - 1] = updatedLastLine;
+          const newContentWithoutPattern = lines.join('\n');
+          
+          setContent(newContentWithoutPattern);
+          onContentChange?.(newContentWithoutPattern);
+          
+          // Trigger the auto-link callback
+          onElementAutoLink(bestMatch.id, bestMatch.name, bestMatch.category);
+          
+          // Update editor
+          editorRef.current?.setMarkdown(newContentWithoutPattern);
+          
+          // Move cursor to the end after a short delay
+          setTimeout(() => {
+            editorRef.current?.focus();
+            
+            const editorDiv = document.querySelector('.mdxeditor-root-contenteditable') || 
+                             document.querySelector('[contenteditable="true"]');
+            
+            if (editorDiv) {
+              // Get all text nodes
+              const walker = document.createTreeWalker(
+                editorDiv,
+                NodeFilter.SHOW_TEXT,
+                null
+              );
+              
+              let lastTextNode = null;
+              let node;
+              while (node = walker.nextNode()) {
+                lastTextNode = node;
+              }
+              
+              if (lastTextNode) {
+                const range = document.createRange();
+                const selection = window.getSelection();
+                
+                // Set range to end of last text node
+                range.setStart(lastTextNode, lastTextNode.textContent?.length || 0);
+                range.collapse(true);
+                
+                selection?.removeAllRanges();
+                selection?.addRange(range);
+              } else {
+                // Fallback: select all and collapse
+                const range = document.createRange();
+                const selection = window.getSelection();
+                range.selectNodeContents(editorDiv);
+                range.collapse(false); // false = collapse to end
+                selection?.removeAllRanges();
+                selection?.addRange(range);
+              }
+            }
+          }, 50);
+          
+          // Additional fallback approach
+          setTimeout(() => {
+            const editorDiv = document.querySelector('.mdxeditor-root-contenteditable') || 
+                             document.querySelector('[contenteditable="true"]');
+            if (editorDiv) {
+              editorDiv.focus();
+              // Try using execCommand to move to end
+              document.execCommand('selectAll', false);
+              document.getSelection()?.collapseToEnd();
+            }
+          }, 200);
+          
+          lastContentRef.current = newContentWithoutPattern;
+          return;
+        }
+      }
+      
       setContent(newContent);
       onContentChange?.(newContent);
+      lastContentRef.current = newContent;
     };
 
     return (

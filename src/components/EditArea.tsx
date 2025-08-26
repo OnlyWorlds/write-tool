@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useWorldContext } from '../contexts/WorldContext';
 import { TypeManagementService } from '../services/TypeManagementService';
 import { detectFieldType } from '../services/UnifiedFieldTypeService';
 import { useEditorStore, useSidebarStore } from '../stores/uiStore';
 import { FieldRenderer } from './FieldRenderers';
 import { ReverseRelationsPanel } from './ReverseRelationsPanel';
+import { calculateReverseLinks } from '../utils/reverseLinks';
 
 export function EditArea() {
   const { elements, saveElement } = useWorldContext();
@@ -22,6 +23,13 @@ export function EditArea() {
   // Get the edited supertype value if it exists
   const editedSupertype = selectedElementId ? getEditedValue(selectedElementId, 'supertype') : undefined;
   const currentSupertype = editedSupertype !== undefined ? editedSupertype : selectedElement?.supertype;
+  
+  // Calculate if there are reverse relations for the current element
+  const hasReverseRelations = useMemo(() => {
+    if (!selectedElementId) return false;
+    const reverseLinks = calculateReverseLinks(selectedElementId, elements);
+    return reverseLinks.size > 0;
+  }, [selectedElementId, elements]);
   
   const handleChange = (value: any) => {
     if (selectedElementId && selectedFieldId) {
@@ -79,8 +87,12 @@ export function EditArea() {
     return null;
   }
   
-  // Case 2: Element selected but no field - show reverse relations
+  // Case 2: Element selected but no field - show reverse relations only if they exist
   if (!selectedFieldId) {
+    if (!hasReverseRelations) {
+      // No reverse relations, hide sidebar
+      return null;
+    }
     return (
       <div className="w-96 border-l border-blue-200 dark:border-dark-bg-border flex flex-col bg-white dark:bg-dark-bg-secondary h-full">
         <ReverseRelationsPanel elementId={selectedElementId} />

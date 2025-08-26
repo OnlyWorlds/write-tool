@@ -1,5 +1,5 @@
 import { ChevronDownIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { useWorldContext } from '../contexts/WorldContext';
@@ -22,6 +22,7 @@ export function ElementViewer() {
   const { selectedElementId } = useSidebarStore();
   const { selectedFieldId, selectField, getEditedValue, editMode, getFieldError, isFieldVisible, toggleFieldVisibility, toggleMode, setMode, resetHiddenFields, hiddenFields, setFieldValue } = useEditorStore();
   const navigate = useNavigate();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedName, setEditedName] = useState('');
@@ -58,6 +59,13 @@ export function ElementViewer() {
     // But only if the element actually changed (not on first mount or mode change)
     setMode('edit');
   }, [selectedElementId]); // Only depend on selectedElementId changing
+
+  // Reset scroll position when entering write or network mode
+  useEffect(() => {
+    if ((editMode === 'write' || editMode === 'network') && scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = 0;
+    }
+  }, [editMode]);
   
   const toggleSection = (sectionName: string) => {
     setCollapsedSections(prev => {
@@ -318,13 +326,13 @@ export function ElementViewer() {
   
   
   return (
-    <div className={`flex-1 h-screen pb-32 ${(editMode === 'network' || editMode === 'write') ? 'overflow-hidden' : 'overflow-y-auto'}`}>
+    <div ref={scrollContainerRef} className={`flex-1 h-screen pb-32 ${(editMode === 'network' || editMode === 'write') ? 'overflow-hidden' : 'overflow-y-auto'}`}>
       <div className="p-6 max-w-5xl">
         <div 
           id={editMode === 'showcase' ? `showcase-${selectedElementId}` : undefined}
           className={`bg-gradient-to-br from-slate-50 to-slate-100 dark:from-dark-bg-secondary dark:to-dark-bg-tertiary rounded-lg shadow-md border border-slate-200 dark:border-dark-bg-border ${editMode === 'showcase' ? 'shadow-lg' : ''}`}
         >
-          <div className="sticky top-6 z-10 border-b border-border dark:border-dark-bg-border bg-sidebar-dark dark:bg-dark-bg-tertiary shadow-md rounded-t-lg">
+          <div className={`${editMode === 'edit' || editMode === 'showcase' ? 'sticky top-6' : ''} z-10 border-b border-border dark:border-dark-bg-border bg-sidebar-dark dark:bg-dark-bg-tertiary shadow-md rounded-t-lg`}>
             <div className="p-6 pb-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-6">

@@ -100,17 +100,29 @@ export const StoryEditor = forwardRef<StoryEditorRef, StoryEditorProps>(
       }
     }, [element.id, element.story]);
 
+    // Helper function to decode HTML entities
+    const decodeHtmlEntities = (text: string): string => {
+      return text
+        .replace(/&#x20;/g, ' ')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'");
+    };
+
     const handleChange = (newContent: string) => {
+      // Decode HTML entities that MDXEditor might have added
+      newContent = decodeHtmlEntities(newContent);
+      
       // Check if we just added a space after text starting with //
       const lines = newContent.split('\n');
       const lastLine = lines[lines.length - 1];
       
-      // Decode HTML entities (MDXEditor encodes space as &#x20;)
-      const decodedLine = lastLine.replace(/&#x20;/g, ' ').replace(/&nbsp;/g, ' ');
-      
       // Pattern: check if line ends with //word(s) followed by space
       const autoLinkPattern = /\/\/([a-zA-Z0-9\s]+?)\s$/;
-      const match = decodedLine.match(autoLinkPattern);
+      const match = lastLine.match(autoLinkPattern);
       
       if (match && onElementAutoLink) {
         const searchTerm = match[1].trim(); // Keep original case

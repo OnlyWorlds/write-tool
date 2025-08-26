@@ -1,6 +1,6 @@
-import { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
+import { Fragment } from 'react';
 
 interface HelpModalProps {
   isOpen: boolean;
@@ -52,94 +52,109 @@ export function HelpModal({ isOpen, onClose }: HelpModalProps) {
                 <div className="space-y-6 text-sm leading-relaxed max-h-[70vh] overflow-y-auto pr-2">
                   {/* Overview */}
                   <section>
-                    <h3 className="text-lg font-semibold mb-2">What is the Browse Tool?</h3>
+                    <h3 className="text-lg font-semibold mb-2">Overview</h3>
                     <p className="text-text-dark/80">
-                      The Browse Tool is your advanced viewer and editor for OnlyWorlds data. It allows you to explore your world's elements, 
-                      visualize relationships between them, and make edits with a sophisticated interface designed for world builders.
+                      The Browse Tool is a viewer and editor for OnlyWorlds. It offers functionality for 
+                      1. viewing world elements and their relations
+                      2. writing (larger) texts for elements, particularly for narratives and events
+                      3. publishing individual elements to public showcase URLs
                     </p>
+                    <div className="mt-3 space-y-2 text-text-dark/80">
+                      <p><strong>Left Sidebar:</strong> Select elements</p>
+                      <p><strong>Center Panel:</strong> Element view with various modes</p>
+                      <p><strong>Right Panel:</strong> Field editing and reverse relation insights</p> 
+                    </div>
                   </section>
 
-                  {/* Getting Started */}
+                  {/* Element Editing */}
                   <section>
-                    <h3 className="text-lg font-semibold mb-2">Getting Started</h3>
-                    <ol className="list-decimal list-inside space-y-2 text-text-dark/80">
-                      <li>Enter your 10-digit API key and 4-digit PIN in the top bar</li>
-                      <li>Click "validate" to load your world</li>
-                      <li>Browse elements by category in the left sidebar</li>
-                      <li>Click any element to view its details</li>
-                    </ol>
-                  </section>
-
-                  {/* Key Features */}
-                  <section>
-                    <h3 className="text-lg font-semibold mb-2">Key Features</h3>
-                    <div className="space-y-3">
-                      <div>
-                        <h4 className="font-medium mb-1">📊 Network Visualization</h4>
-                        <p className="text-text-dark/80 dark:text-gray-400 text-xs ml-6">
-                          See relationships between elements as an interactive graph. Adjust depth (1-5) to control how many connections to show.
+                    <h3 className="text-lg font-semibold mb-2">Edit Mode</h3>
+                    <div className="space-y-3 text-text-dark/80">
+                      <div> 
+                        <p className="text-xs ml-4">
+                          Default mode for viewing and editing elements. 
+                          Click any field to modify it using right panel.  
                         </p>
                       </div>
-                      <div>
-                        <h4 className="font-medium mb-1">✏️ Edit Mode</h4>
-                        <p className="text-text-dark/80 dark:text-gray-400 text-xs ml-6">
-                          Toggle edit mode with the button or press 'E'. Click any field to edit it. Changes are highlighted until saved.
+                      <div> 
+                   
+                      </div>
+                      <div> 
+                        <p className="text-xs ml-4">
+                          Save individual fields with the Save button in the edit panel, or use Ctrl+S to save all changes at once. 
+                          Press Escape to discard unsaved changes.
                         </p>
                       </div>
-                      <div>
-                        <h4 className="font-medium mb-1">🔗 Smart Linking</h4>
-                        <p className="text-text-dark/80 dark:text-gray-400 text-xs ml-6">
-                          Link fields show related elements. Click links to navigate. Multi-link fields support adding/removing multiple connections.
-                        </p>
-                      </div>
-                      <div>
-                        <h4 className="font-medium mb-1">🔄 Reverse Relationships</h4>
-                        <p className="text-text-dark/80 dark:text-gray-400 text-xs ml-6">
-                          See which elements link TO the current element in the reverse relations panel.
-                        </p>
-                      </div>
-                      <div>
-                        <h4 className="font-medium mb-1">📤 Export & Share</h4>
-                        <p className="text-text-dark/80 dark:text-gray-400 text-xs ml-6">
-                          Export elements to PDF or publish showcase URLs for public sharing.
+                      <div> 
+                        <p className="text-xs ml-4">
+                          Links to the element are shown in right panelwhen no field is selected. View which other elements reference the current element. For example, see all Characters who list this Location as their birthplace.
                         </p>
                       </div>
                     </div>
                   </section>
 
-                  {/* Interface Guide */}
+                  {/* Showcase Mode */}
                   <section>
-                    <h3 className="text-lg font-semibold mb-2">Interface Guide</h3>
-                    <div className="space-y-2 text-text-dark/80">
-                      <p><strong>Left Sidebar:</strong> Categories and elements. Use search to filter.</p>
-                      <p><strong>Center Panel:</strong> Element details and network view.</p>
-                      <p><strong>Right Panel:</strong> Edit area (when in edit mode) or reverse relations.</p>
-                      <p><strong>Top Bar:</strong> Authentication, save controls, and world name.</p>
+                    <h3 className="text-lg font-semibold mb-2">Showcase Mode</h3>
+                    <div className="space-y-3 text-text-dark/80">
+                      <p className="text-xs">
+                        Share read-only views of your elements with others using showcase URLs. No authentication required for viewers.
+                      </p>
+                      <div>
+                        <p className="text-xs ml-4">
+                          Click the Share button on any element to generate a public showcase URL.  
+                          Showcases pages can be customized to include specific fields. 
+                          One showcase can be created per element, and newer versions override older ones. 
+                        </p>
+                      </div>
+                      <div>
+              
+                      </div>
                     </div>
                   </section>
 
-                  {/* Keyboard Shortcuts */}
+                  {/* Graph Mode */}
                   <section>
-                    <h3 className="text-lg font-semibold mb-2">Keyboard Shortcuts</h3>
-                    <div className="grid grid-cols-2 gap-2 text-text-dark/80">
-                      <div><kbd className="px-2 py-1 bg-primary-dark rounded text-xs">E</kbd> Toggle edit mode</div>
-                      <div><kbd className="px-2 py-1 bg-primary-dark rounded text-xs">Ctrl+S</kbd> Save all changes</div>
-                      <div><kbd className="px-2 py-1 bg-primary-dark rounded text-xs">N</kbd> New element</div>
-                      <div><kbd className="px-2 py-1 bg-primary-dark rounded text-xs">Esc</kbd> Cancel editing</div>
+                    <h3 className="text-lg font-semibold mb-2">Network Graph</h3>
+                    <div className="space-y-3 text-text-dark/80">
+                      <p className="text-xs">
+                        View relationships between elements in an interactive 2D or 3D graph.
+                      </p>
+                      <div> 
+                        <ul className="text-xs ml-4 space-y-1">
+                          <li>• <strong>Depth (1-5):</strong> Control how many relationship layers to display</li>
+                          <li>• <strong>Drag nodes:</strong> Reposition elements</li>
+                          <li>• <strong>Click nodes:</strong> Navigate to that element</li>
+                          <li>• <strong>Zoom:</strong> Scroll to zoom in/out</li>
+                          <li>• <strong>Pan:</strong> Right / middle click and drag</li>
+                        </ul>
+                      </div>
+                
+            
                     </div>
                   </section>
 
-                  {/* Tips */}
+                  {/* Story Writing Mode */}
                   <section>
-                    <h3 className="text-lg font-semibold mb-2">Pro Tips</h3>
-                    <ul className="list-disc list-inside space-y-1 text-text-dark/80 text-xs">
-                      <li>Use the options menu (⋮) to hide empty fields or sort alphabetically</li>
-                      <li>Drag nodes in the network view to rearrange the layout</li>
-                      <li>Double-click nodes in the network to navigate to that element</li>
-                      <li>Hold Shift while clicking links to open in edit mode</li>
-                      <li>Use showcase mode to share read-only views with players</li>
-                    </ul>
+                    <h3 className="text-lg font-semibold mb-2">Story Writing Tools</h3>
+                    <div className="space-y-3 text-text-dark/80">
+                      <div>
+                      // pls write this concise, more like a story (no bullet points, and combine for both narrative and event,
+                      the   functionality is msotly hte same for both )
+          
+                      </div>
+              
+                      <div>
+                        <h4 className="font-medium mb-1">Auto-Link Detection</h4>
+                        <p className="text-xs ml-4">
+                          The editor scans your text for element names and offers to link them. Accept suggestions 
+                          with Tab or click, or ignore to keep as plain text. Toggle highlight visibility as needed.
+                        </p>
+                      </div>
+                    </div>
                   </section>
+
+          
 
                   {/* About OnlyWorlds */}
                   <section className="border-t border-primary-dark pt-4">
@@ -147,7 +162,7 @@ export function HelpModal({ isOpen, onClose }: HelpModalProps) {
                     <p className="text-text-dark/80 text-xs">
                       OnlyWorlds is an open standard for portable world-building data. Your worlds can flow between different tools 
                       and applications. Visit <a href="https://onlyworlds.com" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">onlyworlds.com</a> to 
-                      learn more or explore other tools in the ecosystem.
+                      learn more.
                     </p>
                   </section>
                 </div>

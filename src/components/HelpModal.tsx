@@ -78,7 +78,7 @@ export function HelpModal({ isOpen, onClose }: HelpModalProps) {
                   <section>
                     <h3 className="text-lg font-semibold mb-2">Showcase Mode</h3>
                     <p className="text-xs text-text-dark/80">
-                      Share read-only views of your elements with others using showcase URLs. No authentication required for viewers. Click the Share button on any element to generate a public URL. Showcase pages can be customized to include specific fields. One showcase exists per element, with newer versions overriding older ones.
+                      Share read-only views of your elements with others using showcase URLs. No authentication required for viewers. Click the Share button on any element to generate a public URL. Showcase pages can be customized to exclude specific fields. One showcase exists per element, with newer versions overriding older ones.
                     </p>
                   </section>
 

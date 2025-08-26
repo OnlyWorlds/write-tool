@@ -117,7 +117,24 @@ const FIELD_LABELS: Record<string, string> = {
 
 // Get a friendly label for a field name
 export function getFieldLabel(fieldName: string): string {
-  return FIELD_LABELS[fieldName] || fieldName.replace(/_/g, ' ').replace(/Id$/, '');
+  // Check if we have a predefined label
+  if (FIELD_LABELS[fieldName]) {
+    return FIELD_LABELS[fieldName];
+  }
+  
+  // Otherwise, create a label from the field name
+  // Remove underscores, remove trailing 'Id' or 'Ids', and capitalize first letter
+  let label = fieldName
+    .replace(/_/g, ' ')
+    .replace(/Ids?$/, '')
+    .trim();
+  
+  // Capitalize first letter
+  if (label.length > 0) {
+    label = label.charAt(0).toUpperCase() + label.slice(1);
+  }
+  
+  return label;
 }
 
 // Calculate which elements reference the given element

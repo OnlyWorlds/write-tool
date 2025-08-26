@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useWorldContext } from '../contexts/WorldContext';
-import { useSidebarStore, useEditorStore } from '../stores/uiStore';
-import { FieldRenderer } from './FieldRenderers';
-import { detectFieldType } from '../services/UnifiedFieldTypeService';
-import { ReverseRelationsPanel } from './ReverseRelationsPanel';
 import { TypeManagementService } from '../services/TypeManagementService';
+import { detectFieldType } from '../services/UnifiedFieldTypeService';
+import { useEditorStore, useSidebarStore } from '../stores/uiStore';
+import { FieldRenderer } from './FieldRenderers';
+import { ReverseRelationsPanel } from './ReverseRelationsPanel';
 
 export function EditArea() {
   const { elements, saveElement } = useWorldContext();
@@ -74,23 +74,9 @@ export function EditArea() {
     return null;
   }
   
-  // Case 1: No element selected - show empty state
+  // Case 1: No element selected - don't show panel
   if (!selectedElement || !selectedElementId) {
-    return (
-      <div className="w-96 border-l border-blue-200 dark:border-dark-bg-border flex flex-col bg-white dark:bg-dark-bg-secondary h-full">
-        <div className="h-full flex flex-col">
-          <div className="bg-sidebar-dark dark:bg-dark-bg-tertiary border-b border-border dark:border-dark-bg-border p-4">
-            <h3 className="font-bold text-slate-800 dark:text-gray-200">Element Details</h3>
-            <p className="text-xs text-accent dark:text-blue-400 mt-1">Select an element to view details</p>
-          </div>
-          <div className="flex-1 flex items-center justify-center p-6">
-            <p className="text-sm text-slate-500 dark:text-gray-400 text-center">
-              Select an element from the sidebar to view its details and relationships
-            </p>
-          </div>
-        </div>
-      </div>
-    );
+    return null;
   }
   
   // Case 2: Element selected but no field - show reverse relations

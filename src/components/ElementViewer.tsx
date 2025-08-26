@@ -9,11 +9,11 @@ import { detectFieldType } from '../services/UnifiedFieldTypeService';
 import { useEditorStore, useSidebarStore } from '../stores/uiStore';
 import { CategoryIcon } from '../utils/categoryIcons';
 import { exportElementToPdf, isPdfExportSupported } from '../utils/pdfExport';
+import { EventWriter } from './event/EventWriter';
 import { FieldRenderer } from './FieldRenderers';
 import { FieldTypeIcon } from './FieldTypeIcon';
 import { CollapseAllIcon, ExpandAllIcon } from './icons';
 import { NarrativeWriter } from './narrative/NarrativeWriter';
-import { EventWriter } from './event/EventWriter';
 import { NetworkView } from './NetworkView';
 import { NetworkView3D } from './NetworkView3D';
 
@@ -74,7 +74,7 @@ export function ElementViewer() {
   if (!selectedElement) {
     return (
       <div className="flex-1 flex items-center justify-center text-text-light/60 dark:text-gray-400">
-        <p>select an element from the sidebar to view its details</p>
+        <p>select an element from the sidebar</p>
       </div>
     );
   }

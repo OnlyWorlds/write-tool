@@ -1,9 +1,9 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useWorldContext } from '../contexts/WorldContext';
-import { calculateReverseLinks, groupReverseLinks } from '../utils/reverseLinks';
-import { CategoryIcon } from '../utils/categoryIcons';
 import type { Element } from '../types/world';
+import { CategoryIcon } from '../utils/categoryIcons';
+import { calculateReverseLinks, groupReverseLinks } from '../utils/reverseLinks';
 
 interface ReverseRelationsPanelProps {
   elementId: string;
@@ -92,7 +92,7 @@ export function ReverseRelationsPanel({ elementId }: ReverseRelationsPanelProps)
         </div>
         <div className="flex-1 flex items-center justify-center p-6">
           <p className="text-sm text-slate-500 dark:text-gray-400 text-center">
-            No elements currently reference this one
+            No elements currently link to this one
           </p>
         </div>
       </div>

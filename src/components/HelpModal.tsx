@@ -38,7 +38,7 @@ export function HelpModal({ isOpen, onClose }: HelpModalProps) {
                 {/* Header */}
                 <div className="flex items-center justify-between mb-6">
                   <Dialog.Title className="text-2xl font-semibold">
-                    OnlyWorlds Browse Tool Guide
+                    OnlyWorlds Browse Tool
                   </Dialog.Title>
                   <button
                     onClick={onClose}
@@ -53,118 +53,56 @@ export function HelpModal({ isOpen, onClose }: HelpModalProps) {
                   {/* Overview */}
                   <section>
                     <h3 className="text-lg font-semibold mb-2">Overview</h3>
-                    <p className="text-text-dark/80">
-                      The Browse Tool is a viewer and editor for OnlyWorlds. It offers functionality for 
-                      1. viewing world elements and their relations
-                      2. writing (larger) texts for elements, particularly for narratives and events
-                      3. publishing individual elements to public showcase URLs
+                    <p className="text-text-dark/80 text-xs">
+                      The Browse Tool is a viewer and editor for <a href="https://onlyworlds.com" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">OnlyWorlds</a> and offers three core functions: viewing & editing world elements and their relations, writing extended texts for narratives and events, and publishing individual elements to public showcase URLs.
                     </p>
-                    <div className="mt-3 space-y-2 text-text-dark/80">
+                    <div className="mt-3 space-y-1 text-text-dark/80 text-xs">
                       <p><strong>Left Sidebar:</strong> Select elements</p>
                       <p><strong>Center Panel:</strong> Element view with various modes</p>
-                      <p><strong>Right Panel:</strong> Field editing and reverse relation insights</p> 
+                      <p><strong>Right Panel:</strong> Field editing and reverse relation view</p> 
                     </div>
                   </section>
 
                   {/* Element Editing */}
                   <section>
                     <h3 className="text-lg font-semibold mb-2">Edit Mode</h3>
-                    <div className="space-y-3 text-text-dark/80">
-                      <div> 
-                        <p className="text-xs ml-4">
-                          Default mode for viewing and editing elements. 
-                          Click any field to modify it using right panel.  
-                        </p>
-                      </div>
-                      <div> 
-                   
-                      </div>
-                      <div> 
-                        <p className="text-xs ml-4">
-                          Save individual fields with the Save button in the edit panel, or use Ctrl+S to save all changes at once. 
-                          Press Escape to discard unsaved changes.
-                        </p>
-                      </div>
-                      <div> 
-                        <p className="text-xs ml-4">
-                          Links to the element are shown in right panelwhen no field is selected. View which other elements reference the current element. For example, see all Characters who list this Location as their birthplace.
-                        </p>
-                      </div>
-                    </div>
+                    <p className="text-xs text-text-dark/80">
+                      The default mode for viewing and editing elements. Click any field to modify it using the right panel. Save individual fields with the Save button, or press Ctrl+S to save all changes at once. Press Escape to discard unsaved changes.
+                    </p>
+                    <p className="text-xs text-text-dark/80 mt-2">
+                      When no field is selected, the right panel shows reverse relations—all elements that reference the current one. For example, see which Characters list a Location as their birthplace.
+                    </p>
                   </section>
 
                   {/* Showcase Mode */}
                   <section>
                     <h3 className="text-lg font-semibold mb-2">Showcase Mode</h3>
-                    <div className="space-y-3 text-text-dark/80">
-                      <p className="text-xs">
-                        Share read-only views of your elements with others using showcase URLs. No authentication required for viewers.
-                      </p>
-                      <div>
-                        <p className="text-xs ml-4">
-                          Click the Share button on any element to generate a public showcase URL.  
-                          Showcases pages can be customized to include specific fields. 
-                          One showcase can be created per element, and newer versions override older ones. 
-                        </p>
-                      </div>
-                      <div>
-              
-                      </div>
-                    </div>
+                    <p className="text-xs text-text-dark/80">
+                      Share read-only views of your elements with others using showcase URLs. No authentication required for viewers. Click the Share button on any element to generate a public URL. Showcase pages can be customized to include specific fields. One showcase exists per element, with newer versions overriding older ones.
+                    </p>
                   </section>
 
                   {/* Graph Mode */}
                   <section>
                     <h3 className="text-lg font-semibold mb-2">Network Graph</h3>
-                    <div className="space-y-3 text-text-dark/80">
-                      <p className="text-xs">
-                        View relationships between elements in an interactive 2D or 3D graph.
-                      </p>
-                      <div> 
-                        <ul className="text-xs ml-4 space-y-1">
-                          <li>• <strong>Depth (1-5):</strong> Control how many relationship layers to display</li>
-                          <li>• <strong>Drag nodes:</strong> Reposition elements</li>
-                          <li>• <strong>Click nodes:</strong> Navigate to that element</li>
-                          <li>• <strong>Zoom:</strong> Scroll to zoom in/out</li>
-                          <li>• <strong>Pan:</strong> Right / middle click and drag</li>
-                        </ul>
-                      </div>
-                
-            
-                    </div>
+                    <p className="text-xs text-text-dark/80">
+                      View relationships between elements in an interactive 2D or 3D graph. Control depth (1-5) to show more or fewer relationship layers. Drag nodes to reposition them, click to navigate to an element. Scroll to zoom, right or middle-click and drag to pan the view.
+                    </p>
                   </section>
 
                   {/* Story Writing Mode */}
                   <section>
-                    <h3 className="text-lg font-semibold mb-2">Story Writing Tools</h3>
-                    <div className="space-y-3 text-text-dark/80">
-                      <div>
-                      // pls write this concise, more like a story (no bullet points, and combine for both narrative and event,
-                      the   functionality is msotly hte same for both )
-          
-                      </div>
-              
-                      <div>
-                        <h4 className="font-medium mb-1">Auto-Link Detection</h4>
-                        <p className="text-xs ml-4">
-                          The editor scans your text for element names and offers to link them. Accept suggestions 
-                          with Tab or click, or ignore to keep as plain text. Toggle highlight visibility as needed.
-                        </p>
-                      </div>
-                    </div>
-                  </section>
-
-          
-
-                  {/* About OnlyWorlds */}
-                  <section className="border-t border-primary-dark pt-4">
-                    <h3 className="text-lg font-semibold mb-2">About OnlyWorlds</h3>
-                    <p className="text-text-dark/80 text-xs">
-                      OnlyWorlds is an open standard for portable world-building data. Your worlds can flow between different tools 
-                      and applications. Visit <a href="https://onlyworlds.com" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">onlyworlds.com</a> to 
-                      learn more.
+                    <h3 className="text-lg font-semibold mb-2">Story Writing</h3>
+                    <p className="text-xs text-text-dark/80">
+                      Narrative and Event elements have dedicated writing interfaces with rich text editing and integration of element linking.
+                      The editor automatically detects element names in your text, and offers easy way to 'link' these, through a widget or by typing //elementname, then space.
+                      Linking means that the element is added to the multilink field of its corresponding type for the narrative or event.   
                     </p>
                   </section>
+
+          
+
+     
                 </div>
 
                 {/* Footer */}

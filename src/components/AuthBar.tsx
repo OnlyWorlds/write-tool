@@ -10,11 +10,9 @@ import { ThemeToggle } from './ThemeToggle';
 export function AuthBar() {
   const { authenticate, isLoading, error, isAuthenticated, logout, metadata, worldKey: authenticatedWorldKey, saveElement, elements } = useWorldContext();
   const { hasUnsavedChanges, clearEdits, localEdits, setValidationErrors, clearValidationErrors } = useEditorStore();
-  const { openHelpModal } = useSidebarStore();
-  const [worldKey, setWorldKey] = useState('3550908908');
-   const [pin, setPin] = useState('1111');
-//   const [worldKey, setWorldKey] = useState('');
-//   const [pin, setPin] = useState('');
+  const { openHelpModal } = useSidebarStore(); 
+   const [worldKey, setWorldKey] = useState('');
+   const [pin, setPin] = useState('');
   
   // Set initial values when authenticated
   useEffect(() => {

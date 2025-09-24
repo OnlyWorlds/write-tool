@@ -698,9 +698,9 @@ export function ElementViewer() {
                     <div className={`flex-1 py-3 ${!hideFieldIcons && editMode === 'edit' && !baseFields.includes(fieldName) ? 'pr-4' : 'px-4'}`}>
                       <div className="flex items-start">
                         <label className={`block w-32 flex-shrink-0 cursor-pointer font-bold ${
-                          editMode === 'showcase' 
-                            ? 'text-base text-gray-700 dark:text-gray-300 font-medium' 
-                            : 'text-sm text-blue-600 dark:text-blue-300'
+                          editMode === 'showcase'
+                            ? 'text-base text-gray-700 dark:text-gray-300 font-medium'
+                            : 'text-sm text-slate-700 dark:text-white'
                         }`}>
                           {fieldName.replace(/_/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
                         </label>
@@ -853,9 +853,9 @@ export function ElementViewer() {
                     <div className={`flex-1 py-3 ${!hideFieldIcons && editMode === 'edit' ? 'pr-4' : 'px-4'}`}>
                       <div className="flex items-start">
                         <label className={`block w-32 flex-shrink-0 cursor-pointer font-bold ${
-                          editMode === 'showcase' 
-                            ? 'text-base text-gray-700 font-medium' 
-                            : 'text-sm text-blue-500'
+                          editMode === 'showcase'
+                            ? 'text-base text-gray-700 font-medium'
+                            : 'text-sm text-slate-700 dark:text-white'
                         }`}>
                           {fieldName.replace(/_/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
                         </label>

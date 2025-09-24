@@ -59,7 +59,7 @@ const FieldViewer = memo(function FieldViewer({ fieldName, value, fieldTypeInfo,
           href={value} 
           target="_blank" 
           rel="noopener noreferrer"
-          className={`text-blue-600 dark:text-white dark:font-bold hover:text-blue-800 dark:hover:text-gray-200 hover:underline ${className}`}
+          className={`text-slate-800 font-bold dark:text-white hover:text-slate-600 dark:hover:text-gray-200 hover:underline ${className}`}
         >
           {value}
         </a>
@@ -121,7 +121,7 @@ const FieldViewer = memo(function FieldViewer({ fieldName, value, fieldTypeInfo,
                 e.preventDefault();
                 navigate(`/element/${value}`);
               }}
-              className={`text-blue-600 dark:text-white dark:font-bold hover:text-blue-800 dark:hover:text-gray-200 hover:underline cursor-pointer ${className}`}
+              className={`text-slate-800 font-bold dark:text-white hover:text-slate-600 dark:hover:text-gray-200 hover:underline cursor-pointer ${className}`}
             >
               {linkedElement.name}
             </button>
@@ -152,7 +152,7 @@ const FieldViewer = memo(function FieldViewer({ fieldName, value, fieldTypeInfo,
                   <button
                     key={index}
                     onClick={() => navigate(`/element/${linkId}`)}
-                    className="block text-blue-600 dark:text-white dark:font-bold hover:text-blue-800 dark:hover:text-gray-200 hover:underline text-left"
+                    className="block text-slate-800 font-bold dark:text-white hover:text-slate-600 dark:hover:text-gray-200 hover:underline text-left"
                   >
                     {linkedElement.name}
                   </button>

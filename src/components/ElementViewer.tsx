@@ -669,12 +669,12 @@ export function ElementViewer() {
                     onClick={() => editMode === 'edit' && selectField(selectedFieldId === fieldName ? null : fieldName)}
                     className={`mb-3 rounded-lg transition-all relative flex items-start ${
                       editMode === 'showcase' 
-                        ? 'bg-zinc-50 dark:bg-dark-bg-tertiary border border-slate-200 dark:border-dark-bg-border shadow-sm' 
+                        ? 'bg-gray-200 dark:bg-dark-bg-tertiary border border-slate-200 dark:border-dark-bg-border shadow-sm' 
                         : error
                           ? 'bg-red-50 dark:bg-red-900/20 cursor-pointer'
                           : selectedFieldId === fieldName 
                             ? 'bg-blue-100 dark:bg-blue-900/40 border-blue-300 dark:border-blue-500 shadow-md cursor-pointer' 
-                            : 'bg-zinc-50 dark:bg-dark-bg-tertiary hover:bg-zinc-100 dark:hover:bg-dark-bg-hover shadow-sm hover:shadow-md cursor-pointer'
+                            : 'bg-gray-200 dark:bg-dark-bg-tertiary hover:bg-gray-300 dark:hover:bg-dark-bg-hover shadow-sm hover:shadow-md cursor-pointer'
                     }`}
                   >
                     {/* Category icon for link fields */}
@@ -824,12 +824,12 @@ export function ElementViewer() {
                     onClick={() => editMode === 'edit' && selectField(selectedFieldId === fieldName ? null : fieldName)}
                     className={`rounded-lg transition-all relative flex items-start ${
                       editMode === 'showcase' 
-                        ? 'bg-zinc-50 dark:bg-dark-bg-tertiary border border-slate-200 dark:border-dark-bg-border shadow-sm' 
+                        ? 'bg-gray-200 dark:bg-dark-bg-tertiary border border-slate-200 dark:border-dark-bg-border shadow-sm' 
                         : error
                           ? 'bg-red-50 dark:bg-red-900/20 cursor-pointer'
                           : selectedFieldId === fieldName 
                             ? 'bg-blue-100 dark:bg-blue-900/40 border-blue-300 dark:border-blue-500 shadow-md cursor-pointer' 
-                            : 'bg-zinc-50 dark:bg-dark-bg-tertiary hover:bg-zinc-100 dark:hover:bg-dark-bg-hover shadow-sm hover:shadow-md cursor-pointer'
+                            : 'bg-gray-200 dark:bg-dark-bg-tertiary hover:bg-gray-300 dark:hover:bg-dark-bg-hover shadow-sm hover:shadow-md cursor-pointer'
                     }`}
                   >
                     {/* Category icon for link fields */}

@@ -1,4 +1,4 @@
-import { QuestionMarkCircleIcon } from '@heroicons/react/24/outline';
+import { QuestionMarkCircleIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import { FormEvent, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useWorldContext } from '../contexts/WorldContext';
@@ -6,6 +6,7 @@ import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { ValidationService } from '../services/ValidationService';
 import { useEditorStore, useSidebarStore } from '../stores/uiStore';
 import { ThemeToggle } from './ThemeToggle';
+import { copyWorldToClipboard } from '../utils/worldExport';
 
 export function AuthBar() {
   const { authenticate, isLoading, error, isAuthenticated, logout, metadata, worldKey: authenticatedWorldKey, saveElement, elements } = useWorldContext();
@@ -117,6 +118,24 @@ export function AuthBar() {
     }
   };
 
+  const handleExportWorld = async () => {
+    if (!isAuthenticated) return;
+
+    try {
+      await copyWorldToClipboard(elements, metadata, authenticatedWorldKey || worldKey);
+      toast.success(
+        <div>
+          <p className="font-semibold">World exported!</p>
+          <p className="text-sm">JSON copied to clipboard</p>
+        </div>,
+        { duration: 3000 }
+      );
+    } catch (error) {
+      console.error('Export error:', error);
+      toast.error('Failed to export world');
+    }
+  };
+
   return (
     <div className="flex items-center justify-between p-4 bg-primary dark:bg-dark-bg-primary text-text-dark shadow-lg">
       <form onSubmit={handleSubmit} className="flex items-center gap-2">
@@ -165,9 +184,20 @@ export function AuthBar() {
       </form>
       
       <div className="flex items-center gap-2">
+        {/* Export button - only show when authenticated */}
+        {isAuthenticated && (
+          <button
+            onClick={handleExportWorld}
+            className="p-2 rounded hover:bg-primary-dark dark:hover:bg-dark-bg-secondary transition-colors"
+            title="Export World to JSON (copies to clipboard)"
+          >
+            <ArrowDownTrayIcon className="h-5 w-5 text-text-dark/70 hover:text-text-dark" />
+          </button>
+        )}
+
         {/* Theme toggle */}
         <ThemeToggle />
-        
+
         {/* Help button */}
         <button
           onClick={openHelpModal}

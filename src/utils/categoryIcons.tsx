@@ -27,8 +27,8 @@ const categoryIconMap: Record<string, string> = {
   // Main categories with correct Material Icons names
   character: 'person',
   characters: 'person',
-  object: 'hub', // webhook icon
-  objects: 'hub',
+  object: 'webhook', // webhook icon
+  objects: 'webhook',
   location: 'castle',
   locations: 'castle',
   family: 'supervisor_account',
@@ -37,27 +37,27 @@ const categoryIconMap: Record<string, string> = {
   creatures: 'bug_report',
   institution: 'business',
   institutions: 'business',
-  trait: 'ac_unit', // flaky/snowflake icon
-  traits: 'ac_unit',
-  species: 'child_care', // crib icon
+  trait: 'flaky', // snowflake icon
+  traits: 'flaky',
+  species: 'crib', // crib/DNA icon
   zone: 'architecture',
   zones: 'architecture',
-  ability: 'auto_fix_high', // auto fix icon
-  abilities: 'auto_fix_high',
-  collective: 'groups',
-  collectives: 'groups',
+  ability: 'auto_fix_normal', // auto fix icon
+  abilities: 'auto_fix_normal',
+  collective: 'groups_3',
+  collectives: 'groups_3',
   title: 'military_tech',
   titles: 'military_tech',
-  language: 'translate',
-  languages: 'translate',
+  language: 'edit_road',
+  languages: 'edit_road',
   phenomenon: 'thunderstorm',
   phenomena: 'thunderstorm',
-  law: 'gavel', // law/gavel icon
-  laws: 'gavel',
+  law: 'gpp_bad', // shield/gavel icon
+  laws: 'gpp_bad',
   relation: 'link',
   relations: 'link',
-  event: 'event',
-  events: 'event',
+  event: 'saved_search',
+  events: 'saved_search',
   construct: 'api',
   constructs: 'api',
   marker: 'place',

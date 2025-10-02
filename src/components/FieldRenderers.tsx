@@ -515,10 +515,9 @@ const FieldEditor = memo(function FieldEditor({ fieldName, value, fieldTypeInfo,
         <textarea
           value={localValue || ''}
           onChange={(e) => handleChange(e.target.value)}
-          className={`${baseTextareaClass} min-h-[100px] resize-y overflow-y-auto`}
+          className={`${baseTextareaClass} resize-y overflow-y-auto`}
           placeholder="enter text..."
-          rows={5}
-          style={{ maxHeight: '400px' }}
+          style={{ height: '60vh', maxHeight: '80vh' }}
         />
       );
       
@@ -546,26 +545,14 @@ const FieldEditor = memo(function FieldEditor({ fieldName, value, fieldTypeInfo,
       );
       
     default:
-      // For longer text values, use a textarea instead of input
-      if (localValue && typeof localValue === 'string' && localValue.length > 100) {
-        return (
-          <textarea
-            value={localValue || ''}
-            onChange={(e) => handleChange(e.target.value)}
-            className={`${baseTextareaClass} min-h-[100px] resize-y overflow-y-auto`}
-            placeholder="enter text..."
-            rows={5}
-            style={{ maxHeight: '400px' }}
-          />
-        );
-      }
+      // Use textarea for all text fields to give more space
       return (
-        <input
-          type="text"
+        <textarea
           value={localValue || ''}
           onChange={(e) => handleChange(e.target.value)}
-          className={baseInputClass}
+          className={`${baseTextareaClass} resize-y overflow-y-auto`}
           placeholder="enter text..."
+          style={{ height: '60vh', maxHeight: '80vh' }}
         />
       );
   }

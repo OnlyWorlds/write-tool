@@ -458,19 +458,25 @@ export function ElementViewer() {
                       <button
                         onClick={handlePublishShowcase}
                         disabled={isPublishing}
-                        className="text-sm text-white bg-accent hover:bg-accent-hover px-3 py-1 rounded-full transition-colors disabled:opacity-50"
+                        className="px-4 py-2 text-sm font-medium rounded-lg transition-all shadow-sm flex items-center gap-2 bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-900/60 text-blue-900 dark:text-blue-200 border border-blue-200 dark:border-blue-700/50 disabled:opacity-50"
                         data-exclude-from-export
                       >
-                        {isPublishing ? 'Publishing...' : 'Publish'}
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                        <span>{isPublishing ? 'Publishing...' : 'Publish'}</span>
                       </button>
                       {isPdfExportSupported() && (
                         <button
                           onClick={handleExport}
                           disabled={isExporting}
-                          className="text-sm text-accent hover:text-accent-hover bg-info-bg hover:bg-info-bg/80 px-3 py-1 rounded-full transition-colors disabled:opacity-50"
+                          className="px-4 py-2 text-sm font-medium rounded-lg transition-all shadow-sm flex items-center gap-2 bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-900/60 text-blue-900 dark:text-blue-200 border border-blue-200 dark:border-blue-700/50 disabled:opacity-50"
                           data-exclude-from-export
                         >
-                          {isExporting ? 'Creating PDF...' : 'Create PDF'}
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                          </svg>
+                          <span>{isExporting ? 'Creating PDF...' : 'Create PDF'}</span>
                         </button>
                       )}
                     </>

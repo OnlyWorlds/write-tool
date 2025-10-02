@@ -54,13 +54,14 @@ interface SidebarState {
   filterText: string;
   createModalOpen: boolean;
   createModalCategory: string | null;
+  createModalAutoSelect: boolean;
   helpModalOpen: boolean;
   showEmptyCategories: boolean;
   sortAlphabetically: boolean;
   toggleCategory: (category: string) => void;
   selectElement: (id: string | null) => void;
   setFilterText: (text: string) => void;
-  openCreateModal: (category: string) => void;
+  openCreateModal: (category: string, autoSelect?: boolean) => void;
   closeCreateModal: () => void;
   openHelpModal: () => void;
   closeHelpModal: () => void;
@@ -76,9 +77,16 @@ export const useSidebarStore = create<SidebarState>((set) => ({
   filterText: '',
   createModalOpen: false,
   createModalCategory: null,
+  createModalAutoSelect: true,
   helpModalOpen: false,
-  showEmptyCategories: true,
-  sortAlphabetically: false,
+  showEmptyCategories: (() => {
+    const saved = localStorage.getItem('showEmptyCategories');
+    return saved !== null ? JSON.parse(saved) : true;
+  })(),
+  sortAlphabetically: (() => {
+    const saved = localStorage.getItem('sortAlphabetically');
+    return saved !== null ? JSON.parse(saved) : false;
+  })(),
   toggleCategory: (category) => set((state) => {
     const newExpanded = new Set(state.expandedCategories);
     if (newExpanded.has(category)) {
@@ -90,8 +98,8 @@ export const useSidebarStore = create<SidebarState>((set) => ({
   }),
   selectElement: (id) => set({ selectedElementId: id }),
   setFilterText: (text) => set({ filterText: text }),
-  openCreateModal: (category) => set({ createModalOpen: true, createModalCategory: category }),
-  closeCreateModal: () => set({ createModalOpen: false, createModalCategory: null }),
+  openCreateModal: (category, autoSelect = true) => set({ createModalOpen: true, createModalCategory: category, createModalAutoSelect: autoSelect }),
+  closeCreateModal: () => set({ createModalOpen: false, createModalCategory: null, createModalAutoSelect: true }),
   openHelpModal: () => set({ helpModalOpen: true }),
   closeHelpModal: () => set({ helpModalOpen: false }),
   expandAllCategories: (categories) => set({ expandedCategories: new Set(categories) }),
@@ -104,8 +112,16 @@ export const useSidebarStore = create<SidebarState>((set) => ({
       return { expandedCategories: new Set(categories) };
     }
   }),
-  toggleShowEmptyCategories: () => set((state) => ({ showEmptyCategories: !state.showEmptyCategories })),
-  toggleSortMode: () => set((state) => ({ sortAlphabetically: !state.sortAlphabetically })),
+  toggleShowEmptyCategories: () => set((state) => {
+    const newValue = !state.showEmptyCategories;
+    localStorage.setItem('showEmptyCategories', JSON.stringify(newValue));
+    return { showEmptyCategories: newValue };
+  }),
+  toggleSortMode: () => set((state) => {
+    const newValue = !state.sortAlphabetically;
+    localStorage.setItem('sortAlphabetically', JSON.stringify(newValue));
+    return { sortAlphabetically: newValue };
+  }),
 }));
 
 interface EditorState {

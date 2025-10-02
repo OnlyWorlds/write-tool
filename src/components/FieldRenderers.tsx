@@ -1,5 +1,6 @@
 import { memo, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { PlusCircleIcon } from '@heroicons/react/24/outline';
 import { useWorldContext } from '../contexts/WorldContext';
 import { detectFieldType, type FieldTypeInfo } from '../services/UnifiedFieldTypeService';
 import { useSidebarStore } from '../stores/uiStore';
@@ -16,6 +17,21 @@ interface FieldRendererProps {
   className?: string;
   selectedElement?: any; // For accessing supertype when editing subtype
   linkedElements?: Record<string, LinkedElement>; // For showcase mode
+}
+
+// Helper component for creating new elements when no linkable elements exist
+function CreateElementButton({ category }: { category: string }) {
+  const { openCreateModal } = useSidebarStore();
+
+  return (
+    <button
+      onClick={() => openCreateModal(category, false)} // Don't auto-select when created from link field
+      className="w-full px-2 py-2 hover:bg-gray-100 dark:hover:bg-dark-bg-hover rounded-md transition-colors flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
+    >
+      <PlusCircleIcon className="w-5 h-5" />
+      <span className="text-sm">Create new {category}</span>
+    </button>
+  );
 }
 
 export const FieldRenderer = memo(function FieldRenderer({ fieldName, value, elementCategory, mode, onChange, className, selectedElement, linkedElements }: FieldRendererProps) {
@@ -427,13 +443,18 @@ const FieldEditor = memo(function FieldEditor({ fieldName, value, fieldTypeInfo,
       
     case 'link':
       const allElements = Array.from(elements.values());
-      
+
       // Filter elements by category if specified in field type info
       let filteredElements = allElements;
       if (linkedCategory) {
         filteredElements = allElements.filter(el => el.category === linkedCategory);
       }
-      
+
+      // If no elements exist for this category, show create button
+      if (filteredElements.length === 0 && linkedCategory) {
+        return <CreateElementButton category={linkedCategory} />;
+      }
+
       return (
         <div className="space-y-2">
           <select
@@ -456,15 +477,20 @@ const FieldEditor = memo(function FieldEditor({ fieldName, value, fieldTypeInfo,
       
     case 'links':
       const allElementsForLinks = Array.from(elements.values());
-      
+
       // Filter elements by category if specified in field type info
       let filteredElementsForLinks = allElementsForLinks;
       if (linkedCategory) {
         filteredElementsForLinks = allElementsForLinks.filter(el => el.category === linkedCategory);
       }
-      
+
       const currentLinks = Array.isArray(localValue) ? localValue : [];
-      
+
+      // If no elements exist for this category and no current links, show create button
+      if (filteredElementsForLinks.length === 0 && currentLinks.length === 0 && linkedCategory) {
+        return <CreateElementButton category={linkedCategory} />;
+      }
+
       return (
         <div className="space-y-3">
           <div className="space-y-2">
@@ -488,25 +514,29 @@ const FieldEditor = memo(function FieldEditor({ fieldName, value, fieldTypeInfo,
               );
             })}
           </div>
-          
-          <select
-            value=""
-            onChange={(e) => {
-              if (e.target.value && !currentLinks.includes(e.target.value)) {
-                handleChange([...currentLinks, e.target.value]);
-              }
-            }}
-            className={baseInputClass}
-          >
-            <option value="">Choose element...</option>
-            {filteredElementsForLinks
-              .filter(element => !currentLinks.includes(element.id))
-              .map(element => (
-                <option key={element.id} value={element.id}>
-                  {element.name} ({element.category})
-                </option>
-              ))}
-          </select>
+
+          {filteredElementsForLinks.length > 0 ? (
+            <select
+              value=""
+              onChange={(e) => {
+                if (e.target.value && !currentLinks.includes(e.target.value)) {
+                  handleChange([...currentLinks, e.target.value]);
+                }
+              }}
+              className={baseInputClass}
+            >
+              <option value="">Choose element...</option>
+              {filteredElementsForLinks
+                .filter(element => !currentLinks.includes(element.id))
+                .map(element => (
+                  <option key={element.id} value={element.id}>
+                    {element.name} ({element.category})
+                  </option>
+                ))}
+            </select>
+          ) : linkedCategory ? (
+            <CreateElementButton category={linkedCategory} />
+          ) : null}
         </div>
       );
       

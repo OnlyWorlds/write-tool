@@ -8,7 +8,7 @@ import { useSidebarStore } from '../stores/uiStore';
 import { FieldRenderer } from './FieldRenderers';
 
 export function CreateElementModal() {
-  const { createModalOpen, createModalCategory, closeCreateModal } = useSidebarStore();
+  const { createModalOpen, createModalCategory, createModalAutoSelect, closeCreateModal } = useSidebarStore();
   const { createElement, elements } = useWorldContext();
   const navigate = useNavigate();
   
@@ -69,14 +69,16 @@ export function CreateElementModal() {
       };
       
       const createdElement = await createElement(newElement);
-      
+
       // Reset form and close modal
       setFormData({});
       closeCreateModal();
-      
-      // Navigate to the newly created element
-      navigate(`/element/${createdElement.id}`);
-      
+
+      // Only navigate to the element if autoSelect is true
+      if (createModalAutoSelect) {
+        navigate(`/element/${createdElement.id}`);
+      }
+
       // Show success message
       toast.success(`created ${createdElement.name} successfully!`);
     } catch (err) {

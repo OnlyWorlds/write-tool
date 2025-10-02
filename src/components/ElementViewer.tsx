@@ -19,7 +19,7 @@ import { NetworkView3D } from './NetworkView3D';
 
 export function ElementViewer() {
   const { elements, worldKey, pin, deleteElement, updateElement, saveElement } = useWorldContext();
-  const { selectedElementId } = useSidebarStore();
+  const { selectedElementId, toggleCategory } = useSidebarStore();
   const { selectedFieldId, selectField, getEditedValue, editMode, getFieldError, isFieldVisible, toggleFieldVisibility, toggleMode, setMode, resetHiddenFields, hiddenFields, setFieldValue } = useEditorStore();
   const navigate = useNavigate();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -428,12 +428,12 @@ export function ElementViewer() {
                   )}
                   {unsavedFieldsForElement.length > 0 && editMode === 'edit' && (
                     <>
-                      <span 
-                        className="text-sm text-accent dark:text-blue-400 bg-info-bg dark:bg-blue-900/20 px-3 py-1 rounded-full cursor-help" 
+                      <span
+                        className="text-sm text-accent dark:text-blue-400 bg-info-bg dark:bg-blue-900/20 px-3 py-1 rounded-full cursor-help"
                         data-exclude-from-export
                         title={`unsaved changes in: ${unsavedFieldsForElement.map(f => f.fieldName.replace(/_/g, ' ')).join(', ')}`}
                       >
-                        {unsavedFieldsForElement.length} unsaved {unsavedFieldsForElement.length === 1 ? 'change' : 'changes'}
+                        {unsavedFieldsForElement.length} unsaved
                       </span>
                       <button
                         onClick={handleSaveAll}
@@ -441,7 +441,7 @@ export function ElementViewer() {
                         className="text-sm text-white bg-green-600 dark:bg-green-700 hover:bg-green-700 dark:hover:bg-green-600 px-3 py-1 rounded-full transition-colors disabled:opacity-50"
                         data-exclude-from-export
                       >
-                        {isSavingAll ? 'Saving...' : 'Save All'}
+                        {isSavingAll ? 'saving...' : 'save'}
                       </button>
                       <button
                         onClick={handleDiscardAll}
@@ -449,7 +449,7 @@ export function ElementViewer() {
                         className="text-sm text-slate-600 dark:text-gray-300 bg-slate-200 dark:bg-dark-bg-tertiary hover:bg-slate-300 dark:hover:bg-dark-bg-hover px-3 py-1 rounded-full transition-colors disabled:opacity-50"
                         data-exclude-from-export
                       >
-                        Discard All
+                        discard
                       </button>
                     </>
                   )}
@@ -685,12 +685,21 @@ export function ElementViewer() {
                   >
                     {/* Category icon for link fields */}
                     {!hideFieldIcons && editMode === 'edit' && (fieldTypeInfo.type === 'link' || fieldTypeInfo.type === 'links') && (
-                      <div className="absolute -left-5 top-4 flex items-center justify-center w-3 h-3">
-                        <CategoryIcon 
-                          category={fieldTypeInfo.linkedCategory || 'category'} 
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (fieldTypeInfo.linkedCategory) {
+                            toggleCategory(fieldTypeInfo.linkedCategory);
+                          }
+                        }}
+                        className="absolute -left-5 top-4 flex items-center justify-center w-3 h-3 cursor-pointer hover:text-slate-600 dark:hover:text-gray-300 transition-colors"
+                        title={`Toggle ${fieldTypeInfo.linkedCategory || 'category'} category`}
+                      >
+                        <CategoryIcon
+                          category={fieldTypeInfo.linkedCategory || 'category'}
                           className="text-[12px] text-slate-400/70"
                         />
-                      </div>
+                      </button>
                     )}
                     {/* Field type icon */}
                     {!hideFieldIcons && editMode === 'edit' && !baseFields.includes(fieldName) && (
@@ -840,12 +849,21 @@ export function ElementViewer() {
                   >
                     {/* Category icon for link fields */}
                     {!hideFieldIcons && editMode === 'edit' && (fieldTypeInfo.type === 'link' || fieldTypeInfo.type === 'links') && (
-                      <div className="absolute -left-5 top-4 flex items-center justify-center w-3 h-3">
-                        <CategoryIcon 
-                          category={fieldTypeInfo.linkedCategory || 'category'} 
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (fieldTypeInfo.linkedCategory) {
+                            toggleCategory(fieldTypeInfo.linkedCategory);
+                          }
+                        }}
+                        className="absolute -left-5 top-4 flex items-center justify-center w-3 h-3 cursor-pointer hover:text-slate-600 dark:hover:text-gray-300 transition-colors"
+                        title={`Toggle ${fieldTypeInfo.linkedCategory || 'category'} category`}
+                      >
+                        <CategoryIcon
+                          category={fieldTypeInfo.linkedCategory || 'category'}
                           className="text-[12px] text-slate-400/70"
                         />
-                      </div>
+                      </button>
                     )}
                     {/* Field type icon */}
                     {!hideFieldIcons && editMode === 'edit' && (

@@ -6,6 +6,7 @@ import { useEditorStore, useSidebarStore } from '../stores/uiStore';
 import { FieldRenderer } from './FieldRenderers';
 import { ReverseRelationsPanel } from './ReverseRelationsPanel';
 import { calculateReverseLinks } from '../utils/reverseLinks';
+import { CategoryIcon } from '../utils/categoryIcons';
 
 export function EditArea() {
   const { elements, saveElement } = useWorldContext();
@@ -111,9 +112,17 @@ export function EditArea() {
         <div className="p-4">
           <div className="flex items-center justify-between">
             <div className="flex flex-col gap-1">
-              <h3 className="font-bold text-slate-800 dark:text-gray-200 capitalize">
-                {selectedFieldId.replace(/_/g, ' ')}
-              </h3>
+              <div className="flex items-center gap-2">
+                {(fieldTypeInfo.type === 'link' || fieldTypeInfo.type === 'links') && fieldTypeInfo.linkedCategory && (
+                  <CategoryIcon
+                    category={fieldTypeInfo.linkedCategory}
+                    className="text-[18px] text-slate-600 dark:text-gray-400"
+                  />
+                )}
+                <h3 className="font-bold text-slate-800 dark:text-gray-200 capitalize">
+                  {selectedFieldId.replace(/_/g, ' ')}
+                </h3>
+              </div>
               <span className="text-xs text-accent dark:text-blue-400">
                 ({fieldTypeInfo.type === 'textarea' ? 'text' : fieldTypeInfo.type} field)
               </span>

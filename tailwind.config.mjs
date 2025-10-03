@@ -5,7 +5,7 @@ export default {
   theme: {
     extend: {
       colors: {
-        // OnlyWorlds Browse Tool - Vibrant color palette with dark mode support
+        // OnlyWorlds Write Tool - Vibrant color palette with dark mode support
         primary: {
           DEFAULT: '#2c3e50', // Dark blue-grey
           dark: '#1a2531',    // Darker border

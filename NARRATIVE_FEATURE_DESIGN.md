@@ -1,8 +1,8 @@
-# OnlyWorlds Browse Tool: Narrative Writing Features Design Document
+# OnlyWorlds Write Tool: Narrative Writing Features Design Document
 
 ## Executive Summary
 
-This document outlines a comprehensive design for adding narrative writing capabilities to the OnlyWorlds Browse Tool. The design leverages OnlyWorlds' unique data model where Narratives and Events are first-class elements, enabling sophisticated story management that goes beyond traditional linear text editors.
+This document outlines a comprehensive design for adding narrative writing capabilities to the OnlyWorlds Write Tool. The design leverages OnlyWorlds' unique data model where Narratives and Events are first-class elements, enabling sophisticated story management that goes beyond traditional linear text editors.
 
 ## Core Concepts
 
@@ -212,7 +212,7 @@ Add "Story Mode" to the existing edit/showcase/network modes:
 3. **Theme**: Should story mode have a distinct visual theme? Perhaps a more paper-like aesthetic?
 
 ### Strategic Questions
-1. **Scope**: Should this be part of Browse Tool or a separate "Write Tool"?
+1. **Scope**: Should this be part of Write Tool or a separate tool?
 
 2. **Integration**: How deeply should this integrate with the upcoming Timeline Tool mentioned in the comprehensive guide?
 
@@ -246,9 +246,9 @@ Add "Story Mode" to the existing edit/showcase/network modes:
 
 ## Conclusion
 
-Adding narrative writing features to the OnlyWorlds Browse Tool would create a unique story creation environment that leverages the power of interconnected world elements. Unlike traditional writing tools that treat stories as isolated documents, this approach treats narratives as living parts of the world, creating opportunities for deeper storytelling and world consistency.
+Adding narrative writing features to the OnlyWorlds Write Tool would create a unique story creation environment that leverages the power of interconnected world elements. Unlike traditional writing tools that treat stories as isolated documents, this approach treats narratives as living parts of the world, creating opportunities for deeper storytelling and world consistency.
 
-The phased implementation approach allows for iterative development and user feedback, ensuring we build the most valuable features first. The design maintains the familiar Browse Tool interface while adding story-specific functionality that enhances rather than replaces the existing experience.
+The phased implementation approach allows for iterative development and user feedback, ensuring we build the most valuable features first. The design maintains the familiar Write Tool interface while adding story-specific functionality that enhances rather than replaces the existing experience.
 
 ## Next Steps
 1. Review and prioritize features based on user needs

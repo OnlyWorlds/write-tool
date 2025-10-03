@@ -5,7 +5,7 @@ import { App } from './App';
 
 export function AppWrapper() {
   return (
-    <BrowserRouter basename="/browse-tool">
+    <BrowserRouter>
       <WorldProvider>
         <App />
         <Toaster 

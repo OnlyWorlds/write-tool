@@ -1,6 +1,5 @@
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-import type { Element } from '../types/world';
 
 export interface ExportOptions {
   elementName: string;
@@ -71,8 +70,8 @@ export async function exportElementToPdf(
     pdf.setProperties({
       title: `${options.elementName} - OnlyWorlds Export`,
       subject: 'OnlyWorlds Element Export',
-      author: 'OnlyWorlds Browse Tool',
-      creator: 'OnlyWorlds Browse Tool'
+      author: 'OnlyWorlds Write Tool',
+      creator: 'OnlyWorlds Write Tool'
     });
     
     // Save the PDF

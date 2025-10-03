@@ -31,6 +31,6 @@ describe('App', () => {
       </BrowserRouter>
     );
     
-    expect(screen.getByText('Welcome to the OnlyWorlds Browse Tool!')).toBeInTheDocument();
+    expect(screen.getByText('Welcome to the OnlyWorlds Write Tool!')).toBeInTheDocument();
   });
 });

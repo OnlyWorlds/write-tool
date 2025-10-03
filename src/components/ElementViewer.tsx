@@ -225,7 +225,7 @@ export function ElementViewer() {
       if (response) {
         // Generate the shareable URL - always use production URL
         // This ensures the showcase link works regardless of where it's published from
-        const productionUrl = 'https://onlyworlds.github.io/browse-tool';
+        const productionUrl = 'https://onlyworlds.github.io/write-tool';
         const shareableUrl = `${productionUrl}/showcase/${response.showcase_id}`;
         
         // Copy to clipboard

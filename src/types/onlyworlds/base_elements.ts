@@ -7,7 +7,7 @@ export interface BaseElement {
   subtype?: string | null;
   imageUrl?: string | null;
   world?: string | null;
-  // Additional fields used by the browse tool
+  // Additional fields used by the write tool
   category?: string;
   is_public?: boolean;
   created_at?: string;

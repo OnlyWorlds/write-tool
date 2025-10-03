@@ -38,7 +38,7 @@ export function HelpModal({ isOpen, onClose }: HelpModalProps) {
                 {/* Header */}
                 <div className="flex items-center justify-between mb-6">
                   <Dialog.Title className="text-2xl font-semibold">
-                    OnlyWorlds Browse Tool
+                    OnlyWorlds Write Tool
                   </Dialog.Title>
                   <button
                     onClick={onClose}
@@ -54,7 +54,7 @@ export function HelpModal({ isOpen, onClose }: HelpModalProps) {
                   <section>
                     <h3 className="text-lg font-semibold mb-2">Overview</h3>
                     <p className="text-text-dark/80 text-xs">
-                      The Browse Tool is a viewer and editor for <a href="https://onlyworlds.com" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">OnlyWorlds</a> and offers three core functions: viewing & editing world elements and their relations, writing extended texts for narratives and events, and publishing individual elements to public showcase URLs.
+                      The Write Tool is a viewer and editor for <a href="https://onlyworlds.com" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">OnlyWorlds</a> and offers three core functions: viewing & editing world elements and their relations, writing extended texts for narratives and events, and publishing individual elements to public showcase URLs.
                     </p>
                     <div className="mt-3 space-y-1 text-text-dark/80 text-xs">
                       <p><strong>Left Sidebar:</strong> Select elements</p>

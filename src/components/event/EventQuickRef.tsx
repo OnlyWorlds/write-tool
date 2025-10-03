@@ -53,7 +53,7 @@ function LinkedElementItem({ element, isInText, mentionCount, onInsert, onUnlink
           <button
             onClick={(e) => {
               e.stopPropagation();
-              const elementUrl = `/browse-tool/element/${element.id}`;
+              const elementUrl = `/write-tool/element/${element.id}`;
               window.open(elementUrl, '_blank');
             }}
             className="p-2 text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors"

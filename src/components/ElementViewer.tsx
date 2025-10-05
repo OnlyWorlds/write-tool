@@ -464,7 +464,7 @@ export function ElementViewer() {
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                         </svg>
-                        <span>{isPublishing ? 'Publishing...' : 'Publish'}</span>
+                        <span>{isPublishing ? 'publishing...' : 'publish'}</span>
                       </button>
                       {isPdfExportSupported() && (
                         <button
@@ -476,7 +476,7 @@ export function ElementViewer() {
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                           </svg>
-                          <span>{isExporting ? 'Creating PDF...' : 'Create PDF'}</span>
+                          <span>{isExporting ? 'creating PDF...' : 'create PDF'}</span>
                         </button>
                       )}
                     </>
@@ -492,7 +492,7 @@ export function ElementViewer() {
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>
-                        <span>Edit</span>
+                        <span>edit</span>
                       </button>
                     )}
                     {editMode !== 'showcase' && (
@@ -505,7 +505,7 @@ export function ElementViewer() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                         </svg>
-                        <span>Showcase</span>
+                        <span>showcase</span>
                       </button>
                     )}
                     {editMode !== 'network' && (
@@ -523,7 +523,7 @@ export function ElementViewer() {
                           <circle cx="20" cy="16" r="2" strokeWidth={2} />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 11L4 8M9 13L4 16M15 11L20 8M15 13L20 16" />
                         </svg>
-                        <span>Network</span>
+                        <span>network</span>
                       </button>
                     )}
                     {(selectedElement.category === 'narrative' || selectedElement.category === 'event') && editMode !== 'write' && (
@@ -537,7 +537,7 @@ export function ElementViewer() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
                                 d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                         </svg>
-                        <span>Write</span>
+                        <span>write</span>
                       </button>
                     )}
                   </div>
@@ -554,7 +554,7 @@ export function ElementViewer() {
                       onChange={(e) => setHideEmptyFields(e.target.checked)}
                       className="w-4 h-4 text-accent rounded border-gray-300 focus:ring-accent"
                     />
-                    <span className="text-text-light/60 dark:text-gray-400">Hide empty</span>
+                    <span className="text-text-light/60 dark:text-gray-400">hide empty</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer text-sm">
                     <input
@@ -563,7 +563,7 @@ export function ElementViewer() {
                       onChange={(e) => setExpandAllFields(e.target.checked)}
                       className="w-4 h-4 text-accent rounded border-gray-300 focus:ring-accent"
                     />
-                    <span className="text-text-light/60 dark:text-gray-400">Always expand</span>
+                    <span className="text-text-light/60 dark:text-gray-400">always expand</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer text-sm">
                     <input
@@ -572,7 +572,7 @@ export function ElementViewer() {
                       onChange={(e) => setHideFieldIcons(e.target.checked)}
                       className="w-4 h-4 text-accent rounded border-gray-300 focus:ring-accent"
                     />
-                    <span className="text-text-light/60 dark:text-gray-400">Hide icons</span>
+                    <span className="text-text-light/60 dark:text-gray-400">hide icons</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer text-sm">
                     <input
@@ -581,7 +581,7 @@ export function ElementViewer() {
                       onChange={(e) => setSortAlphabetically(e.target.checked)}
                       className="w-4 h-4 text-accent rounded border-gray-300 focus:ring-accent"
                     />
-                    <span className="text-text-light/60 dark:text-gray-400">Sort A-Z</span>
+                    <span className="text-text-light/60 dark:text-gray-400">sort A-Z</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer text-sm">
                     <input
@@ -590,7 +590,7 @@ export function ElementViewer() {
                       onChange={(e) => setHideSections(e.target.checked)}
                       className="w-4 h-4 text-accent rounded border-gray-300 focus:ring-accent"
                     />
-                    <span className="text-text-light/60 dark:text-gray-400">Hide sections</span>
+                    <span className="text-text-light/60 dark:text-gray-400">hide sections</span>
                   </label>
               </div>
             </div>

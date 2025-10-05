@@ -153,7 +153,7 @@ export function CategorySidebar() {
       </div>
       
       <div className="flex-1 overflow-y-auto">
-        {categories.size === 0 ? (
+        {!showEmptyCategories && categories.size === 0 ? (
           <p className="text-sm text-slate-500 dark:text-gray-400 p-4">no elements loaded</p>
         ) : filteredCategories.size === 0 ? (
           <p className="text-sm text-slate-500 dark:text-gray-400 p-4">no elements found matching "{filterText}"</p>

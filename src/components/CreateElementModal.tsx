@@ -138,7 +138,6 @@ export function CreateElementModal() {
             value={value || ''}
             onChange={(e) => handleFieldChange(field.name, e.target.value)}
             className={baseClassName}
-            placeholder={field.placeholder}
             disabled={isSubmitting}
           />
         );
@@ -151,7 +150,6 @@ export function CreateElementModal() {
             onChange={(e) => handleFieldChange(field.name, e.target.value)}
             className={baseClassName}
             rows={3}
-            placeholder={field.placeholder}
             disabled={isSubmitting}
           />
         );
@@ -187,7 +185,6 @@ export function CreateElementModal() {
                 value={value || ''}
                 onChange={(e) => handleFieldChange(field.name, e.target.value)}
                 className={baseClassName}
-                placeholder={field.placeholder || `enter custom ${field.label.toLowerCase()}`}
                 disabled={isSubmitting}
               />
             )}
@@ -224,7 +221,6 @@ export function CreateElementModal() {
             value={value || ''}
             onChange={(e) => handleFieldChange(field.name, e.target.value)}
             className={baseClassName}
-            placeholder={field.placeholder}
             disabled={isSubmitting}
           />
         );
@@ -237,7 +233,6 @@ export function CreateElementModal() {
             value={value || ''}
             onChange={(e) => handleFieldChange(field.name, e.target.value)}
             className={baseClassName}
-            placeholder={field.placeholder}
             disabled={isSubmitting}
           />
         );
@@ -250,7 +245,6 @@ export function CreateElementModal() {
             value={value || ''}
             onChange={(e) => handleFieldChange(field.name, e.target.value)}
             className={baseClassName}
-            placeholder={field.placeholder || `enter ${field.label.toLowerCase()}`}
             disabled={isSubmitting}
           />
         );
@@ -269,7 +263,7 @@ export function CreateElementModal() {
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-lg font-semibold mb-4 text-slate-800 dark:text-gray-200">
-          Create new {schema.name.toLowerCase()}
+          create new {schema.name.toLowerCase()}
         </h2>
         
         <form onSubmit={handleSubmit} className="space-y-4">

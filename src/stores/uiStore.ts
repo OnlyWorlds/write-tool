@@ -72,7 +72,17 @@ interface SidebarState {
 }
 
 export const useSidebarStore = create<SidebarState>((set) => ({
-  expandedCategories: new Set(),
+  expandedCategories: (() => {
+    const saved = localStorage.getItem('expandedCategories');
+    if (saved) {
+      try {
+        return new Set(JSON.parse(saved));
+      } catch {
+        return new Set(['narrative']);
+      }
+    }
+    return new Set(['narrative']); // Default to narrative expanded
+  })(),
   selectedElementId: null,
   filterText: '',
   createModalOpen: false,
@@ -85,7 +95,7 @@ export const useSidebarStore = create<SidebarState>((set) => ({
   })(),
   sortAlphabetically: (() => {
     const saved = localStorage.getItem('sortAlphabetically');
-    return saved !== null ? JSON.parse(saved) : false;
+    return saved !== null ? JSON.parse(saved) : true;
   })(),
   toggleCategory: (category) => set((state) => {
     const newExpanded = new Set(state.expandedCategories);
@@ -94,6 +104,7 @@ export const useSidebarStore = create<SidebarState>((set) => ({
     } else {
       newExpanded.add(category);
     }
+    localStorage.setItem('expandedCategories', JSON.stringify(Array.from(newExpanded)));
     return { expandedCategories: newExpanded };
   }),
   selectElement: (id) => set({ selectedElementId: id }),
@@ -102,15 +113,17 @@ export const useSidebarStore = create<SidebarState>((set) => ({
   closeCreateModal: () => set({ createModalOpen: false, createModalCategory: null, createModalAutoSelect: true }),
   openHelpModal: () => set({ helpModalOpen: true }),
   closeHelpModal: () => set({ helpModalOpen: false }),
-  expandAllCategories: (categories) => set({ expandedCategories: new Set(categories) }),
+  expandAllCategories: (categories) => {
+    const newExpanded = new Set(categories);
+    localStorage.setItem('expandedCategories', JSON.stringify(Array.from(newExpanded)));
+    return set({ expandedCategories: newExpanded });
+  },
   toggleAllCategories: (categories) => set((state) => {
     // If any categories are expanded, collapse all. Otherwise, expand all.
     const anyExpanded = categories.some(cat => state.expandedCategories.has(cat));
-    if (anyExpanded) {
-      return { expandedCategories: new Set() };
-    } else {
-      return { expandedCategories: new Set(categories) };
-    }
+    const newExpanded = anyExpanded ? new Set() : new Set(categories);
+    localStorage.setItem('expandedCategories', JSON.stringify(Array.from(newExpanded)));
+    return { expandedCategories: newExpanded };
   }),
   toggleShowEmptyCategories: () => set((state) => {
     const newValue = !state.showEmptyCategories;

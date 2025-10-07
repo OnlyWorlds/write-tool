@@ -90,10 +90,10 @@ export function ShowcaseViewer({ showcaseId }: ShowcaseViewerProps) {
 
   const element = showcase.element_data;
   const hiddenFields = new Set(showcase.showcase_config.hidden_fields || []);
-  
-  // Get all fields except system fields and name
-  const fields = Object.entries(element).filter(([key]) => 
-    !['id', 'created_at', 'updated_at', 'name'].includes(key)
+
+  // Get all fields except system fields, name, and category
+  const fields = Object.entries(element).filter(([key]) =>
+    !['id', 'created_at', 'updated_at', 'name', 'category'].includes(key)
   );
   
   // Base fields that get different styling
@@ -132,19 +132,8 @@ export function ShowcaseViewer({ showcaseId }: ShowcaseViewerProps) {
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={handleCopyJSON}
-                  className="p-2 text-blue-300 hover:text-blue-200 hover:bg-blue-500/10 rounded-lg transition-all"
-                  title="Copy element JSON"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                  </svg>
-                </button>
-                <div className="text-sm text-blue-200/60 bg-blue-950/40 px-4 py-2 rounded-lg border border-blue-500/20">
-                  Published {new Date(showcase.metadata.published_at).toLocaleDateString()}
-                </div>
+              <div className="text-sm text-blue-200/60 bg-blue-950/40 px-4 py-2 rounded-lg border border-blue-500/20">
+                Published {new Date(showcase.metadata.published_at).toLocaleDateString()}
               </div>
             </div>
           </div>
@@ -164,6 +153,17 @@ export function ShowcaseViewer({ showcaseId }: ShowcaseViewerProps) {
                 </svg>
                 {showcase.metadata.world_name}
               </span>
+              <span className="text-blue-400/40">•</span>
+              <button
+                onClick={handleCopyJSON}
+                className="flex items-center gap-1.5 text-blue-300 hover:text-blue-200 hover:bg-blue-500/10 px-2 py-1 rounded transition-all"
+                title="Copy element JSON"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+                Copy data
+              </button>
             </div>
           </div>
         </div>

@@ -128,7 +128,7 @@ const FieldViewer = memo(function FieldViewer({ fieldName, value, fieldTypeInfo,
         if (linkedElement) {
           // In showcase mode, display as plain text without link
           if (isShowcaseMode) {
-            return <span className={`text-gray-800 ${className}`}>{linkedElement.name}</span>;
+            return <span className={`text-white ${className}`}>{linkedElement.name}</span>;
           }
           // In normal mode, display as clickable link
           return (
@@ -158,7 +158,7 @@ const FieldViewer = memo(function FieldViewer({ fieldName, value, fieldTypeInfo,
                 // In showcase mode, display as plain text without link
                 if (isShowcaseMode) {
                   return (
-                    <span key={index} className="block text-gray-800">
+                    <span key={index} className="block text-white">
                       {linkedElement.name}
                     </span>
                   );

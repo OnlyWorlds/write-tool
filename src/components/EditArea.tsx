@@ -139,7 +139,7 @@ export function EditArea() {
                     save
                   </button>
                   <div className="flex items-center text-xs text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/30 px-2 py-1 rounded-full">
-                    <span>Modified</span>
+                    <span>modified</span>
                     <button
                       onClick={() => selectedElementId && selectedFieldId && setFieldValue(selectedElementId, selectedFieldId, undefined)}
                       className="ml-1.5 hover:text-amber-900 dark:hover:text-amber-100 transition-colors"

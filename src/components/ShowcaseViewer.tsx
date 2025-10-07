@@ -5,6 +5,7 @@ import { ApiService, type ShowcaseRetrieveResponse } from '../services/ApiServic
 import { CategoryIcon } from '../utils/categoryIcons';
 import { FieldRenderer } from './FieldRenderers';
 import type { Element } from '../types/world';
+import { useThemeStore } from '../stores/uiStore';
 
 interface ShowcaseViewerProps {
   showcaseId?: string;
@@ -15,6 +16,12 @@ export function ShowcaseViewer({ showcaseId }: ShowcaseViewerProps) {
   const [error, setError] = useState<string | null>(null);
   const [showcase, setShowcase] = useState<ShowcaseRetrieveResponse | null>(null);
   const navigate = useNavigate();
+  const { initializeTheme } = useThemeStore();
+
+  // Initialize theme on mount (important for standalone showcase pages)
+  useEffect(() => {
+    initializeTheme();
+  }, [initializeTheme]);
 
   useEffect(() => {
     if (!showcaseId) {

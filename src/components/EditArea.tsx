@@ -1,12 +1,12 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useWorldContext } from '../contexts/WorldContext';
 import { TypeManagementService } from '../services/TypeManagementService';
 import { detectFieldType } from '../services/UnifiedFieldTypeService';
 import { useEditorStore, useSidebarStore } from '../stores/uiStore';
+import { CategoryIcon } from '../utils/categoryIcons';
+import { calculateReverseLinks } from '../utils/reverseLinks';
 import { FieldRenderer } from './FieldRenderers';
 import { ReverseRelationsPanel } from './ReverseRelationsPanel';
-import { calculateReverseLinks } from '../utils/reverseLinks';
-import { CategoryIcon } from '../utils/categoryIcons';
 
 export function EditArea() {
   const { elements, saveElement } = useWorldContext();
@@ -136,7 +136,7 @@ export function EditArea() {
                     className="text-xs text-white bg-green-600 dark:bg-green-700 hover:bg-green-700 dark:hover:bg-green-600 px-2 py-0.5 rounded transition-colors disabled:opacity-50"
                     title={`Save ${selectedFieldId.replace(/_/g, ' ')}`}
                   >
-                    Save
+                    save
                   </button>
                   <div className="flex items-center text-xs text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/30 px-2 py-1 rounded-full">
                     <span>Modified</span>

@@ -1,12 +1,12 @@
-import { QuestionMarkCircleIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
+import { ArrowDownTrayIcon, QuestionMarkCircleIcon } from '@heroicons/react/24/outline';
 import { FormEvent, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useWorldContext } from '../contexts/WorldContext';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { ValidationService } from '../services/ValidationService';
 import { useEditorStore, useSidebarStore } from '../stores/uiStore';
-import { ThemeToggle } from './ThemeToggle';
 import { copyWorldToClipboard } from '../utils/worldExport';
+import { ThemeToggle } from './ThemeToggle';
 
 export function AuthBar() {
   const { authenticate, isLoading, error, isAuthenticated, logout, metadata, worldKey: authenticatedWorldKey, saveElement, elements } = useWorldContext();
@@ -98,7 +98,7 @@ export function AuthBar() {
       
       if (allSuccess) {
         clearEdits();
-        toast.success('All changes saved');
+        toast.success('all changes saved');
       } else {
         toast.error('some changes could not be saved. please try again.');
       }

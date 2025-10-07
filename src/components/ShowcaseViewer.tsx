@@ -132,9 +132,6 @@ export function ShowcaseViewer({ showcaseId }: ShowcaseViewerProps) {
                   </p>
                 </div>
               </div>
-              <div className="text-sm text-blue-200/60 bg-blue-950/40 px-4 py-2 rounded-lg border border-blue-500/20">
-                Published {new Date(showcase.metadata.published_at).toLocaleDateString()}
-              </div>
             </div>
           </div>
           <div className="px-8 pb-4">

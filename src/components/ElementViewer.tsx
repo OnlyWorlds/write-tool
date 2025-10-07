@@ -268,7 +268,7 @@ export function ElementViewer() {
         unsavedFieldsForElement.forEach(({ fieldName }) => {
           setFieldValue(selectedElementId, fieldName, undefined);
         });
-        toast.success('All changes saved');
+        toast.success('all changes saved');
       } else {
         toast.error('Failed to save changes');
       }
@@ -287,7 +287,7 @@ export function ElementViewer() {
     unsavedFieldsForElement.forEach(({ fieldName }) => {
       setFieldValue(selectedElementId, fieldName, undefined);
     });
-    toast.success('All changes discarded');
+    toast.success('al changes discarded');
   };
   
   const handleSaveField = async (fieldName: string) => {

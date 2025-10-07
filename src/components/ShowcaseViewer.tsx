@@ -99,11 +99,21 @@ export function ShowcaseViewer({ showcaseId }: ShowcaseViewerProps) {
   // Base fields that get different styling
   const baseFields = ['description', 'supertype', 'subtype', 'image_url'];
 
+  const handleCopyJSON = async () => {
+    try {
+      const json = JSON.stringify(element, null, 2);
+      await navigator.clipboard.writeText(json);
+      toast.success('JSON copied to clipboard!');
+    } catch (err) {
+      toast.error('Failed to copy JSON');
+    }
+  };
+
   return (
-    <div className="flex-1 p-6 max-w-4xl mx-auto bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 min-h-screen">
-      <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl shadow-2xl border border-blue-500/30 overflow-hidden">
+    <div className="flex-1 p-6 max-w-4xl mx-auto bg-slate-900 min-h-screen">
+      <div className="bg-slate-800 rounded-xl shadow-2xl border border-blue-500/30 overflow-hidden">
         {/* Header */}
-        <div className="relative border-b border-blue-500/30 bg-gradient-to-r from-blue-900/40 to-slate-800/40 backdrop-blur-sm shadow-xl">
+        <div className="relative border-b border-blue-500/30 bg-slate-800/80 shadow-xl">
           <div className="p-8 pb-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-6">
@@ -122,8 +132,19 @@ export function ShowcaseViewer({ showcaseId }: ShowcaseViewerProps) {
                   </p>
                 </div>
               </div>
-              <div className="text-sm text-blue-200/60 bg-blue-950/40 px-4 py-2 rounded-lg border border-blue-500/20">
-                Published {new Date(showcase.metadata.published_at).toLocaleDateString()}
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleCopyJSON}
+                  className="p-2 text-blue-300 hover:text-blue-200 hover:bg-blue-500/10 rounded-lg transition-all"
+                  title="Copy element JSON"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                </button>
+                <div className="text-sm text-blue-200/60 bg-blue-950/40 px-4 py-2 rounded-lg border border-blue-500/20">
+                  Published {new Date(showcase.metadata.published_at).toLocaleDateString()}
+                </div>
               </div>
             </div>
           </div>
@@ -148,7 +169,7 @@ export function ShowcaseViewer({ showcaseId }: ShowcaseViewerProps) {
         </div>
 
         {/* Content */}
-        <div className="px-6 pb-8 pt-2 bg-gradient-to-b from-slate-800/50 to-slate-900/50">
+        <div className="px-6 pb-8 pt-2 bg-slate-900">
           {/* Base fields section */}
           <div className="pt-6 pb-4 border-b border-blue-500/20">
             {fields.filter(([fieldName]) => baseFields.includes(fieldName)).map(([fieldName, value]) => {
@@ -158,7 +179,7 @@ export function ShowcaseViewer({ showcaseId }: ShowcaseViewerProps) {
               }
 
               return (
-                <div key={fieldName} className="mb-4 rounded-xl bg-gradient-to-br from-slate-700/40 to-slate-800/40 border border-blue-500/20 shadow-lg hover:shadow-blue-500/10 transition-all">
+                <div key={fieldName} className="mb-4 rounded-xl bg-slate-700/40 border border-blue-500/20 shadow-lg hover:shadow-blue-500/10 transition-all">
                   <div className="flex-1 py-4 px-5">
                     <div className="flex items-start">
                       <label className="block w-40 flex-shrink-0 text-base text-blue-200 font-semibold">
@@ -190,7 +211,7 @@ export function ShowcaseViewer({ showcaseId }: ShowcaseViewerProps) {
               }
 
               return (
-                <div key={fieldName} className="rounded-xl bg-gradient-to-br from-slate-700/30 to-slate-800/30 border border-blue-500/20 shadow-md hover:shadow-blue-500/10 transition-all">
+                <div key={fieldName} className="rounded-xl bg-slate-700/30 border border-blue-500/20 shadow-md hover:shadow-blue-500/10 transition-all">
                   <div className="flex-1 py-4 px-5">
                     <div className="flex items-start">
                       <label className="block w-40 flex-shrink-0 text-base text-blue-200/90 font-semibold">

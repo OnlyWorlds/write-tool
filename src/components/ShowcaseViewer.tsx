@@ -113,23 +113,35 @@ export function ShowcaseViewer({ showcaseId }: ShowcaseViewerProps) {
     <div className="flex-1 p-6 max-w-4xl mx-auto bg-slate-900 min-h-screen">
       <div className="bg-slate-800 rounded-xl shadow-2xl border border-blue-500/30 overflow-hidden">
         {/* Header */}
-        <div className="relative border-b border-blue-500/30 bg-slate-800/80 shadow-xl">
+        <div className="relative border-b border-blue-500/30">
           <div className="p-8 pb-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-6">
-                <div className="p-3 bg-blue-500/10 rounded-2xl border border-blue-400/30 shadow-lg">
+                <a
+                  href={`https://onlyworlds.github.io/docs/specification/element_categories/${element.category?.toLowerCase()}.html`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:opacity-80 transition-opacity"
+                  title={`View ${element.category} documentation`}
+                >
                   <CategoryIcon
                     category={element.category || ''}
                     className="text-[56px] text-blue-400"
                   />
-                </div>
+                </a>
                 <div>
                   <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">
                     {element.name}
                   </h1>
-                  <p className="text-base text-blue-300/80 font-medium capitalize">
+                  <a
+                    href={`https://onlyworlds.github.io/docs/specification/element_categories/${element.category?.toLowerCase()}.html`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-base text-blue-300/80 font-medium capitalize hover:text-blue-300 transition-colors"
+                    title={`View ${element.category} documentation`}
+                  >
                     {element.category}
-                  </p>
+                  </a>
                 </div>
               </div>
             </div>

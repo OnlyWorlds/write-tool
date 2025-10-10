@@ -6,6 +6,8 @@ import { CategoryIcon } from '../utils/categoryIcons';
 import { FieldRenderer } from './FieldRenderers';
 import type { Element } from '../types/world';
 import { useThemeStore } from '../stores/uiStore';
+import { Tooltip } from './Tooltip';
+import { getFieldDescription } from '../utils/fieldDescriptions';
 
 interface ShowcaseViewerProps {
   showcaseId?: string;
@@ -187,13 +189,24 @@ export function ShowcaseViewer({ showcaseId }: ShowcaseViewerProps) {
                 return null;
               }
 
+              const fieldDescription = getFieldDescription(fieldName, element.category);
+              const fieldLabel = fieldName.replace(/_/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+
               return (
                 <div key={fieldName} className="mb-4 rounded-xl bg-slate-700/40 border border-blue-500/20 shadow-lg hover:shadow-blue-500/10 transition-all">
                   <div className="flex-1 py-4 px-5">
                     <div className="flex items-start">
-                      <label className="block w-40 flex-shrink-0 text-base text-blue-200 font-semibold">
-                        {fieldName.replace(/_/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
-                      </label>
+                      {fieldDescription ? (
+                        <Tooltip content={fieldDescription}>
+                          <label className="block w-40 flex-shrink-0 text-base text-blue-200 font-semibold border-b border-dotted border-blue-200/50">
+                            {fieldLabel}
+                          </label>
+                        </Tooltip>
+                      ) : (
+                        <label className="block w-40 flex-shrink-0 text-base text-blue-200 font-semibold">
+                          {fieldLabel}
+                        </label>
+                      )}
                       <div className="flex-1 text-slate-100 font-normal">
                         <FieldRenderer
                           fieldName={fieldName}
@@ -219,13 +232,24 @@ export function ShowcaseViewer({ showcaseId }: ShowcaseViewerProps) {
                 return null;
               }
 
+              const fieldDescription = getFieldDescription(fieldName, element.category);
+              const fieldLabel = fieldName.replace(/_/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+
               return (
                 <div key={fieldName} className="rounded-xl bg-slate-700/30 border border-blue-500/20 shadow-md hover:shadow-blue-500/10 transition-all">
                   <div className="flex-1 py-4 px-5">
                     <div className="flex items-start">
-                      <label className="block w-40 flex-shrink-0 text-base text-blue-200/90 font-semibold">
-                        {fieldName.replace(/_/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
-                      </label>
+                      {fieldDescription ? (
+                        <Tooltip content={fieldDescription}>
+                          <label className="block w-40 flex-shrink-0 text-base text-blue-200/90 font-semibold border-b border-dotted border-blue-200/50">
+                            {fieldLabel}
+                          </label>
+                        </Tooltip>
+                      ) : (
+                        <label className="block w-40 flex-shrink-0 text-base text-blue-200/90 font-semibold">
+                          {fieldLabel}
+                        </label>
+                      )}
                       <div className="flex-1 text-slate-100 font-normal">
                         <FieldRenderer
                           fieldName={fieldName}

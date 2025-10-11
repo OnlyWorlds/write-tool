@@ -198,12 +198,12 @@ export function ShowcaseViewer({ showcaseId }: ShowcaseViewerProps) {
                     <div className="flex items-start">
                       {fieldDescription ? (
                         <Tooltip content={fieldDescription}>
-                          <label className="block w-40 flex-shrink-0 text-base text-blue-200 font-semibold border-b border-dotted border-blue-200/50">
+                          <label className="inline-block flex-shrink-0 text-base text-blue-200 font-semibold border-b border-dotted border-blue-200/50 cursor-help mr-4">
                             {fieldLabel}
                           </label>
                         </Tooltip>
                       ) : (
-                        <label className="block w-40 flex-shrink-0 text-base text-blue-200 font-semibold">
+                        <label className="inline-block flex-shrink-0 text-base text-blue-200 font-semibold mr-4">
                           {fieldLabel}
                         </label>
                       )}
@@ -241,12 +241,12 @@ export function ShowcaseViewer({ showcaseId }: ShowcaseViewerProps) {
                     <div className="flex items-start">
                       {fieldDescription ? (
                         <Tooltip content={fieldDescription}>
-                          <label className="block w-40 flex-shrink-0 text-base text-blue-200/90 font-semibold border-b border-dotted border-blue-200/50">
+                          <label className="inline-block flex-shrink-0 text-base text-blue-200/90 font-semibold border-b border-dotted border-blue-200/50 cursor-help mr-4">
                             {fieldLabel}
                           </label>
                         </Tooltip>
                       ) : (
-                        <label className="block w-40 flex-shrink-0 text-base text-blue-200/90 font-semibold">
+                        <label className="inline-block flex-shrink-0 text-base text-blue-200/90 font-semibold mr-4">
                           {fieldLabel}
                         </label>
                       )}

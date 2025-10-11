@@ -133,16 +133,16 @@ export function EditArea() {
                   <button
                     onClick={handleSaveField}
                     disabled={isSaving}
-                    className="text-xs text-white bg-green-600 dark:bg-green-700 hover:bg-green-700 dark:hover:bg-green-600 px-2 py-0.5 rounded transition-colors disabled:opacity-50"
+                    className="text-xs text-white bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 dark:hover:bg-blue-600 px-2 py-0.5 rounded transition-colors disabled:opacity-50"
                     title={`Save ${selectedFieldId.replace(/_/g, ' ')}`}
                   >
                     save
                   </button>
-                  <div className="flex items-center text-xs text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/30 px-2 py-1 rounded-full">
+                  <div className="flex items-center text-xs text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/30 px-2 py-1 rounded-full">
                     <span>modified</span>
                     <button
                       onClick={() => selectedElementId && selectedFieldId && setFieldValue(selectedElementId, selectedFieldId, undefined)}
-                      className="ml-1.5 hover:text-amber-900 dark:hover:text-amber-100 transition-colors"
+                      className="ml-1.5 hover:text-blue-900 dark:hover:text-blue-100 transition-colors"
                       title={`Discard changes to ${selectedFieldId.replace(/_/g, ' ')}`}
                     >
                       <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">

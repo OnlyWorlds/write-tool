@@ -54,12 +54,12 @@ export function HelpModal({ isOpen, onClose }: HelpModalProps) {
                   <section>
                     <h3 className="text-lg font-semibold mb-2">Overview</h3>
                     <p className="text-text-dark/80 text-xs">
-                      The Write Tool is a viewer and editor for <a href="https://onlyworlds.com" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">OnlyWorlds</a> and offers three core functions: viewing & editing world elements and their relations, writing extended texts for narratives and events, and publishing individual elements to public showcase URLs.
+                      The Write Tool is a viewer and editor for <a href="https://onlyworlds.com" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">OnlyWorlds</a> and offers basic element CRUD, graph network views, dedicated writing features for narratives and events, and an element showcase-publish prototype feature.
                     </p>
                     <div className="mt-3 space-y-1 text-text-dark/80 text-xs">
                       <p><strong>Left Sidebar:</strong> Select elements</p>
                       <p><strong>Center Panel:</strong> Element view with various modes</p>
-                      <p><strong>Right Panel:</strong> Field editing and reverse relation view</p> 
+                      <p><strong>Right Panel:</strong> Field editing and reverse relation view</p>
                     </div>
                   </section>
 
@@ -78,7 +78,7 @@ export function HelpModal({ isOpen, onClose }: HelpModalProps) {
                   <section>
                     <h3 className="text-lg font-semibold mb-2">Showcase Mode</h3>
                     <p className="text-xs text-text-dark/80">
-                      Share read-only views of your elements with others using showcase URLs. No authentication required for viewers. Click the Share button on any element to generate a public URL. Showcase pages can be customized to exclude specific fields. One showcase exists per element, with newer versions overriding older ones.
+                      Share customizable element cards through a generated public URL. Click the Share button on any element to generate a public URL. One showcase exists per element: newer versions override existing ones.
                     </p>
                   </section>
 
@@ -94,15 +94,14 @@ export function HelpModal({ isOpen, onClose }: HelpModalProps) {
                   <section>
                     <h3 className="text-lg font-semibold mb-2">Story Writing</h3>
                     <p className="text-xs text-text-dark/80">
-                      Narrative and Event elements have dedicated writing interfaces with rich text editing and integration of element linking.
-                      The editor automatically detects element names in your text, and offers easy way to 'link' these, through a widget or by typing //elementname, then space.
-                      Linking means that the element is added to the multilink field of its corresponding type for the narrative or event.   
+                      Narrative and Event elements have dedicated writing interfaces with rich text editing and integrated element linking.
+                      The editor automatically detects element names in your text. Link by clicking the 'unlinked' widget or by typing //elementname then space. This assigns the corresponding element to the correct respective link field.
                     </p>
                   </section>
 
-          
 
-     
+
+
                 </div>
 
                 {/* Footer */}
@@ -111,7 +110,7 @@ export function HelpModal({ isOpen, onClose }: HelpModalProps) {
                     onClick={onClose}
                     className="px-4 py-2 bg-accent hover:bg-accent-hover text-text-dark rounded text-sm transition-colors"
                   >
-                    Got it!
+                    ok
                   </button>
                 </div>
               </Dialog.Panel>

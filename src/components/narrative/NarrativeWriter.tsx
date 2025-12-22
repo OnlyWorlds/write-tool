@@ -33,7 +33,7 @@ export function NarrativeWriter({ element }: NarrativeWriterProps) {
   const [linkedCount, setLinkedCount] = useState(0);
   const [isDirty, setIsDirty] = useState(false);
   const [autosaveEnabled, setAutosaveEnabled] = useState(true);
-  const [highlightsEnabled, setHighlightsEnabled] = useState(false);
+  const [highlightsEnabled, setHighlightsEnabled] = useState(true);
   const editorRef = useRef<EnhancedStoryEditorRef>(null);
   const detectionWidgetRef = useRef<HTMLButtonElement>(null);
 

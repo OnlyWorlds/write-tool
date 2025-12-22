@@ -137,7 +137,7 @@ export function AuthBar() {
   };
 
   return (
-    <div className="flex items-center justify-between p-4 bg-primary dark:bg-dark-bg-primary text-text-dark shadow-lg">
+    <div className="flex items-center justify-between p-4 bg-primary dark:bg-dark-bg-secondary text-text-dark shadow-lg">
       <form onSubmit={handleSubmit} className="flex items-center gap-2">
         <input
           type="text"
@@ -158,8 +158,7 @@ export function AuthBar() {
           maxLength={4}
         />
         <button
-          type="button"
-          onClick={handleValidate}
+          type="submit"
           disabled={isLoading || worldKey.length !== 10 || pin.length !== 4}
           className={`px-4 py-1 text-xs rounded transition-colors border ${
             isLoading

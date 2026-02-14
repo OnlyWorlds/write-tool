@@ -14,7 +14,20 @@ export function AuthBar() {
   const { openHelpModal } = useSidebarStore(); 
    const [worldKey, setWorldKey] = useState('');
    const [pin, setPin] = useState('');
-  
+
+  // Prefill API key from ?key= URL param
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const urlKey = params.get('key');
+    if (urlKey) {
+      setWorldKey(urlKey);
+      // Clean ?key= from URL
+      const url = new URL(window.location.href);
+      url.searchParams.delete('key');
+      window.history.replaceState({}, '', url.pathname + url.search);
+    }
+  }, []);
+
   // Set initial values when authenticated
   useEffect(() => {
     if (isAuthenticated && authenticatedWorldKey) {
